@@ -1,0 +1,24 @@
+{
+  "options": {
+    "threshold": 100,
+    "persistResult": true,
+    "datasource": {
+      "database": "ghtorrent".
+      "user": "",
+      "password": "",
+      "host": ""
+    }
+  },
+  "attributes: [
+    "architecture": {
+      "enabled": true,
+      "options": {
+      }
+    },
+    "documentation": {
+      "enabled": true,
+      "options": {
+      }
+    }
+  ]
+}
