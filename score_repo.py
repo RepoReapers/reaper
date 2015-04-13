@@ -7,10 +7,11 @@ import sys
 
 def loadAttributePlugins(attributes):
   for attribute in attributes:
-    try:
-      attribute['implementation'] = importlib.import_module("attributes.{0}.main".format(attribute['name']))
-    except ImportError:
-      print("Failed to load the {0} attribute.".format(attribute['name']))
+    if attribute['enabled']:
+      try:
+        attribute['implementation'] = importlib.import_module("attributes.{0}.main".format(attribute['name']))
+      except ImportError:
+        print("Failed to load the {0} attribute.".format(attribute['name']))
 
 def processConfiguration(config_file):
   try:
