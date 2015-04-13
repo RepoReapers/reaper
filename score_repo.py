@@ -37,8 +37,10 @@ def main():
   attributes = config['attributes']
   loadAttributePlugins(attributes)
 
+  score = 0
   for attribute in attributes:
-    result = attribute['implementation'].run(metadata, repo_path, config[attribute]['options'])
+    result = attribute['implementation'].run(metadata, repo_path, attribute['options'])
+    score += result * attribute['weight']
 
 if __name__ == '__main__':
   main()
