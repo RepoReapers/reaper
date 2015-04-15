@@ -13,12 +13,14 @@
     {
       "name": "architecture",
       "enabled": true,
+      "weight": 50,
       "options": {
       }
     },
     {
       "name": "documentation",
       "enabled": true,
+      "weight": 50,
       "options": {
       }
     }
