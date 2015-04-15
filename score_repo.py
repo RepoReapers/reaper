@@ -7,6 +7,9 @@ import mysql.connector
 import os
 import sys
 
+def save_result(repo_id, results):
+    pass
+
 def load_attribute_plugins(attributes):
     for attribute in attributes:
         if attribute['enabled']:
@@ -60,8 +63,13 @@ def main():
     score = 0
     for attribute in attributes:
         cursor = connection.cursor()
-        result = attribute['implementation'].run(args.repository_id, args.repository_path, cursor, attribute['options'])
+        result = attribute['implementation'].run(args.repository_id, args.repository_path, cursor, **attribute['options'])
         score += result * attribute['weight']
+
+    if config.get('persistResult', False):
+        save_result(args.repository_id, results)
+    else:
+        print("Raw score: {0}".format(score))
 
     connection.close()
 
