@@ -18,7 +18,50 @@
       }
     },
     {
+      "name": "community",
+      "enabled": true,
+      "weight": 50,
+      "options": {
+      }
+    },
+    {
+      "name": "continuous_integration",
+      "enabled": true,
+      "weight": 50,
+      "options": {
+      }
+    },
+    {
       "name": "documentation",
+      "enabled": true,
+      "weight": 50,
+      "options": {
+      }
+    },
+    {
+      "name": "history",
+      "enabled": true,
+      "weight": 50,
+      "options": {
+      }
+    },
+    {
+      "name": "license",
+      "essential": true,
+      "enabled": true,
+      "weight": 50,
+      "options": {
+      }
+    },
+    {
+      "name": "management",
+      "enabled": true,
+      "weight": 50,
+      "options": {
+      }
+    },
+    {
+      "name": "unit_test",
       "enabled": true,
       "weight": 50,
       "options": {
