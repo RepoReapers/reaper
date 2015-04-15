@@ -25,6 +25,7 @@ def establish_database_connection(config):
 
 def process_configuration(config_file):
     try:
+        # TODO: Validate configuration contents
         config = json.load(config_file)
         return config
     except:
@@ -59,7 +60,7 @@ def main():
     score = 0
     for attribute in attributes:
         cursor = connection.cursor()
-        result = attribute['implementation'].run(config.repository_id, config.repository_path, cursor, attribute['options'])
+        result = attribute['implementation'].run(args.repository_id, args.repository_path, cursor, attribute['options'])
         score += result * attribute['weight']
 
     connection.close()
