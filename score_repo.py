@@ -33,10 +33,7 @@ def process_configuration(config_file):
 
 def repository_path(path_string):
     if os.path.exists(path_string):
-        if os.path.exists("{0}/.git".format(path_string)):
-            return path_string
-        else:
-            raise argparse.ArgumentTypeError("{0} is not a git repository.".format(path_string))
+        return path_string
     else:
         raise argparse.ArgumentTypeError("{0} is not a directory.".format(path_string))
 
