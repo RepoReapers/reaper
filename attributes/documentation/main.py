@@ -1,4 +1,4 @@
-def run(metadata, path_to_repo, **options):
+def run(project_id, repo_path, cursor, **options):
   pass
 
 if __name__ == '__main__':
