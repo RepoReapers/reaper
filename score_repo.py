@@ -7,16 +7,23 @@ import mysql.connector
 import os
 import sys
 
+
 def save_result(repo_id, results):
     pass
+
 
 def load_attribute_plugins(attributes):
     for attribute in attributes:
         if attribute['enabled']:
             try:
-                attribute['implementation'] = importlib.import_module("attributes.{0}.main".format(attribute['name']))
+                attribute['implementation'] = importlib.import_module(
+                    "attributes.{0}.main".format(attribute['name'])
+                )
             except ImportError:
-                print("Failed to load the {0} attribute.".format(attribute['name']))
+                print("Failed to load the {0} attribute.".format(
+                    attribute['name'])
+                )
+
 
 def establish_database_connection(config):
     try:
@@ -25,6 +32,7 @@ def establish_database_connection(config):
     except mysql.connector.Error:
         print("Unable to establish connection to database.")
         sys.exit(1)
+
 
 def process_configuration(config_file):
     try:
@@ -35,23 +43,47 @@ def process_configuration(config_file):
         print("Malformatted or missing configuration.")
         sys.exit(2)
 
+
 def repository_path(path_string):
     if os.path.exists(path_string):
         return path_string
     else:
-        raise argparse.ArgumentTypeError("{0} is not a directory.".format(path_string))
+        raise argparse.ArgumentTypeError(
+            "{0} is not a directory.".format(path_string)
+        )
+
 
 def process_arguments():
-    parser = argparse.ArgumentParser(description='Calculate the score of a repository.')
-    parser.add_argument('-c', '--config', type=argparse.FileType('r'), default='config.json', dest='config_file', help='Path to the configuration file.')
-    parser.add_argument('repository_id', type=int, nargs=1, help='Identifier for a repository as it appears in the GHTorrent database.')
-    parser.add_argument('repository_path', type=repository_path, nargs=1, help='Path to the repository source code.')
+    parser = argparse.ArgumentParser(
+        description='Calculate the score of a repository.'
+    )
+    parser.add_argument(
+        '-c',
+        '--config',
+        type=argparse.FileType('r'),
+        default='config.json',
+        dest='config_file', help='Path to the configuration file.'
+    )
+    parser.add_argument(
+        'repository_id',
+        type=int,
+        nargs=1,
+        help='Identifier for a project as it appears in the \
+              GHTorrent database.'
+    )
+    parser.add_argument(
+        'repository_path',
+        type=repository_path,
+        nargs=1,
+        help='Path to the repository source code.'
+    )
 
     if len(sys.argv) is 1:
         parser.print_help()
         sys.exit(1)
 
     return parser.parse_args()
+
 
 def main():
     args = process_arguments()
@@ -63,10 +95,17 @@ def main():
     score = 0
     for attribute in attributes:
         cursor = connection.cursor()
-        result = attribute['implementation'].run(args.repository_id, args.repository_path, cursor, **attribute['options'])
+
+        result = attribute['implementation'].run(
+            args.repository_id,
+            args.repository_path,
+            cursor,
+            **attribute['options']
+        )
+
         score += result * attribute['weight']
 
-    if config.get('persistResult', False):
+    if config['options'].get('persistResult', False):
         save_result(args.repository_id, results)
     else:
         print("Raw score: {0}".format(score))
