@@ -105,6 +105,10 @@ def main():
 
         score += result * attribute['weight']
 
+        if attribute['essential'] and not result:
+            score = 0
+            break
+
     if config['options'].get('persistResult', False):
         save_result(args.repository_id, results)
     else:
