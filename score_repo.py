@@ -63,7 +63,8 @@ def process_arguments():
         '--config',
         type=argparse.FileType('r'),
         default='config.json',
-        dest='config_file', help='Path to the configuration file.'
+        dest='config_file',
+        help='Path to the configuration file.'
     )
     parser.add_argument(
         'repository_id',
@@ -106,12 +107,14 @@ def main():
                 **attribute['options']
             )
 
-        score += int(result or 0) * attribute['weight']
-        results[attribute['name']] = result
+            score += int(result or 0) * attribute['weight']
+            results[attribute['name']] = result
 
-        if 'essential' in attribute and attribute['essential'] and not result:
-            score = 0
-            break
+            if ('essential' in attribute and
+                    attribute['essential'] and
+                    not result):
+                score = 0
+                break
 
     if config['options'].get('persistResult', False):
         save_result(args.repository_id, results)

@@ -30,3 +30,6 @@ def run(project_id, repo_path, cursor, **options):
         result = 0
 
     return result
+
+if __name__ == '__main__':
+    print("Attribute plugins are not meant to be executed directly.")
