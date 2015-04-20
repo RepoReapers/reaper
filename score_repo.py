@@ -21,7 +21,8 @@ def load_attribute_plugins(attributes):
                 )
             except ImportError:
                 print("Failed to load the {0} attribute.".format(
-                    attribute['name'])
+                        attribute['name']
+                    )
                 )
 
 
@@ -93,19 +94,22 @@ def main():
     load_attribute_plugins(attributes)
 
     score = 0
+    results = {}
     for attribute in attributes:
         cursor = connection.cursor()
 
-        result = attribute['implementation'].run(
-            args.repository_id,
-            args.repository_path,
-            cursor,
-            **attribute['options']
-        )
+        if 'implementation' in attribute:
+            result = attribute['implementation'].run(
+                args.repository_id[0],
+                args.repository_path[0],
+                cursor,
+                **attribute['options']
+            )
 
-        score += result * attribute['weight']
+        score += int(result or 0) * attribute['weight']
+        results[attribute['name']] = result
 
-        if attribute['essential'] and not result:
+        if 'essential' in attribute and attribute['essential'] and not result:
             score = 0
             break
 
