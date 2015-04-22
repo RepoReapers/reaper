@@ -37,6 +37,13 @@ TEST_DISCOVERERS = {
     )
 }
 
+TEST_DISCOVERER_CACHE = dict()
+
+
+def _load_test_discoverer(module_, class_):
+    mod = __import__(module_, None, None, ['__all__'])
+    TEST_DISCOVERER_CACHE[class_] = getattr(mod, class_)()
+
 
 def get_test_discoverer(language):
     """Return an instance of an appropriate test discover.
@@ -55,7 +62,8 @@ def get_test_discoverer(language):
     _language = language.lower()
     if _language in TEST_DISCOVERERS:
         (module_, class_) = TEST_DISCOVERERS[_language]
-        mod = __import__(module_, None, None, ['__all__'])
-        return getattr(mod, class_)()
+        if class_ not in TEST_DISCOVERER_CACHE:
+            _load_test_discoverer(module_, class_)
+        return TEST_DISCOVERER_CACHE[class_]
     else:
         raise Exception('Test discoverer for %s is not defined.' % language)

@@ -46,6 +46,12 @@ class DiscovererTestCase(unittest.TestCase):
             ruby.RubyTestDiscoverer
         )
 
+        # Test: Test discoverer cached objects
+        self.assertEqual(
+            id(get_test_discoverer('Ruby')),
+            id(get_test_discoverer('Ruby'))
+        )
+
         # Test: Case insensitivity of language
         self.assertIsInstance(
             get_test_discoverer('pYtHoN'),
