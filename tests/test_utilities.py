@@ -12,22 +12,46 @@ class UtilitiesTestCase(unittest.TestCase):
         )
 
         # Test: Get SLOC of source at ./assets/projekt
-        expected = {'C': 6, 'C/C++ Header': 4, 'Javascript': 3, 'Python': 2}
+        expected = {
+            'C':  {'cloc': 4, 'sloc': 6},
+            'C/C++ Header': {'cloc': 0, 'sloc': 4},
+            'Javascript': {'cloc': 1, 'sloc': 13},
+            'Python': {'cloc': 1, 'sloc': 2}
+        }
 
         sloc = utilities.get_sloc(path)
 
         self.assertEqual(len(expected), len(sloc))
         for (k, v) in sloc.items():
-            self.assertEqual(expected[k], v)
+            for (_k, _v) in v.items():
+                self.assertEqual(expected[k][_k], _v)
 
-        # Test: Get SLOC of only include for source at ./assets/projekt
-        expected = {'C/C++ Header': 4}
+        # Test: Get SLOC of only the directory 'include' for source at
+        # ./assets/projekt
+        expected = {
+            'C/C++ Header': {'cloc': 0, 'sloc': 4},
+        }
 
-        sloc = utilities.get_sloc(path, only='include')
+        sloc = utilities.get_sloc(path, only=['include'])
 
         self.assertEqual(len(expected), len(sloc))
         for (k, v) in sloc.items():
-            self.assertEqual(expected[k], v)
+            for (_k, _v) in v.items():
+                self.assertEqual(expected[k][_k], _v)
+
+        # Test: Get SLOC of only the directories 'include' and 'utilities' for
+        # source at./assets/projekt
+        expected = {
+            'C/C++ Header': {'cloc': 0, 'sloc': 4},
+            'Javascript': {'cloc': 1, 'sloc': 10},
+        }
+
+        sloc = utilities.get_sloc(path, only=['include', 'utilities'])
+
+        self.assertEqual(len(expected), len(sloc))
+        for (k, v) in sloc.items():
+            for (_k, _v) in v.items():
+                self.assertEqual(expected[k][_k], _v)
 
         # Test: Missing source directory
         self.assertRaises(Exception, utilities.get_sloc, '/home/nocturnal')

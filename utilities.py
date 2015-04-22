@@ -1,39 +1,43 @@
 import os
+import shlex
 import subprocess
 
 
 def get_sloc(path, only=None):
-    """Return the source-lines-of-code for each language.
+    """Return the lines-of-code for each language.
 
-    cloc (http://cloc.sourceforge.net/) is used to compute the
-    source-lines-of-code and this method merely parses the output from cloc
-    to return a Python-friendly data structure.
+    cloc (http://cloc.sourceforge.net/) is used to compute the metrics. The
+    method merely parses the output from cloc to return a Python-friendly
+    data structure.
 
     Parameters
     ----------
     path : string
         An absolute path to the source code.
-    only : string, optional
+    only : list, optional
         The name(s) of director(y/ies) that must only be included when
-        counting the source-lines-of-code.
+        counting the lines-of-code.
 
     Returns
     -------
     sloc : dictionary
-        Dictionary keyed by language with source-lines-of-code as the value.
+        Dictionary keyed by language with a dictionary containing the metrics
+        as the value. The metric dictionary is keyed by 'cloc' for
+        comment-lines-of-code and 'sloc' for source-lines-of-code.
     """
     if not (os.path.exists(path) or os.path.isdir(path)):
         raise Exception('%s is an invalid path.' % path)
 
     sloc = None
 
+    command = 'cloc . --csv'
     if only:
-        command = ['cloc', '.', '--match-d=%s' % only, '--csv']
-    else:
-        command = ['cloc', '.', '--csv']
+        _only = '(' + '|'.join(only) + ')'
+        command = command + ' --match-d=%s --csv' % shlex.quote(_only)
 
     process = subprocess.Popen(
-        command, cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        command, cwd=path, shell=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     (out, err) = [x.decode() for x in process.communicate()]
 
@@ -48,6 +52,9 @@ def get_sloc(path, only=None):
         sloc = dict()
         for _index in range(index + 1, len(lines)):
             components = lines[_index].split(',')
-            sloc[components[1]] = int(components[4])
+            sloc[components[1]] = {
+                'cloc': int(components[3]),
+                'sloc': int(components[4])
+            }
 
     return sloc
