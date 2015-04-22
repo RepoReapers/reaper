@@ -67,3 +67,9 @@ def get_test_discoverer(language):
         return TEST_DISCOVERER_CACHE[class_]
     else:
         raise Exception('Test discoverer for %s is not defined.' % language)
+
+
+class TestDiscoverer(object):
+    """Base class for all TestDiscoverer classes"""
+    def discover(self, path):
+        raise NotImplementedError()
