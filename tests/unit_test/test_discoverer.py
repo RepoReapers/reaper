@@ -111,4 +111,4 @@ class DiscovererTestCase(unittest.TestCase):
         discoverer = TestDiscoverer()
 
         # Test: TestDiscoverer.discover is not callable
-        self.assertRaises(NotImplementedError, discoverer.discover, path='')
+        self.assertRaises(Exception, discoverer.discover, path='')

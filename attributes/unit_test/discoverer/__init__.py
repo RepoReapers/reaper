@@ -71,5 +71,17 @@ def get_test_discoverer(language):
 
 class TestDiscoverer(object):
     """Base class for all TestDiscoverer classes"""
+    def __init__(self):
+        self.frameworks = None
+
     def discover(self, path):
-        raise NotImplementedError()
+        if not self.frameworks:
+            raise Exception('No unit test frameworks configured.')
+
+        for framework in self.frameworks:
+            proportion = framework(path)
+
+            if proportion != -1:
+                return proportion
+
+        return -1
