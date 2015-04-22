@@ -27,7 +27,7 @@ class UtilitiesTestCase(unittest.TestCase):
                 self.assertEqual(expected[k][_k], _v)
 
         # Test: Get SLOC of only the directory 'include' for source at
-        # ./assets/projekt
+        #   ./assets/projekt
         expected = {
             'C/C++ Header': {'cloc': 0, 'sloc': 4},
         }
@@ -40,7 +40,7 @@ class UtilitiesTestCase(unittest.TestCase):
                 self.assertEqual(expected[k][_k], _v)
 
         # Test: Get SLOC of only the directories 'include' and 'utilities' for
-        # source at./assets/projekt
+        #   source at ./assets/projekt
         expected = {
             'C/C++ Header': {'cloc': 0, 'sloc': 4},
             'Javascript': {'cloc': 1, 'sloc': 10},
@@ -58,3 +58,48 @@ class UtilitiesTestCase(unittest.TestCase):
 
         # Test: Path is not a directory
         self.assertRaises(Exception, utilities.get_loc, '/bin/bash')
+
+    def test_search(self):
+        path = os.path.join(
+            os.path.dirname(__file__),
+            'assets/projekt'
+        )
+
+        # Test: Search for '#include <stdio.h>' in source at ./assets/projekt
+        self.assertTrue(utilities.search('#include <stdio.h>', path))
+
+        # Test: Search for '#include <stdio.h>' in '*.c' files in source at
+        #   ./assets/projekt
+        self.assertTrue(
+            utilities.search(
+                '#include <stdio.h>', path, include=['*.c']
+            )
+        )
+
+        # Test: Search for '#include <stdio.h>' in '*.c' and '*.js' files in
+        #   source at ./assets/projekt
+        self.assertTrue(
+            utilities.search(
+                '#include <stdio.h>', path, include=['*.c']
+            )
+        )
+
+        # Test: Search for '#include <stdio.h>' in '*.h' files in source at
+        #   ./assets/projekt
+        self.assertFalse(
+            utilities.search(
+                '#include <stdio.h>', path, include=['*.h']
+            )
+        )
+
+        # Test: Missing source directory
+        self.assertRaises(
+            Exception, utilities.search,
+            pattern='#include <stdio.h>', path='/home/nocturnal',
+        )
+
+        # Test: Path is not a directory
+        self.assertRaises(
+            Exception, utilities.search,
+            pattern='#include <stdio.h>', path='/bin/bash',
+        )
