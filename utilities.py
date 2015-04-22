@@ -58,3 +58,61 @@ def get_loc(path, only=None):
             }
 
     return sloc
+
+
+def search(pattern, path, recursive=True, whole=False, include=None):
+    """Search for the presence of a pattern in file.
+
+    grep (http://www.gnu.org/software/grep/manual/grep.html) is used to
+    recursively search for the pattern in all files within a specified path.
+
+    Parameters
+    ----------
+    pattern : string
+        A non-empty regular expression to match.
+    path : string
+        An absolute path to the location where the search is to be performed.
+    recursive : bool
+        Indicates if the pattern matching should be done recursively on all
+        files contained in the location identified by path.
+    whole : bool
+        Indicates if the pattern matching should use whole word matching.
+    include : list, optional
+        A list of patterns that specify the files to search.
+
+    Returns
+    -------
+    bool
+        True if the pattern was found, else False.
+    """
+    if not (os.path.exists(path) or os.path.isdir(path)):
+        raise Exception('%s is an invalid path.' % path)
+
+    if not pattern:
+        raise Exception('Parameter pattern cannot be emtpy.')
+
+    is_present = False
+
+    command = 'grep -c'
+    if recursive:
+        command += ' -r'
+    if whole:
+        command += ' -w'
+    if include:
+        command += ' --include '
+        command += ' --include '.join(shlex.quote(i) for i in include)
+
+    command += ' '
+    command += shlex.quote(pattern)
+
+    try:
+        subprocess.check_call(
+            command, cwd=path, shell=True,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        is_present = True
+    except subprocess.CalledProcessError as error:
+        if error.returncode != 1:
+            raise error
+
+    return is_present
