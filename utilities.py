@@ -3,7 +3,7 @@ import shlex
 import subprocess
 
 
-def get_sloc(path, only=None):
+def get_loc(path, only=None):
     """Return the lines-of-code for each language.
 
     cloc (http://cloc.sourceforge.net/) is used to compute the metrics. The

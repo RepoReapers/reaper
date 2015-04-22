@@ -5,7 +5,7 @@ import utilities
 
 
 class UtilitiesTestCase(unittest.TestCase):
-    def test_get_sloc(self):
+    def test_get_loc(self):
         path = os.path.join(
             os.path.dirname(__file__),
             'assets/projekt'
@@ -19,7 +19,7 @@ class UtilitiesTestCase(unittest.TestCase):
             'Python': {'cloc': 1, 'sloc': 2}
         }
 
-        sloc = utilities.get_sloc(path)
+        sloc = utilities.get_loc(path)
 
         self.assertEqual(len(expected), len(sloc))
         for (k, v) in sloc.items():
@@ -32,7 +32,7 @@ class UtilitiesTestCase(unittest.TestCase):
             'C/C++ Header': {'cloc': 0, 'sloc': 4},
         }
 
-        sloc = utilities.get_sloc(path, only=['include'])
+        sloc = utilities.get_loc(path, only=['include'])
 
         self.assertEqual(len(expected), len(sloc))
         for (k, v) in sloc.items():
@@ -46,7 +46,7 @@ class UtilitiesTestCase(unittest.TestCase):
             'Javascript': {'cloc': 1, 'sloc': 10},
         }
 
-        sloc = utilities.get_sloc(path, only=['include', 'utilities'])
+        sloc = utilities.get_loc(path, only=['include', 'utilities'])
 
         self.assertEqual(len(expected), len(sloc))
         for (k, v) in sloc.items():
@@ -54,7 +54,7 @@ class UtilitiesTestCase(unittest.TestCase):
                 self.assertEqual(expected[k][_k], _v)
 
         # Test: Missing source directory
-        self.assertRaises(Exception, utilities.get_sloc, '/home/nocturnal')
+        self.assertRaises(Exception, utilities.get_loc, '/home/nocturnal')
 
         # Test: Path is not a directory
-        self.assertRaises(Exception, utilities.get_sloc, '/bin/bash')
+        self.assertRaises(Exception, utilities.get_loc, '/bin/bash')
