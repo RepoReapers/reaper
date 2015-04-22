@@ -6,10 +6,23 @@ import json
 import mysql.connector
 import os
 import sys
+import threading
+import time
 
 
-def save_result(repo_id, results):
-    pass
+def save_result(repo_id, results, cursor):
+    return
+    # Very much under a TODO
+    try:
+        query = 'CREATE TABLE {0}'.format(
+            'results_' + time.strftime('%Y-%m-%d')
+        )
+        cursor.execute(query)
+    except mysql.connector.Error as error:
+        print('test')
+    finally:
+        query = 'INSERT INTO results () VALUES ()'
+        cursor.execute(query)
 
 
 def load_attribute_plugins(attributes):
@@ -17,10 +30,10 @@ def load_attribute_plugins(attributes):
         if attribute['enabled']:
             try:
                 attribute['implementation'] = importlib.import_module(
-                    "attributes.{0}.main".format(attribute['name'])
+                    'attributes.{0}.main'.format(attribute['name'])
                 )
             except ImportError:
-                print("Failed to load the {0} attribute.".format(
+                print('Failed to load the {0} attribute.'.format(
                         attribute['name']
                     )
                 )
@@ -31,17 +44,30 @@ def establish_database_connection(config):
         connection = mysql.connector.connect(**config)
         return connection
     except mysql.connector.Error:
-        print("Unable to establish connection to database.")
+        print('Unable to establish connection to database.')
         sys.exit(1)
 
 
 def process_configuration(config_file):
     try:
-        # TODO: Validate configuration contents
         config = json.load(config_file)
-        return config
+        if 'options' in config and 'attributes' in config:
+            for attribute in config['attributes']:
+                if 'name' not in attribute:
+                    attribute['enabled'] = False
+                if 'enabled' not in attribute:
+                    attribute['enabled'] = False
+                if 'weight' not in attribute:
+                    attribute['weight'] = 5
+                if 'options' not in attribute:
+                    attribute['options'] = {}
+            return config
+        else:
+            print('Configuration is missing required keys. See the sample \
+                configuration provided with the repository contents.')
+            sys.exit(2)
     except:
-        print("Malformatted or missing configuration.")
+        print('Malformatted or missing configuration.')
         sys.exit(2)
 
 
@@ -50,7 +76,7 @@ def repository_path(path_string):
         return path_string
     else:
         raise argparse.ArgumentTypeError(
-            "{0} is not a directory.".format(path_string)
+            '{0} is not a directory.'.format(path_string)
         )
 
 
@@ -107,6 +133,8 @@ def main():
                 **attribute['options']
             )
 
+            cursor.close()
+
             score += int(result or 0) * attribute['weight']
             results[attribute['name']] = result
 
@@ -117,15 +145,31 @@ def main():
                 break
 
     if config['options'].get('persistResult', False):
-        save_result(args.repository_id, results)
+        save_result(args.repository_id, results, connection.cursor())
+        print('\rResult saved to datasource.')
     else:
-        print("Raw score: {0}".format(score))
+        print('\rRaw score: {0}'.format(score))
 
     connection.close()
 
+
+def spin(stop_condition):
+    tokens = ['-', '\\', '|', '/']
+    while not stop_condition:
+        for token in tokens:
+            sys.stdout.write(token)
+            time.sleep(0.1)
+            sys.stdout.flush()
+            sys.stdout.write('\b')
+
 if __name__ == '__main__':
+    stop_condition = False
+    spinner_thread = threading.Thread(target=spin, args=([stop_condition]))
+    spinner_thread.daemon = True
+    spinner_thread.start()
     try:
         main()
     except KeyboardInterrupt:
-        print("Caught interrupt, exiting.")
-        sys.exit(1)
+        print('\rCaught interrupt, exiting.')
+    finally:
+        stop_condition = True
