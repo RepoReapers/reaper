@@ -32,7 +32,7 @@ class UtilitiesTestCase(unittest.TestCase):
             'C/C++ Header': {'cloc': 0, 'sloc': 4},
         }
 
-        sloc = utilities.get_loc(path, only=['include'])
+        sloc = utilities.get_loc(path, files=['include/projekt.h'])
 
         self.assertEqual(len(expected), len(sloc))
         for (k, v) in sloc.items():
@@ -46,7 +46,9 @@ class UtilitiesTestCase(unittest.TestCase):
             'Javascript': {'cloc': 1, 'sloc': 10},
         }
 
-        sloc = utilities.get_loc(path, only=['include', 'utilities'])
+        sloc = utilities.get_loc(
+            path, files=['include/projekt.h', 'utilities/projekt.js']
+        )
 
         self.assertEqual(len(expected), len(sloc))
         for (k, v) in sloc.items():
@@ -66,11 +68,17 @@ class UtilitiesTestCase(unittest.TestCase):
         )
 
         # Test: Search for '#include <stdio.h>' in source at ./assets/projekt
-        self.assertTrue(utilities.search('#include <stdio.h>', path))
+        expected = ['projekt.c']
+        self.assertListEqual(
+            expected,
+            utilities.search('#include <stdio.h>', path)
+        )
 
         # Test: Search for '#include <stdio.h>' in '*.c' files in source at
         #   ./assets/projekt
-        self.assertTrue(
+        expected = ['projekt.c']
+        self.assertListEqual(
+            expected,
             utilities.search(
                 '#include <stdio.h>', path, include=['*.c']
             )
@@ -78,15 +86,17 @@ class UtilitiesTestCase(unittest.TestCase):
 
         # Test: Search for '#include <stdio.h>' in '*.c' and '*.js' files in
         #   source at ./assets/projekt
-        self.assertTrue(
+        expected = ['projekt.c']
+        self.assertListEqual(
+            expected,
             utilities.search(
-                '#include <stdio.h>', path, include=['*.c']
+                '#include <stdio.h>', path, include=['*.c', '*.js']
             )
         )
 
         # Test: Search for '#include <stdio.h>' in '*.h' files in source at
         #   ./assets/projekt
-        self.assertFalse(
+        self.assertIsNone(
             utilities.search(
                 '#include <stdio.h>', path, include=['*.h']
             )
