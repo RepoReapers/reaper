@@ -3,7 +3,7 @@ import shlex
 import subprocess
 
 
-def get_loc(path, only=None):
+def get_loc(path, files=None):
     """Return the lines-of-code for each language.
 
     cloc (http://cloc.sourceforge.net/) is used to compute the metrics. The
@@ -14,9 +14,9 @@ def get_loc(path, only=None):
     ----------
     path : string
         An absolute path to the source code.
-    only : list, optional
-        The name(s) of director(y/ies) that must only be included when
-        counting the lines-of-code.
+    files : list, optional
+        The relative path of file(s) that must used when counting the
+        lines-of-code.
 
     Returns
     -------
@@ -30,10 +30,11 @@ def get_loc(path, only=None):
 
     sloc = None
 
-    command = 'cloc . --csv'
-    if only:
-        _only = '(' + '|'.join(only) + ')'
-        command = command + ' --match-d=%s --csv' % shlex.quote(_only)
+    command = 'cloc --csv '
+    if files:
+        command += ' '.join(files)
+    else:
+        command += '.'
 
     process = subprocess.Popen(
         command, cwd=path, shell=True,
@@ -61,7 +62,7 @@ def get_loc(path, only=None):
 
 
 def search(pattern, path, recursive=True, whole=False, include=None):
-    """Search for the presence of a pattern in file.
+    """Search for the presence of a pattern.
 
     grep (http://www.gnu.org/software/grep/manual/grep.html) is used to
     recursively search for the pattern in all files within a specified path.
@@ -69,21 +70,25 @@ def search(pattern, path, recursive=True, whole=False, include=None):
     Parameters
     ----------
     pattern : string
-        A non-empty regular expression to match.
+        A non-empty PERL style regular expression to match.
     path : string
-        An absolute path to the location where the search is to be performed.
-    recursive : bool
-        Indicates if the pattern matching should be done recursively on all
-        files contained in the location identified by path.
-    whole : bool
-        Indicates if the pattern matching should use whole word matching.
+        An absolute path to the location to root the search at.
+    recursive : bool, optional
+        Indicates if the search should be recursively across the entire
+        directory tree rooted at path. Default is True.
+    whole : bool, optional
+        Indicates if the search should use whole word matching. Default is
+        False.
     include : list, optional
-        A list of patterns that specify the files to search.
+        A list of patterns that specify the files to include in the search.
+        Default is None.
 
     Returns
     -------
-    bool
-        True if the pattern was found, else False.
+    files : list
+        A list of relative paths to files that contain the matching string. If
+        no files were found containing the matching string then None is
+        returned.
     """
     if not (os.path.exists(path) or os.path.isdir(path)):
         raise Exception('%s is an invalid path.' % path)
@@ -91,9 +96,9 @@ def search(pattern, path, recursive=True, whole=False, include=None):
     if not pattern:
         raise Exception('Parameter pattern cannot be emtpy.')
 
-    is_present = False
+    files = None
 
-    command = 'grep -c'
+    command = 'grep -Plc'
     if recursive:
         command += ' -r'
     if whole:
@@ -105,14 +110,18 @@ def search(pattern, path, recursive=True, whole=False, include=None):
     command += ' '
     command += shlex.quote(pattern)
 
-    try:
-        subprocess.check_call(
-            command, cwd=path, shell=True,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-        is_present = True
-    except subprocess.CalledProcessError as error:
-        if error.returncode != 1:
-            raise error
+    process = subprocess.Popen(
+        command, cwd=path, shell=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    (out, err) = [x.decode() for x in process.communicate()]
 
-    return is_present
+    lines = [
+        line.strip('\n')
+        for line in out.split('\n') if len(line.strip('\n')) != 0
+    ]
+
+    if lines:
+        files = lines
+
+    return files
