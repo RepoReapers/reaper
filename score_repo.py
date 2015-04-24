@@ -11,6 +11,9 @@ import time
 
 
 def save_result(repo_id, results, cursor):
+    """
+    Save the results to the specified data source.
+    """
     return
     # Very much under a TODO
     try:
@@ -42,9 +45,10 @@ def load_attribute_plugins(attributes):
 def establish_database_connection(config):
     try:
         connection = mysql.connector.connect(**config)
+        connection.connect()
         return connection
     except mysql.connector.Error:
-        print('Unable to establish connection to database.')
+        print('\rUnable to establish connection to database.')
         sys.exit(1)
 
 
@@ -106,7 +110,7 @@ def process_arguments():
         help='Path to the repository source code.'
     )
 
-    if len(sys.argv) is 1:
+    if len(sys.argv) < 2:
         parser.print_help()
         sys.exit(1)
 
