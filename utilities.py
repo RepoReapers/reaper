@@ -1,39 +1,44 @@
 import os
+import shlex
 import subprocess
 
 
-def get_sloc(path, only=None):
-    """Return the source-lines-of-code for each language.
+def get_loc(path, files=None):
+    """Return the lines-of-code for each language.
 
-    cloc (http://cloc.sourceforge.net/) is used to compute the
-    source-lines-of-code and this method merely parses the output from cloc
-    to return a Python-friendly data structure.
+    cloc (http://cloc.sourceforge.net/) is used to compute the metrics. The
+    method merely parses the output from cloc to return a Python-friendly
+    data structure.
 
     Parameters
     ----------
     path : string
         An absolute path to the source code.
-    only : string, optional
-        The name(s) of director(y/ies) that must only be included when
-        counting the source-lines-of-code.
+    files : list, optional
+        The relative path of file(s) that must used when counting the
+        lines-of-code.
 
     Returns
     -------
     sloc : dictionary
-        Dictionary keyed by language with source-lines-of-code as the value.
+        Dictionary keyed by language with a dictionary containing the metrics
+        as the value. The metric dictionary is keyed by 'cloc' for
+        comment-lines-of-code and 'sloc' for source-lines-of-code.
     """
     if not (os.path.exists(path) or os.path.isdir(path)):
         raise Exception('%s is an invalid path.' % path)
 
     sloc = None
 
-    if only:
-        command = ['cloc', '.', '--match-d=%s' % only, '--csv']
+    command = 'cloc --csv '
+    if files:
+        command += ' '.join(files)
     else:
-        command = ['cloc', '.', '--csv']
+        command += '.'
 
     process = subprocess.Popen(
-        command, cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        command, cwd=path, shell=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     (out, err) = [x.decode() for x in process.communicate()]
 
@@ -48,6 +53,75 @@ def get_sloc(path, only=None):
         sloc = dict()
         for _index in range(index + 1, len(lines)):
             components = lines[_index].split(',')
-            sloc[components[1]] = int(components[4])
+            sloc[components[1]] = {
+                'cloc': int(components[3]),
+                'sloc': int(components[4])
+            }
 
     return sloc
+
+
+def search(pattern, path, recursive=True, whole=False, include=None):
+    """Search for the presence of a pattern.
+
+    grep (http://www.gnu.org/software/grep/manual/grep.html) is used to
+    recursively search for the pattern in all files within a specified path.
+
+    Parameters
+    ----------
+    pattern : string
+        A non-empty PERL style regular expression to match.
+    path : string
+        An absolute path to the location to root the search at.
+    recursive : bool, optional
+        Indicates if the search should be recursively across the entire
+        directory tree rooted at path. Default is True.
+    whole : bool, optional
+        Indicates if the search should use whole word matching. Default is
+        False.
+    include : list, optional
+        A list of patterns that specify the files to include in the search.
+        Default is None.
+
+    Returns
+    -------
+    files : list
+        A list of relative paths to files that contain the matching string. If
+        no files were found containing the matching string then None is
+        returned.
+    """
+    if not (os.path.exists(path) or os.path.isdir(path)):
+        raise Exception('%s is an invalid path.' % path)
+
+    if not pattern:
+        raise Exception('Parameter pattern cannot be emtpy.')
+
+    files = None
+
+    command = 'grep -Plc'
+    if recursive:
+        command += ' -r'
+    if whole:
+        command += ' -w'
+    if include:
+        command += ' --include '
+        command += ' --include '.join(shlex.quote(i) for i in include)
+
+    command += ' '
+    command += shlex.quote(pattern)
+
+    process = subprocess.Popen(
+        command, cwd=path, shell=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    (out, err) = [x.decode() for x in process.communicate()]
+
+    lines = [
+        line.strip('\n')
+        for line in out.split('\n') if len(line.strip('\n')) != 0
+    ]
+
+    if lines:
+        files = lines
+
+    return files

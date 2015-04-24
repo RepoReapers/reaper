@@ -1,9 +1,24 @@
 import sys
 
+from attributes.unit_test.discoverer import get_test_discoverer
+
 
 def run(project_id, repo_path, cursor, **options):
-    pass
+    query = 'SELECT language FROM projects WHERE id = %d' % project_id
+    cursor.execute(query)
+
+    discoverer = get_test_discoverer(language=record[0])
+    proportion = discoverer(repo_path)
+
+    cursor.close()
+
+    threshold = 0
+    if 'threshold' in options:
+        threshold = options['threshold']
+    proportion = discoverer.discover(repo_path)
+
+    return proportion != -1 and proportion >= threshold
 
 if __name__ == '__main__':
-    print()
+    print('Attribute plugins are not meant to be executed directly.')
     sys.exit(1)
