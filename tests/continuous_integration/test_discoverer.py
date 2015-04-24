@@ -32,7 +32,7 @@ class CiDiscovererTestCase(unittest.TestCase):
             os.path.join(REPOS_PATH, 'grunt')
         ))
 
-        # Test: Project with no CI
+        # Test: Project with no CI (when these tests were written)
         self.assertFalse(self.ci_discoverer.discover(
             os.path.join(REPOS_PATH, 'django')
         ))
