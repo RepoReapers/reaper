@@ -2,14 +2,12 @@ import os
 import unittest
 
 import utilities
+from tests import ASSETS_PATH
 
 
 class UtilitiesTestCase(unittest.TestCase):
     def test_get_loc(self):
-        path = os.path.join(
-            os.path.dirname(__file__),
-            'assets/projekt'
-        )
+        path = os.path.join(ASSETS_PATH, 'projekt')
 
         # Test: Get SLOC of source at ./assets/projekt
         expected = {
