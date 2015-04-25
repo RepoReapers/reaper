@@ -13,6 +13,9 @@
   "attributes": [
     {
       "name": "architecture",
+      "dependencies": [
+        "ctags"
+      ],
       "enabled": true,
       "weight": 50,
       "options": {
