@@ -1,6 +1,4 @@
-import json
-import urllib
-import urllib.request
+from utilities import url_to_json
 
 
 def run(project_id, repo_path, cursor, **options):
@@ -9,24 +7,11 @@ def run(project_id, repo_path, cursor, **options):
     record = cursor.fetchone()
 
     full_url = record[0].rstrip()
-    request = urllib.request.Request(
-        full_url,
-        headers={
-            'Accept': 'application/vnd.github.drax-preview+json'
-        }
-    )
+    json_response = url_to_json(full_url)
 
-    try:
-        response = urllib.request.urlopen(request)
-
-        raw_data = response.readall().decode('utf-8')
-        json_data = json.loads(raw_data)
-
-        if 'license' in json_data:
-            result = 1
-        else:
-            result = 0
-    except urllib.request.HTTPError as e:
+    if 'license' in json_response:
+        result = 1
+    else:
         result = 0
 
     return result

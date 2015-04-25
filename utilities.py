@@ -1,7 +1,10 @@
 import argparse
+import json
 import os
 import shlex
 import subprocess
+import urllib
+import urllib.request
 
 
 def get_loc(path, files=None):
@@ -128,6 +131,32 @@ def search(pattern, path, recursive=True, whole=False, include=None):
     return files
 
 
+def url_to_json(url, headers={}):
+    """Returns the JSON response from the url.
+
+    Args:
+        url (string): URL from which to GET the JSON resource.
+
+    Returns:
+        dict: JSON of the response or empty dict on error.
+    """
+    request = urllib.request.Request(
+        url,
+        headers=headers
+    )
+
+    try:
+        response = urllib.request.urlopen(request)
+
+        raw_data = response.readall().decode('utf-8')
+        result = json.loads(raw_data)
+    except Exception as eu:
+        print(e)
+        result = {}
+
+    return result
+
+
 def is_dir(path):
     """Returns `path` if path is a valid directory, otherwise raises an
     argparse.ArgumentTypeError.
@@ -136,8 +165,7 @@ def is_dir(path):
         path (string): User supplied path.
 
     Returns:
-        string: string
-            User supplied path.
+        string: User supplied path.
 
     Raises:
         argparse.ArgumentTypeError: Raised if `path` is not a valid directory.
