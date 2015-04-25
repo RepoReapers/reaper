@@ -8,6 +8,7 @@ import os
 import sys
 import threading
 import time
+from utilities import is_dir
 
 
 def save_result(repo_id, results, cursor):
@@ -26,6 +27,34 @@ def save_result(repo_id, results, cursor):
     finally:
         query = 'INSERT INTO results () VALUES ()'
         cursor.execute(query)
+
+
+def process_repo(project_id, repo_path, attributes, connection):
+    score = 0
+    results = {}
+    for attribute in attributes:
+        cursor = connection.cursor()
+
+        if 'implementation' in attribute:
+            result = attribute['implementation'].run(
+                project_id,
+                repo_path,
+                cursor,
+                **attribute['options']
+            )
+
+            cursor.close()
+
+            score += int(result or 0) * attribute['weight']
+            results[attribute['name']] = result
+
+            if ('essential' in attribute and
+                    attribute['essential'] and
+                    not result):
+                score = 0
+                break
+
+    return score, results
 
 
 def load_attribute_plugins(attributes):
@@ -124,29 +153,12 @@ def main():
     attributes = config['attributes']
     load_attribute_plugins(attributes)
 
-    score = 0
-    results = {}
-    for attribute in attributes:
-        cursor = connection.cursor()
-
-        if 'implementation' in attribute:
-            result = attribute['implementation'].run(
-                args.repository_id[0],
-                args.repository_path[0],
-                cursor,
-                **attribute['options']
-            )
-
-            cursor.close()
-
-            score += int(result or 0) * attribute['weight']
-            results[attribute['name']] = result
-
-            if ('essential' in attribute and
-                    attribute['essential'] and
-                    not result):
-                score = 0
-                break
+    score, results = process_repo(
+        args.repository_id[0],
+        args.repository_path[0],
+        attributes,
+        connection
+    )
 
     if config['options'].get('persistResult', False):
         save_result(args.repository_id, results, connection.cursor())
