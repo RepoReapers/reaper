@@ -7,7 +7,10 @@ def run(project_id, repo_path, cursor, **options):
     record = cursor.fetchone()
 
     full_url = record[0].rstrip()
-    json_response = url_to_json(full_url)
+    json_response = url_to_json(full_url, headers={
+            'Accept': 'application/vnd.github.drax-preview+json'
+        }
+    )
 
     if 'license' in json_response:
         result = 1
