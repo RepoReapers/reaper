@@ -27,10 +27,10 @@ are two high level keys that can be altered, `options` and `attributes`.
 
 | Key | Values | Description |
 | --- |:------:| -----------:|
-| threshold | Positive Numbers | Defines the threshold by which the system considers a repository to contain a software project. |
-| persistResult | true or false | Whether the granular results should be saved to the specified datasource. |
-| datasource | object | Settings for connecting to the GHTorrent database, see next section. |
-| githubTokens | list | List of GitHub OAuth tokens to be used for authentication for rate limiting purposes. |
+| `threshold` | Positive Numbers | Defines the threshold by which the system considers a repository to contain a software project. |
+| `persistResult` | true or false | Whether the granular results should be saved to the specified datasource. |
+| `datasource` | object | Settings for connecting to the GHTorrent database, see description below. |
+| `githubTokens` | list | List of GitHub OAuth tokens to be used for authentication for rate limiting purposes. |
 
 ##### `datasource`
 
