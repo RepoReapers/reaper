@@ -7,6 +7,7 @@ from core import process_configuration
 from core import process_repository
 from core import save_result
 import os
+import random
 import sys
 import threading
 import time
@@ -79,13 +80,11 @@ def main():
 
 
 def spin(stop_condition):
-    tokens = ['-', '\\', '|', '/']
     while not stop_condition:
-        for token in tokens:
-            sys.stdout.write(token)
-            time.sleep(0.1)
-            sys.stdout.flush()
-            sys.stdout.write('\b')
+        print(chr(random.randint(int('2800', 16), int('2880', 16))), end='')
+        sys.stdout.flush()
+        print('\b', end='')
+        time.sleep(0.1)
 
 if __name__ == '__main__':
     stop_condition = False
