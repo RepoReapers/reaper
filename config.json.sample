@@ -50,9 +50,7 @@
       "name": "license",
       "essential": true,
       "enabled": true,
-      "weight": 50,
-      "options": {
-      }
+      "weight": 50
     },
     {
       "name": "management",
@@ -70,4 +68,3 @@
     }
   ]
 }
-
