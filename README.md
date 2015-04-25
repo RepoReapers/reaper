@@ -1,6 +1,6 @@
-# reaping-tools
+# reaper
 
-The purpose of the reaping-tools repository is to store the reference
+The purpose of the reaper repository is to store the reference
 implementation of the scoring system as outlined in the research paper.
 
 ## Installation
@@ -44,7 +44,7 @@ edit the appropriate parameters under the `options => datasource` key.
 
 #### `attributes`
 
-The system is designed as a number of plugins that all have a change to analyze
+The system is designed as a number of plugins that all have a chance to analyze
 a given repository (both metadata as well as contents). A number of provided
 attributes are apart of the base distribution of the system, but more can easily
 be added.
