@@ -3,6 +3,13 @@
 The purpose of the reaping-tools repository is to store the reference
 implementation of the scoring system as outlined in the research paper.
 
+## Installation
+
+The projects runs on systems with `python3`. There are a number of python
+libraries that the code needs in order to execute. To install them, simply run
+`pip -r requirements.txt` (or `pip3` if your system does not have python3 set
+as the default.)
+
 ## Usage
 
 The `score_repo.py` executable is the main interface that should be used by the
