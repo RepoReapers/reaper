@@ -7,8 +7,9 @@ def run(project_id, repo_path, cursor, **options):
     query = 'SELECT language FROM projects WHERE id = %d' % project_id
     cursor.execute(query)
 
+    record = cursor.fetchone()
     discoverer = get_test_discoverer(language=record[0])
-    proportion = discoverer(repo_path)
+    proportion = discoverer.discover(repo_path)
 
     cursor.close()
 
