@@ -11,6 +11,12 @@ from utilities import is_dir
 
 
 def process_arguments():
+    """
+    Uses the argparse module to parse commandline arguments.
+
+    Returns:
+        Dictionary of parsed commandline arguments.
+    """
     parser = argparse.ArgumentParser(
         description='Calculate the scores of a set of repositories.'
     )
@@ -37,6 +43,9 @@ def process_arguments():
 
 
 def main():
+    """
+    Main execution flow.
+    """
     args = process_arguments()
     config = process_configuration(args.config_file)
     connection = establish_database_connection(config['options']['datasource'])

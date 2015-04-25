@@ -5,7 +5,19 @@ import mysql.connector
 
 def save_result(repo_id, results, cursor):
     """
-    Save the results to the specified data source.
+    Save the results to the specified data source, creating the results table
+    as necessary.
+
+    Args:
+        repo_id: int
+            Identifier of the repository to save.
+        results: dict
+            Key value pair of results to be saved.
+        cursor: mysql.cursor.MySQLCursor
+            Cursor object used to insert data.
+
+    Return:
+        True if successful, False otherwise.
     """
     return
     # Very much under a TODO
@@ -22,6 +34,19 @@ def save_result(repo_id, results, cursor):
 
 
 def process_repository(project_id, repo_path, attributes, connection):
+    """
+    Calculate a score for the given repository.
+
+    Args:
+        project_id: int
+            GHTorrent dataset identifier for the repository.
+        repo_path: string
+            Path to the repository contents.
+        attributes: list
+            List of attributes to be executed against the repository.
+        connection: mysql.connector.MySQLConnection
+            Database connection used for querying the GHTorrent dataset.
+    """
     score = 0
     results = {}
     for attribute in attributes:
@@ -50,6 +75,15 @@ def process_repository(project_id, repo_path, attributes, connection):
 
 
 def load_attribute_plugins(attributes):
+    """
+    Attempt to load each of the attributes as defined in the configuration
+    file.
+
+    Args:
+        attributes: list
+            List of attribute dictionaries with the specific configuration
+            data.
+    """
     for attribute in attributes:
         if attribute['enabled']:
             try:
@@ -64,6 +98,14 @@ def load_attribute_plugins(attributes):
 
 
 def establish_database_connection(config):
+    """
+    Attempt to establish a connection to the specified database. Exit with an
+    error message on failure.
+
+    Args:
+        config: dict
+            Settings for the database connection.
+    """
     try:
         connection = mysql.connector.connect(**config)
         connection.connect()
@@ -74,6 +116,16 @@ def establish_database_connection(config):
 
 
 def process_configuration(config_file):
+    """
+    Load and validate the given configuration file.
+
+    Args:
+        config_file: File
+            File object with the configuration contents.
+
+    Returns:
+        Validated dictionary with configuration parameters.
+    """
     try:
         config = json.load(config_file)
         if 'options' in config and 'attributes' in config:
