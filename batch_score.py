@@ -4,7 +4,7 @@ import argparse
 from core import load_attribute_plugins
 from core import establish_database_connection
 from core import process_configuration
-from core import process_repo
+from core import process_repository
 import os
 import sys
 from utilities import is_dir
