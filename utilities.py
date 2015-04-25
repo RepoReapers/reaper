@@ -1,3 +1,4 @@
+import argparse
 import os
 import shlex
 import subprocess
@@ -125,3 +126,25 @@ def search(pattern, path, recursive=True, whole=False, include=None):
         files = lines
 
     return files
+
+
+def is_dir(path):
+    """Returns `path` if path is a valid directory, otherwise raises an
+    argparse.ArgumentTypeError.
+
+    Args:
+        path (string): User supplied path.
+
+    Returns:
+        string: string
+            User supplied path.
+
+    Raises:
+        argparse.ArgumentTypeError: Raised if `path` is not a valid directory.
+    """
+    if not os.path.isdir(path):
+        raise argparse.ArgumentTypeError(
+            '{0} is not a directory.'.format(path)
+        )
+    else:
+        return path
