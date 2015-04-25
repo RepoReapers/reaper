@@ -1,3 +1,4 @@
+import distutils.spawn
 import importlib
 import json
 import mysql.connector
@@ -90,6 +91,7 @@ def load_attribute_plugins(attributes):
                 attribute['implementation'] = importlib.import_module(
                     'attributes.{0}.main'.format(attribute['name'])
                 )
+
             except ImportError:
                 print('Failed to load the {0} attribute.'.format(
                         attribute['name']
@@ -130,6 +132,12 @@ def process_configuration(config_file):
         config = json.load(config_file)
         if 'options' in config and 'attributes' in config:
             for attribute in config['attributes']:
+                if 'dependencies' in attribute:
+                    for dependency in attribute['dependencies']:
+                        if distutils.spawn.find_executable(dependency) is None:
+                            print('Missing dependency for attribute {0}: \
+                                    {1}'.format(attribute['name'], dependency))
+                            sys.exit(1)
                 if 'name' not in attribute:
                     attribute['enabled'] = False
                 if 'enabled' not in attribute:

@@ -57,6 +57,9 @@ An example entry looks like the following:
 ```json
 {
   "name": "architecture",
+  "dependencies": [
+    "ctags"
+  ],
   "enabled": true,
   "weight": 50,
   "options": {
@@ -65,10 +68,12 @@ An example entry looks like the following:
 ```
 
 `name` refers to the name of the attribute as it appears under the `attribute/`
-directory. `enabled` controls whether the attribute will be considered during
-the scoring of the repository. `weight` allows the bias of the attribute to be
-fine tuned in order to adjust its effect on the final score. Finally, `options`
-are specific options for each particular attribute implementation.
+directory. `dependencies` is a list of system utilities that the attribute
+implementation relies on in order to function. `enabled` controls whether the
+attribute will be considered during the scoring of the repository. `weight`
+allows the bias of the attribute to be fine tuned in order to adjust its effect
+on the final score. Finally, `options` are specific options for each particular
+attribute implementation.
 
 ## Attribute Development
 
