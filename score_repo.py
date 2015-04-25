@@ -13,16 +13,13 @@ import time
 from utilities import is_dir
 
 
-def repository_path(path_string):
-    if os.path.exists(path_string):
-        return path_string
-    else:
-        raise argparse.ArgumentTypeError(
-            '{0} is not a directory.'.format(path_string)
-        )
-
-
 def process_arguments():
+    """
+    Uses the argparse module to parse commandline arguments.
+
+    Returns:
+        Dictionary of parsed commandline arguments.
+    """
     parser = argparse.ArgumentParser(
         description='Calculate the score of a repository.'
     )
@@ -43,7 +40,7 @@ def process_arguments():
     )
     parser.add_argument(
         'repository_path',
-        type=repository_path,
+        type=is_dir,
         nargs=1,
         help='Path to the repository source code.'
     )
@@ -56,6 +53,9 @@ def process_arguments():
 
 
 def main():
+    """
+    Main execution flow.
+    """
     args = process_arguments()
     config = process_configuration(args.config_file)
     connection = establish_database_connection(config['options']['datasource'])
