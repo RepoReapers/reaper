@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
+from core import load_attribute_plugins
+from core import establish_database_connection
+from core import process_configuration
+from core import process_repo
 import os
-from score_repo import load_attribute_plugins
-from score_repo import establish_database_connection
-from score_repo import process_configuration
-from score_repo import process_repo
 import sys
 from utilities import is_dir
 
