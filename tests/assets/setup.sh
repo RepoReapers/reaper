@@ -45,6 +45,12 @@ if [ ! -d repos ]; then
     git clone --depth 1 https://github.com/SFTtech/openage.git 1> /dev/null 2> /dev/null
     git clone --depth 1 https://github.com/drmeister/externals-clasp.git 1> /dev/null 2> /dev/null
     git clone --depth 1 https://github.com/atom/electron.git 1> /dev/null 2> /dev/null
+
+    echo '  C'
+    git clone --depth 1 https://github.com/Distrotech/gnome-vfs.git 1> /dev/null 2> /dev/null
+    git clone --depth 1 https://github.com/drobin/grs.git 1> /dev/null 2> /dev/null
+    git clone --depth 1 https://github.com/lpereira/lwan.git 1> /dev/null 2> /dev/null
+
 else
     echo '  Previous clones are still around. Exiting.'
 fi
