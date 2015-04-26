@@ -1,7 +1,50 @@
+from apscheduler.schedulers.background import BackgroundScheduler
+import datetime
 import distutils.spawn
 import importlib
 import json
 import mysql.connector
+import queue
+import sched
+import time
+from utilities import url_to_json
+
+scheduler = BackgroundScheduler()
+scheduler.start()
+available_tokens = queue.Queue()
+
+
+def init(tokens):
+    global available_tokens
+
+    for token in tokens:
+        available_tokens.put(token)
+
+
+def get_token():
+    while True:
+        token = available_tokens.get(block=True)
+
+        status = url_to_json(
+            'https://api.github.com/rate_limit?access_token=%s' % token
+        )
+
+        if status['resources']['core']['remaining'] > 0:
+            return token
+        else:
+            scheduler.add_job(
+                available_tokens.put_nowait,
+                'date',
+                args=[token],
+                run_date=datetime.datetime.fromtimestamp(
+                    status['resources']['core']['reset']
+                )
+            )
+
+
+def tokenize(url):
+    token = get_token()
+    return '{0}?access_token={1}'.format(url, token)
 
 
 def save_result(repo_id, results, cursor):
@@ -146,6 +189,7 @@ def process_configuration(config_file):
                     attribute['weight'] = 5
                 if 'options' not in attribute:
                     attribute['options'] = {}
+            init(config['options']['githubTokens'])
             return config
         else:
             print('Configuration is missing required keys. See the sample \
