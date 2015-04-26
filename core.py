@@ -98,10 +98,10 @@ def process_repository(project_id, repo_path, attributes, connection):
     score = 0
     results = {}
     for attribute in attributes:
-        cursor = connection.cursor()
-
         if 'implementation' in attribute:
-            result = attribute['implementation'].run(
+            cursor = connection.cursor()
+
+            binary_result, raw_result = attribute['implementation'].run(
                 project_id,
                 repo_path,
                 cursor,
@@ -110,8 +110,8 @@ def process_repository(project_id, repo_path, attributes, connection):
 
             cursor.close()
 
-            score += int(result or 0) * attribute['weight']
-            results[attribute['name']] = result
+            score += binary_result * attribute['weight']
+            results[attribute['name']] = raw_result
 
             if ('essential' in attribute and
                     attribute['essential'] and
