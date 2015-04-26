@@ -7,7 +7,8 @@ ci_discoverer = CiDiscoverer()
 
 
 def run(project_id, repo_path, cursor, **options):
-    return ci_discoverer.discover(repo_path)
+    result = ci_discoverer.discover(repo_path)
+    return (result, result)
 
 
 if __name__ == '__main__':

@@ -18,7 +18,7 @@ def run(project_id, repo_path, cursor, **options):
         threshold = options['threshold']
     proportion = discoverer.discover(repo_path)
 
-    return proportion != -1 and proportion >= threshold
+    return (proportion != -1 and proportion >= threshold, proportion)
 
 if __name__ == '__main__':
     print('Attribute plugins are not meant to be executed directly.')
