@@ -91,4 +91,8 @@ def run(project_id, repo_path, cursor, **options):
 ```
 
 Check the doc block for details on what each parameter provides in terms of
-functionality. Additionally, the return value of the function should be 0 or 1.
+functionality. Attribute implementations should return a tuple of two values:
+the binary result of execution and the raw result of execution. The binary
+result should be True or False and the raw result should be a real number that
+is the raw calculation made by the plugin. In the case of purely binary results,
+do something like `return result, int(result)`.
