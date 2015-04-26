@@ -30,6 +30,7 @@ def get_token():
         )
 
         if status['resources']['core']['remaining'] > 0:
+            available_tokens.put_nowait(token)
             return token
         else:
             scheduler.add_job(
@@ -43,8 +44,11 @@ def get_token():
 
 
 def tokenize(url):
-    token = get_token()
-    return '{0}?access_token={1}'.format(url, token)
+    if url.startswith('https://api.github.com'):
+        token = get_token()
+        return '{0}?access_token={1}'.format(url, token)
+    else:
+        raise ValueError('url must be for the GitHub API')
 
 
 def save_result(repo_id, results, cursor):
