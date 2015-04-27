@@ -80,16 +80,18 @@ def save_result(repo_id, results, cursor):
         query = 'INSERT INTO results () VALUES ()'
         cursor.execute(query)
 
+
 def init_attribute_plugins(attributes, connection):
     for attribute in attributes:
         if 'implementation' in attribute:
             try:
-                cursor = connection.cursor() 
+                cursor = connection.cursor()
                 attribute['implementation'].init(cursor)
             except:
-                print(attribute['implementation'] + ".init() does not exit")
+                pass
             finally:
                 cursor.close()
+
 
 def process_repository(project_id, repo_path, attributes, connection):
     """
