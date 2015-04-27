@@ -96,3 +96,11 @@ the binary result of execution and the raw result of execution. The binary
 result should be True or False and the raw result should be a real number that
 is the raw calculation made by the plugin. In the case of purely binary results,
 do something like `return result, int(result)`.
+
+Additionally, there is the option of initializing the plugin. To take advantage
+of initialization, add the following function signature to `main.py`:
+
+```python
+def init(cursor, **options):
+  # Implementation goes here.
+```
