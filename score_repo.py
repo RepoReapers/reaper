@@ -62,6 +62,7 @@ def main():
     connection = establish_database_connection(config['options']['datasource'])
     attributes = config['attributes']
     load_attribute_plugins(attributes)
+    init_attribute_plugins(attributes, connection)
 
     score, results = process_repository(
         args.repository_id[0],
