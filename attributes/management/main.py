@@ -20,6 +20,7 @@ sample_tbl = 'reaper_sample'
 freq_tbl_runs = 'reaper_issue_freq_runs'
 freq_tbl = 'reaper_issue_freq'
 
+
 def init(cursor, **options):
     """
     This function initializes the medians data for all projects in the sample
@@ -40,9 +41,10 @@ def init(cursor, **options):
     # Compute the median number of issues created per month
     compute_medians(cursor, run)
 
+
 def run(project_id, repo_path, cursor, **option):
     """
-    Selects answers for the management attribute on individual repositories. 
+    Selects answers for the management attribute on individual repositories.
     This information comes from the medians data frame in memory. For this
     global table to exist, the init function must have been run first.
     """
@@ -53,22 +55,23 @@ def run(project_id, repo_path, cursor, **option):
     attr_threshold = option['threshold']
 
     attr_pass = (median >= attr_threshold)
-    return (attr_pass, median) 
+    return (attr_pass, median)
+
 
 def create_calendar(cursor, range_tbl):
     """
     Creates a temporary calendar table by months. Months are included within
     the range of the first repository creation date to the date of last commit.
-    Only projects within the sample are considered: this calendar does not 
+    Only projects within the sample are considered: this calendar does not
     necessarily apply to all of GitHub.
 
         That is: Calendar = [ Min(repo creation date) , Max(commit date) ]
 
     Returns:
-        The name of the temporary calendar table 
+        The name of the temporary calendar table
     """
 
-    calendar_tbl = 'reaper_calendar' # Will be returned
+    calendar_tbl = 'reaper_calendar'  # Will be returned
     calendar_proc = 'reaper_fill_calendar'
 
     # Drop existing calendar table and recreate it
@@ -90,28 +93,28 @@ def create_calendar(cursor, range_tbl):
         '''.format(proc=calendar_proc))
 
     cursor.execute('''
-        CREATE PROCEDURE {proc} ()    
-          BEGIN    
+        CREATE PROCEDURE {proc} ()
+          BEGIN
           DECLARE dt_cur, dt_last, temp DATETIME;
 
           -- temp is the minimum repo creation date timestamp
-          -- dt_cur is a DATETIME set to the first day of temp's month 
+          -- dt_cur is a DATETIME set to the first day of temp's month
 
-          SET temp = (SELECT MIN(first) FROM {range_tbl});  
-          SET dt_cur = MAKEDATE(YEAR(temp), MONTH(temp));      
-    
+          SET temp = (SELECT MIN(first) FROM {range_tbl});
+          SET dt_cur = MAKEDATE(YEAR(temp), MONTH(temp));
+
           -- temp is now the maximum commit date timestamp
           -- dt_cur is a DATETIME set to the first day of temp's month
 
-          SET temp = (SELECT MAX(last) FROM {range_tbl});    
+          SET temp = (SELECT MAX(last) FROM {range_tbl});
           SET dt_last = MAKEDATE(YEAR(temp), MONTH(temp));
 
           -- Insert months into the calendar within the desired range
 
-          SET dt_cur = DATE_SUB(dt_cur, INTERVAL 1 MONTH);    
-          WHILE dt_cur <= dt_last DO    
-            INSERT INTO {cal} (dt) VALUES (dt_cur);    
-            SET dt_cur = DATE_ADD(dt_cur, INTERVAL 1 MONTH);    
+          SET dt_cur = DATE_SUB(dt_cur, INTERVAL 1 MONTH);
+          WHILE dt_cur <= dt_last DO
+            INSERT INTO {cal} (dt) VALUES (dt_cur);
+            SET dt_cur = DATE_ADD(dt_cur, INTERVAL 1 MONTH);
           END WHILE;
         END;
         '''.format(proc=calendar_proc, cal=calendar_tbl, range_tbl=range_tbl))
@@ -121,23 +124,24 @@ def create_calendar(cursor, range_tbl):
 
     return calendar_tbl
 
+
 def create_freq_tables(cursor):
     """
     The management attribute requires two permanent tables alongside the
-    GHTorrent tables. The first table, reaper_issue_freq_runs, tracks 
+    GHTorrent tables. The first table, reaper_issue_freq_runs, tracks
     individual runs of the management program with timestamps. The second
     table, reaper_issue_freq, contains the actual issue creation data for
     all runs. You can select particular run sets out of this table on the
-    'run' foreign key. 
+    'run' foreign key.
 
     Each row in reaper_isue_freq is associated with a unique row id and run
     number. Within a single run, issue creation counts are bucketed by month
-    for each project_id. The month bucketing process supports sparse data, as 
+    for each project_id. The month bucketing process supports sparse data, as
     months with no issues created will report a count of 0.
 
     This function simply creates these tables if they do not yet exist.
     """
-    
+
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS {tbl_runs}
           (
@@ -158,9 +162,10 @@ def create_freq_tables(cursor):
           );
         '''.format(tbl=freq_tbl))
 
+
 def update_freq_tables(cursor, range_tbl, calendar_tbl):
     """
-    This function is responsible for selecting the sparse, month-wise, issue 
+    This function is responsible for selecting the sparse, month-wise, issue
     creation, frequency data into the two permanent management tables.
 
     First, a new row is added to the runs table. All frequency data to be
@@ -170,12 +175,12 @@ def update_freq_tables(cursor, range_tbl, calendar_tbl):
     selected for each project in the sample. In this set, each month row
     represents one fake issue creation event. This is done so each month of
     project existence is reflected in the final result set. We union this data
-    with the actual issue data. 
+    with the actual issue data.
 
     Then, we have to subtract out one issue creation event per month because we
-    purposefuly added one fake issue creation event earlier in the process. 
+    purposefuly added one fake issue creation event earlier in the process.
 
-    Hack: 
+    Hack:
         You cannot use a temporary table twice in a single query. So, we
         could not use range_tbl twice. Instead, we use sample_tbl in the
         first part of the query. The tables sample_tbl and range_tbl contain
@@ -186,15 +191,17 @@ def update_freq_tables(cursor, range_tbl, calendar_tbl):
     """
 
     # Generate run timestamp. We get the run number via cursor.lastrowid
-    cursor.execute('''
+    cursor.execute(
+        '''
         INSERT INTO {tbl_runs} (timestamp) SELECT NOW();
         '''.format(tbl_runs=freq_tbl_runs)
     )
-    run = cursor.lastrowid 
+    run = cursor.lastrowid
 
-    cursor.execute('''
+    cursor.execute(
+        '''
         INSERT INTO {freq} (run, project_id, year, month, count)
-        SELECT 
+        SELECT
           {run} AS run,                  -- Current run number
           u.repo_id AS project_id,
           YEAR(u.created_at) AS year,    -- Year as an int
@@ -202,7 +209,7 @@ def update_freq_tables(cursor, range_tbl, calendar_tbl):
           COUNT(*) - 1 AS count          -- Decrement because of fake event
         FROM
           (
-            ( 
+            (
               SELECT -- Does not include zero issue months
 
                 {sample}.project_id AS repo_id, -- Use of {sample} is a hack
@@ -221,35 +228,38 @@ def update_freq_tables(cursor, range_tbl, calendar_tbl):
 
               FROM {range} CROSS JOIN {calendar}
               WHERE
-                ( 
+                (
                   {calendar}.dt BETWEEN {range}.first AND {range}.last
                 )
-              ORDER BY repo_id, created_at 
+              ORDER BY repo_id, created_at
             )
           ) AS u
           GROUP BY u.repo_id, year, month
           ORDER BY u.repo_id, year, month;
-        '''.format(calendar=calendar_tbl, range=range_tbl, sample=sample_tbl, 
-                freq=freq_tbl, run=run)
+        '''.format(
+            calendar=calendar_tbl, range=range_tbl, sample=sample_tbl,
+            freq=freq_tbl, run=run
+        )
     )
     return run
 
+
 def create_active_range(cursor):
     """
-    The generation of issue month buckets, including buckets of zero issue 
+    The generation of issue month buckets, including buckets of zero issue
     months, requires us to know the range of project activity on GitHub. This
     function generates this range. The first date of the range is the date
     on which the repository was created on GitHub (inclusive). The second date
-    of the range is the date on which the repository's latest commit was 
+    of the range is the date on which the repository's latest commit was
     created (inclusive). Of course, since the GHTorrent data quickly grows
-    stale, this commit data is only accurate to the capture date of the 
-    GHTorrent package. 
+    stale, this commit data is only accurate to the capture date of the
+    GHTorrent package.
 
     Returns:
         The name of the temporary range table
     """
 
-    range_tbl = "reaper_sample_active_range" # Name of the temp table
+    range_tbl = "reaper_sample_active_range"  # Name of the temp table
 
     cursor.execute('''
         CREATE TEMPORARY TABLE {range_tbl}
@@ -266,7 +276,7 @@ def create_active_range(cursor):
         SELECT p.project_id,
           p.first,
           MAX(c.created_at) AS last
-        FROM 
+        FROM
           (
             SELECT projects.id AS project_id,
               projects.created_at AS first
@@ -279,7 +289,8 @@ def create_active_range(cursor):
         '''.format(range_tbl=range_tbl, sample_tbl=sample_tbl))
 
     return range_tbl
-   
+
+
 def compute_medians(cursor, run):
     """
     This function computes the median number of commits created per month
@@ -304,13 +315,13 @@ if __name__ == '__main__':
     mysql_config = config['options']['datasource']
 
     connection = mysql.connector.connect(**mysql_config)
-    connection.connect()                           
+    connection.connect()
     init(connection.cursor())
 
     global medians
     print(medians)
 
     attr_options = config['attributes'][6]['options']
-    result = run(1536, None, None, threshold=1.0) 
+    result = run(1536, None, None, threshold=1.0)
 
     print(result)
