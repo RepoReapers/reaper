@@ -20,9 +20,15 @@ def run(project_id, repo_path, cursor, **options):
     file_names = get_language_files(ctags_output)
 
     graph = networkx.Graph()
+    lexer = lexers.get_lexer_by_name(language)
+    build_graph(file_names, graph, lexer)
 
+    result = networkx.is_connected(graph)
+    return result, int(result)
+
+
+def build_graph(file_names, graph, lexer):
     """
-    create a lexer for the language as specified by the ghtorrent metadata
     for each file in the set of files
         create a node and add it to the graph
         open the file
@@ -47,8 +53,6 @@ def run(project_id, repo_path, cursor, **options):
 
     if there is a node without any relationships, fail the architecture test
     """
-
-    lexer = lexers.get_lexer_by_name(language)
     for file_name in file_names:
         node = Node(file_name)
         graph.add_node(node)
@@ -68,26 +72,22 @@ def run(project_id, repo_path, cursor, **options):
         except UnicodeDecodeError:
             continue
 
-    for file_name in file_names:
+    for origin_node in graph.nodes():
         try:
-            with open(file_name, 'r', encoding='utf-8') as file:
+            with open(origin_node.path, 'r', encoding='utf-8') as file:
                 contents = file.read()
 
             tokens = lexer.get_tokens(contents)
             for item in tokens:
                 token_type = item[0]
                 if token_type not in [token.Name.Function, token.Name.Class]:
-                    for node, data in graph.nodes_iter(data=True):
+                    for node in graph.nodes_iter():
                         if node.has_symbol(item[1]):
-                            if 'DEBUG' in os.environ:
-                                print("Found matching symbol.")
-                            graph.add_edge(file_name, node.path)
+                            graph.add_edge(origin_node, node)
         except FileNotFoundError as e:
-            continue
+            print("Not found")
         except UnicodeDecodeError:
             continue
-
-    return networkx.is_connected(graph)
 
 
 def find_node_by_name(graph, name):
@@ -115,11 +115,17 @@ class Node():
     def add_symbol(self, symbol, symbol_type=token.Generic):
         self.symbols.add((symbol_type, symbol))
 
-    def has_symbol(self, symbol):
-        return symbol in self.symbols
+    def has_symbol(self, item):
+        for symbol in self.symbols:
+            if item == symbol[1]:
+                return True
+        return False
 
     def __hash__(self):
         return hash(self.path)
+
+    def __eq__(self, other):
+        return self.path == other.path
 
     def __str__(self):
         result = '\r'
