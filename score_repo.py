@@ -2,6 +2,7 @@
 
 import argparse
 from core import establish_database_connection
+from core import init_attribute_plugins
 from core import load_attribute_plugins
 from core import process_configuration
 from core import process_repository
