@@ -11,7 +11,7 @@ as the contents of the repository itself.
 
 The projects runs on systems with `python3`. There are a number of python
 libraries that the code needs in order to execute. To install them, simply run
-`pip -r requirements.txt` (or `pip3` if your system does not have python3 set
+`pip install -r requirements.txt` (or `pip3` if your system does not have python3 set
 as the default.)
 
 ## Usage
