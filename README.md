@@ -1,7 +1,11 @@
 # reaper
 
-The purpose of the reaper repository is to store the reference
-implementation of the scoring system as outlined in the research paper.
+Reaper is a tool used to assess a GitHub repository in the form of a score. It
+considers a number of different *attributes* in order to perform a thorough
+assessment.
+
+Together with a database of metadata provided by the [GHTorrent](http://ghtorrent.org/) project, *reaper* considers both contextual information such as commit history as well
+as the contents of the repository itself.
 
 ## Installation
 
