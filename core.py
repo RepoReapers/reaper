@@ -5,8 +5,8 @@ import importlib
 import json
 import mysql.connector
 import queue
-import sched
 import time
+import sys
 from utilities import url_to_json
 
 scheduler = BackgroundScheduler()
@@ -127,7 +127,7 @@ def process_repository(project_id, repo_path, attributes, connection):
 
             if ('essential' in attribute and
                     attribute['essential'] and
-                    not result):
+                    not binary_result):
                 score = 0
                 break
 
@@ -187,30 +187,105 @@ def process_configuration(config_file):
     Returns:
         Validated dictionary with configuration parameters.
     """
+
+    # Start with a default configuration.
+    config = {
+        'options': {
+            'threshold': 100,
+            'persistResult': False,
+            'datasource': {
+                'database': 'ghtorrent',
+                'user': 'ghtorrent',
+                'password': '',
+                'host': '127.0.0.1'
+            },
+            'githubTokens': []
+        },
+        'attributes': [
+            {
+                'name': 'architecture',
+                'enabled': False,
+                'weight': 50,
+                'dependencies': [
+                    'ctags'
+                ],
+                'options': {
+                    'threshold': 1.0
+                }
+            },
+            {
+                'name': 'community',
+                'enabled': False,
+                'weight': 50,
+                'options': {
+                }
+            },
+            {
+                'name': 'continuous_integration',
+                'enabled': True,
+                'weight': 50,
+                'options': {
+                }
+            },
+            {
+                'name': 'documentation',
+                'enabled': True,
+                'weight': 50,
+                'options': {
+                }
+            },
+            {
+                'name': 'history',
+                'enabled': True,
+                'weight': 50,
+                'options': {
+                }
+            },
+            {
+                'name': 'license',
+                'essential': True,
+                'enabled': True,
+                'weight': 50,
+                'options': {
+                }
+            },
+            {
+                'name': 'management',
+                'enabled': True,
+                'weight': 50,
+                'options': {
+                    'threshold': 1.0
+                }
+            },
+            {
+                'name': 'unit_test',
+                'enabled': True,
+                'weight': 50,
+                'options': {
+                }
+            }
+        ]
+    }
+
     try:
-        config = json.load(config_file)
-        if 'options' in config and 'attributes' in config:
-            for attribute in config['attributes']:
-                if 'dependencies' in attribute:
-                    for dependency in attribute['dependencies']:
-                        if distutils.spawn.find_executable(dependency) is None:
-                            print('Missing dependency for attribute {0}: \
-                                    {1}'.format(attribute['name'], dependency))
-                            sys.exit(1)
-                if 'name' not in attribute:
-                    attribute['enabled'] = False
-                if 'enabled' not in attribute:
-                    attribute['enabled'] = False
-                if 'weight' not in attribute:
-                    attribute['weight'] = 5
-                if 'options' not in attribute:
-                    attribute['options'] = {}
-            init(config['options']['githubTokens'])
-            return config
-        else:
-            print('Configuration is missing required keys. See the sample \
-                configuration provided with the repository contents.')
-            sys.exit(2)
+        user_config = json.load(config_file)
     except:
-        print('Malformatted or missing configuration.')
-        sys.exit(2)
+        print('Error reading user configuration, proceeding with defaults.')
+    finally:
+        config.update(user_config)
+
+        for attribute in config['attributes']:
+            dependencies = [] if 'dependencies' not in attribute \
+                                else attribute['dependencies']
+
+            for dependency in dependencies:
+                if not distutils.spawn.find_executable(dependency):
+                    print(
+                        'Missing dependency for attribute {0}: {1}'.format(
+                            attribute['name'], dependency
+                        )
+                    )
+                    sys.exit(1)
+
+        init(config['options']['githubTokens'])
+        return config
