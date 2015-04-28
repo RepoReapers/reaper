@@ -271,6 +271,7 @@ def process_configuration(config_file):
         user_config = json.load(config_file)
     except:
         print('Error reading user configuration, proceeding with defaults.')
+        user_config = {}
     finally:
         config.update(user_config)
 
