@@ -67,6 +67,9 @@
     },
     {
       "name": "unit_test",
+      "dependencies": [
+        "cloc"
+      ],
       "enabled": true,
       "weight": 50,
       "options": {
