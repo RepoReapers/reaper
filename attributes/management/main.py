@@ -13,6 +13,12 @@ The table is a pandas data frame, which is constructed via an SQL query over
 the python MySQL connector. Before this can happen though, frequency tables
 must be updated on the MySQL server. See the functions invoked by init() to
 get an understanding of the logic that updates the frequency tables.
+
+Author:
+    Steven Kroh skk8768@rit.edu
+
+Updated:
+    29 April 2015
 """
 
 # Permanent SQL table names

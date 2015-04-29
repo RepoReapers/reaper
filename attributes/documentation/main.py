@@ -1,6 +1,23 @@
 import utilities
 
+"""
+The documentation attribute measures the ratio of comment lines of code to
+source lines of code as determined by the `cloc` tool
+(http://cloc.sourceforge.net/). Even though GitHub determines the primary 
+language of each repository, this module will consider source lines and 
+comment lines of each language cloc reports. We may need to change this in
+the future, as one language may require fewer lines of code to express the
+same idea than another language.
+
+Author:
+    Steven Kroh skk8768@rit.edu
+
+Updated:
+    29 April 2015
+"""
+
 def run(project_id, repo_path, cursor, **options):
+    # Dictionary of language => metrics dictionary
     util = utilities.get_loc(repo_path)
    
     sloc = 0
@@ -19,7 +36,3 @@ def run(project_id, repo_path, cursor, **options):
 if __name__ == '__main__':
     print("Attribute plugins are not meant to be executed directly.")
 
-    (attr_pass, ratio) = run(4324425, "/home/skroh/temp/fetched_repos/4324425",
-None, threshold=2.0)
-
-    print((attr_pass, ratio))
