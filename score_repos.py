@@ -86,7 +86,8 @@ def main():
             attributes,
             connection
         )
-        print("left: %s\n" % left--)
+        print("left: %s\n" % left)
+        left = left - 1
         #print('{}, {}'.format(repo_id, results['documentation']))
         output.append((int(repo_id), float(results['documentation'])))
 
