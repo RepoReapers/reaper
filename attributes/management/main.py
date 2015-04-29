@@ -20,7 +20,6 @@ sample_tbl = 'reaper_sample'
 freq_tbl_runs = 'reaper_issue_freq_runs'
 freq_tbl = 'reaper_issue_freq'
 
-
 def init(cursor, **options):
     """
     This function initializes the medians data for all projects in the sample
@@ -57,7 +56,6 @@ def run(project_id, repo_path, cursor, **option):
     attr_pass = (median >= attr_threshold)
     return (attr_pass, median)
 
-
 def create_calendar(cursor, range_tbl):
     """
     Creates a temporary calendar table by months. Months are included within
@@ -67,6 +65,9 @@ def create_calendar(cursor, range_tbl):
 
         That is: Calendar = [ Min(repo creation date) , Max(commit date) ]
 
+    Todo:
+        Refactor the stored procedure into python code
+       
     Returns:
         The name of the temporary calendar table
     """
@@ -110,9 +111,9 @@ def create_calendar(cursor, range_tbl):
           SET dt_last = MAKEDATE(YEAR(temp), MONTH(temp));
 
           -- Insert months into the calendar within the desired range
-
-          SET dt_cur = DATE_SUB(dt_cur, INTERVAL 1 MONTH);
-          WHILE dt_cur <= dt_last DO
+          SET dt_last = DATE_ADD(dt_last, INTERVAL 1 MONTH);
+          -- SET dt_cur = DATE_SUB(dt_cur, INTERVAL 1 MONTH);
+          WHILE dt_cur < dt_last DO
             INSERT INTO {cal} (dt) VALUES (dt_cur);
             SET dt_cur = DATE_ADD(dt_cur, INTERVAL 1 MONTH);
           END WHILE;
@@ -229,7 +230,9 @@ def update_freq_tables(cursor, range_tbl, calendar_tbl):
               FROM {range} CROSS JOIN {calendar}
               WHERE
                 (
-                  {calendar}.dt BETWEEN {range}.first AND {range}.last
+                  {calendar}.dt > DATE_SUB({range}.first, INTERVAL 1 MONTH) AND
+                  {calendar}.dt <= {range}.last
+                  -- {calendar}.dt BETWEEN {range}.first AND {range}.last
                 )
               ORDER BY repo_id, created_at
             )
@@ -266,16 +269,18 @@ def create_active_range(cursor):
           (
             id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
             project_id INT(11) NOT NULL,
-            first DATETIME,
-            last DATETIME
+            first DATETIME NOT NULL,
+            last DATETIME NOT NULL
           );
         '''.format(range_tbl=range_tbl))
 
     cursor.execute('''
         INSERT INTO {range_tbl} (project_id, first, last)
-        SELECT p.project_id,
-          p.first,
-          MAX(c.created_at) AS last
+        SELECT p.project_id, p.first,
+          CASE 
+            WHEN MAX(c.created_at) >= p.first THEN MAX(c.created_at)
+            ELSE p.first
+          END AS last -- Some repos have last commit date BEFORE creation date
         FROM
           (
             SELECT projects.id AS project_id,
