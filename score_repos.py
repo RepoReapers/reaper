@@ -75,15 +75,17 @@ def main():
     init_attribute_plugins(attributes, connection)
 
     repository_ids = args.repos_sample.read().strip().split('\n')
+
+    output = []
     for repo_id in repository_ids:
         score, results = process_repository(
-            repo_id, 
+            int(repo_id), 
             args.repository_path + repo_id,
             attributes,
             connection
         )
-
-        print('{}, {}'.format(repo_id, score))
+        print('{}, {}'.format(repo_id, results['management']))
+        output.append((int(repo_id), float(results['management'])))
 
 #        if config['options'].get('persistResult', False):
 #            save_result(args.repository_id, results, connection.cursor())
@@ -93,6 +95,9 @@ def main():
 #            print('\rRaw score: {0}'.format(score))
 
     connection.close()
+    with open('results_med.csv', 'w') as file:
+        for item in output:
+            file.write("%d, %f\n" % item)
 
 
 def spin(stop_condition):
