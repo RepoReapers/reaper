@@ -276,7 +276,8 @@ def process_configuration(config_file):
         config.update(user_config)
 
         for attribute in config['attributes']:
-            dependencies = [] if 'dependencies' not in attribute \
+            dependencies = [] if not attribute['enabled'] or \
+                                'dependencies' not in attribute \
                                 else attribute['dependencies']
 
             for dependency in dependencies:
@@ -288,5 +289,5 @@ def process_configuration(config_file):
                     )
                     sys.exit(1)
 
-        init(config['options']['githubTokens'])
+        init(config['options'].get('githubTokens', []))
         return config
