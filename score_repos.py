@@ -76,6 +76,8 @@ def main():
 
     repository_ids = args.repos_sample.read().strip().split('\n')
 
+    left = len(repository_ids)
+
     output = []
     for repo_id in repository_ids:
         score, results = process_repository(
@@ -84,8 +86,9 @@ def main():
             attributes,
             connection
         )
-        print('{}, {}'.format(repo_id, results['management']))
-        output.append((int(repo_id), float(results['management'])))
+        print("left: %s\n" % left--)
+        #print('{}, {}'.format(repo_id, results['documentation']))
+        output.append((int(repo_id), float(results['documentation'])))
 
 #        if config['options'].get('persistResult', False):
 #            save_result(args.repository_id, results, connection.cursor())
@@ -95,7 +98,7 @@ def main():
 #            print('\rRaw score: {0}'.format(score))
 
     connection.close()
-    with open('results_med.csv', 'w') as file:
+    with open('results_rat.csv', 'w') as file:
         for item in output:
             file.write("%d, %f\n" % item)
 
