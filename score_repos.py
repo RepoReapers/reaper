@@ -89,7 +89,7 @@ def main():
         print("left: %s\n" % left)
         left = left - 1
         #print('{}, {}'.format(repo_id, results['documentation']))
-        output.append((int(repo_id), float(results['documentation'])))
+        output.append((int(repo_id), float(results['management'])))
 
 #        if config['options'].get('persistResult', False):
 #            save_result(args.repository_id, results, connection.cursor())
@@ -99,7 +99,7 @@ def main():
 #            print('\rRaw score: {0}'.format(score))
 
     connection.close()
-    with open('results_rat.csv', 'w') as file:
+    with open('results_med.csv', 'w') as file:
         for item in output:
             file.write("%d, %f\n" % item)
 
