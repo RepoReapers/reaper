@@ -26,6 +26,7 @@ sample_tbl = 'reaper_sample'
 freq_tbl_runs = 'reaper_issue_freq_runs'
 freq_tbl = 'reaper_issue_freq'
 
+
 def init(cursor, **options):
     """
     This function initializes the medians data for all projects in the sample
@@ -62,6 +63,7 @@ def run(project_id, repo_path, cursor, **option):
     attr_pass = (median >= attr_threshold)
     return (attr_pass, median)
 
+
 def create_calendar(cursor, range_tbl):
     """
     Creates a temporary calendar table by months. Months are included within
@@ -73,7 +75,7 @@ def create_calendar(cursor, range_tbl):
 
     Todo:
         Refactor the stored procedure into python code
-       
+
     Returns:
         The name of the temporary calendar table
     """
@@ -283,7 +285,7 @@ def create_active_range(cursor):
     cursor.execute('''
         INSERT INTO {range_tbl} (project_id, first, last)
         SELECT p.project_id, p.first,
-          CASE 
+          CASE
             WHEN MAX(c.created_at) >= p.first THEN MAX(c.created_at)
             ELSE p.first
           END AS last -- Some repos have last commit date BEFORE creation date
