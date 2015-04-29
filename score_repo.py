@@ -78,6 +78,9 @@ def main():
     else:
         print('\rRaw score: {0}'.format(score))
 
+        if 'DEBUG' in os.environ:
+            print(results)
+
     connection.close()
 
 
