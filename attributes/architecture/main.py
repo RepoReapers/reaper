@@ -23,8 +23,8 @@ def run(project_id, repo_path, cursor, **options):
     lexer = lexers.get_lexer_by_name(language)
     build_graph(file_names, graph, lexer)
 
-    result = networkx.is_connected(graph)
-    return result, int(result)
+    result = get_connectedness(graph)
+    return result > options.get('connectedness', 0.75), result
 
 
 def build_graph(file_names, graph, lexer):
@@ -48,10 +48,6 @@ def build_graph(file_names, graph, lexer):
                 search the graph for the node that has the symbol definition
                 create a relationship from the current file to the node with
                 the symbol definition
-    for each node in the graph
-        check if there exists a relationship with any other node in the graph
-
-    if there is a node without any relationships, fail the architecture test
     """
     for file_name in file_names:
         node = Node(file_name)
@@ -85,9 +81,18 @@ def build_graph(file_names, graph, lexer):
                         if node.has_symbol(item[1]):
                             graph.add_edge(origin_node, node)
         except FileNotFoundError as e:
-            print("Not found")
+            print("Not found: " + origin_node.path)
         except UnicodeDecodeError:
             continue
+
+
+def get_connectedness(graph):
+    node_degrees = graph.degree()
+    zero_degrees = len(
+        [degree for key, degree in node_degrees.items() if degree is 0]
+    )
+
+    return 1 - (zero_degrees / len(node_degrees))
 
 
 def find_node_by_name(graph, name):
@@ -98,6 +103,7 @@ def find_node_by_name(graph, name):
 
 
 def get_language_files(ctags_output):
+    # TODO: Fix issue where ctags output has unstable fields
     result = set()
 
     for line in ctags_output:
@@ -140,4 +146,24 @@ class Node():
         )
 
 if __name__ == '__main__':
-    print('Attribute plugins are not meant to be executed directly.')
+    import json
+    import mysql.connector
+    import sys
+
+    os.environ['DEBUG'] = '1'
+
+    with open('../../config.json', 'r') as file:
+        config = json.load(file)
+
+    mysql_config = config['options']['datasource']
+
+    connection = mysql.connector.connect(**mysql_config)
+    connection.connect()
+
+    cursor = connection.cursor()
+    result = run(sys.argv[1], sys.argv[2], cursor, threshold=0.75)
+    cursor.close()
+
+    connection.close()
+
+    print(result)
