@@ -6,7 +6,8 @@ class CiDiscoverer(object):
     def __init__(self):
         self.services = [
             self.__travis__,
-            self.__appveyor__
+            self.__appveyor__,
+            self.__circleci__
         ]
 
     def discover(self, path):
@@ -29,6 +30,14 @@ class CiDiscoverer(object):
 
     def __appveyor__(self, path):
         config = os.path.join(path, 'appveyor.yml')
+
+        if os.path.exists(config) and os.path.getsize(config) > 0:
+            return True
+
+        return False
+
+    def __circleci__(self, path):
+        config = os.path.join(path, 'circle.yml')
 
         if os.path.exists(config) and os.path.getsize(config) > 0:
             return True

@@ -19,7 +19,8 @@
       "enabled": true,
       "weight": 50,
       "options": {
-        "threshold": 1.0
+        "connectedness": 0.75,
+        "minimumSize": 1000
       }
     },
     {
