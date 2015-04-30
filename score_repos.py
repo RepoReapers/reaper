@@ -2,8 +2,8 @@
 
 import argparse
 from core import establish_database_connection
-from core import init_attribute_plugins
 from core import load_attribute_plugins
+from core import init_attribute_plugins
 from core import process_configuration
 from core import process_repository
 from core import save_result
@@ -33,18 +33,27 @@ def process_arguments():
         dest='config_file',
         help='Path to the configuration file.'
     )
+    #parser.add_argument(
+    #    'repository_ids',
+    #    type=int,
+    #    nargs='+',
+    #    help='List of identifiers for repositories as they appear in the \
+    #          GHTorrent database.'
+    #)
     parser.add_argument(
-        'repository_id',
-        type=int,
-        nargs=1,
-        help='Identifier for a project as it appears in the \
-              GHTorrent database.'
+        '-p',
+        '--fetched-path',
+        type=is_dir,
+        dest='repository_path',
+        #nargs=1,
+        help='Path to the repository source code.'
     )
     parser.add_argument(
-        'repository_path',
-        type=is_dir,
-        nargs=1,
-        help='Path to the repository source code.'
+        '-s',
+        '--repos-sample',
+        type=argparse.FileType('r'),
+        dest='repos_sample',
+        help='Path to the sample file'
     )
 
     if len(sys.argv) < 2:
@@ -65,23 +74,34 @@ def main():
     load_attribute_plugins(attributes)
     init_attribute_plugins(attributes, connection)
 
-    score, results = process_repository(
-        args.repository_id[0],
-        args.repository_path[0],
-        attributes,
-        connection
-    )
+    repository_ids = args.repos_sample.read().strip().split('\n')
 
-    if config['options'].get('persistResult', False):
-        save_result(args.repository_id, results, connection.cursor())
-        print('\rResult saved to datasource.')
-    else:
-        print('\rRaw score: {0}'.format(score))
+    left = len(repository_ids)
 
-        if 'DEBUG' in os.environ:
-            print(results)
+    output = []
+    for repo_id in repository_ids:
+        score, results = process_repository(
+            int(repo_id), 
+            args.repository_path + repo_id,
+            attributes,
+            connection
+        )
+        print("left: %s\n" % left)
+        left = left - 1
+        #print('{}, {}'.format(repo_id, results['documentation']))
+        output.append((int(repo_id), float(results['management'])))
+
+#        if config['options'].get('persistResult', False):
+#            save_result(args.repository_id, results, connection.cursor())
+#            print('\rResult saved to datasource.')
+#            print('\rRaw score: {0}'.format(score))
+#        else:
+#            print('\rRaw score: {0}'.format(score))
 
     connection.close()
+    with open('results_med.csv', 'w') as file:
+        for item in output:
+            file.write("%d, %f\n" % item)
 
 
 def spin(stop_condition):

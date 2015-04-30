@@ -1,13 +1,17 @@
 # reaper
 
-The purpose of the reaper repository is to store the reference
-implementation of the scoring system as outlined in the research paper.
+Reaper is a tool used to assess a GitHub repository in the form of a score. It
+considers a number of different *attributes* in order to perform a thorough
+assessment.
+
+Together with a database of metadata provided by the [GHTorrent](http://ghtorrent.org/) project, *reaper* considers both contextual information such as commit history as well
+as the contents of the repository itself.
 
 ## Installation
 
 The projects runs on systems with `python3`. There are a number of python
 libraries that the code needs in order to execute. To install them, simply run
-`pip -r requirements.txt` (or `pip3` if your system does not have python3 set
+`pip install -r requirements.txt` (or `pip3` if your system does not have python3 set
 as the default.)
 
 ## Usage
@@ -96,3 +100,11 @@ the binary result of execution and the raw result of execution. The binary
 result should be True or False and the raw result should be a real number that
 is the raw calculation made by the plugin. In the case of purely binary results,
 do something like `return result, int(result)`.
+
+Additionally, there is the option of initializing the plugin. To take advantage
+of initialization, add the following function signature to `main.py`:
+
+```python
+def init(cursor, **options):
+  # Implementation goes here.
+```

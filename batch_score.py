@@ -51,19 +51,20 @@ def main():
     connection = establish_database_connection(config['options']['datasource'])
     attributes = config['attributes']
     load_attribute_plugins(attributes)
+    init_attribute_plugins(attributes, connection)
 
     repos_root = args.repositories_path[0]
     repositories = os.listdir(repos_root)
 
     for repository_id in repositories:
         score, result = process_repo(
-            args.repositories_path[0],
+            int(repository_id),
             '{0}/{1}/repo'.format(repos_root, repository_id),
             attributes,
             connection
         )
 
-        if score > config['thresold']:
+        if score > config['threshold']:
             result_char = '\033[92m✓\033[0m'
         else:
             result_char = '\033[91m✘\033[0m'
