@@ -21,6 +21,8 @@ if [ ! -d repos ]; then
     git clone --depth 1 https://github.com/sparkle-project/Sparkle.git 1> /dev/null 2> /dev/null
     git clone --depth 1 https://github.com/CoderMJLee/MJExtension.git 1> /dev/null 2> /dev/null
 
+    git clone --depth 1 https://github.com/zachwarren/UITableViewController-Challenge-Solution.git 1> /dev/null 2> /dev/null
+
     echo '  PHP'
     git clone --depth 1 https://github.com/composer/composer.git 1> /dev/null 2> /dev/null
     git clone --depth 1 https://github.com/laravel/laravel.git 1> /dev/null 2> /dev/null

@@ -37,3 +37,15 @@ class ObjectiveCDiscovererTestCase(unittest.TestCase):
             os.path.join(REPOS_PATH, 'WebScraper-iOS')
         )
         self.assertEqual(-1, proportion)
+
+        # Bug Fix Tests
+
+        # Bug: If relative file paths in the input to utilities.loc() contained
+        #   spaces then cloc would fail causing loc() to return None.
+        proportion = discoverer.__xctest__(
+            os.path.join(
+                REPOS_PATH,
+                'UITableViewController-Challenge-Solution'
+            )
+        )
+        self.assertLess(0, proportion)

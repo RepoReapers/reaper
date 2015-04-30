@@ -36,7 +36,7 @@ def get_loc(path, files=None):
 
     command = 'cloc --csv '
     if files:
-        command += ' '.join(files)
+        command += ' '.join(["'{0}'".format(file_) for file_ in files])
     else:
         command += '.'
 
