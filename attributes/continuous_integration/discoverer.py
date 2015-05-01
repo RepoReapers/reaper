@@ -7,7 +7,11 @@ class CiDiscoverer(object):
         self.services = [
             self.__travis__,
             self.__appveyor__,
-            self.__circleci__
+            self.__circleci__,
+            self.__houndci__,
+            self.__shippable__,
+            self.__solanoci__,
+            self.__wercker__
         ]
 
     def discover(self, path):
@@ -38,6 +42,38 @@ class CiDiscoverer(object):
 
     def __circleci__(self, path):
         config = os.path.join(path, 'circle.yml')
+
+        if os.path.exists(config) and os.path.getsize(config) > 0:
+            return True
+
+        return False
+
+    def __houndci__(self, path):
+        config = os.path.join(path, '.hound.yml')
+
+        if os.path.exists(config) and os.path.getsize(config) > 0:
+            return True
+
+        return False
+
+    def __shippable__(self, path):
+        config = os.path.join(path, 'shippable.yml')
+
+        if os.path.exists(config) and os.path.getsize(config) > 0:
+            return True
+
+        return False
+
+    def __solanoci__(self, path):
+        config = os.path.join(path, 'solano.yml')
+
+        if os.path.exists(config) and os.path.getsize(config) > 0:
+            return True
+
+        return False
+
+    def __wercker__(self, path):
+        config = os.path.join(path, 'wercker.yml')
 
         if os.path.exists(config) and os.path.getsize(config) > 0:
             return True
