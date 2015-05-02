@@ -7,6 +7,7 @@ import mysql.connector
 import queue
 import time
 import sys
+import pprint
 from utilities import url_to_json
 
 scheduler = BackgroundScheduler()
@@ -291,3 +292,42 @@ def process_configuration(config_file):
 
         init(config['options'].get('githubTokens', []))
         return config
+
+def process_key_string(attributes, key_string):
+    """Reprocesses the attribute configuration based on a keystring
+
+    The keystring is a single string interpreted as a list of individual 
+    initials. Each initial indicates a particular attribute, as defined in
+    config.json. 
+
+    If no keystring is provided, the attribute configuration is left untouched.
+    If a keystring is provided, then first, all attributes are disabled. Only
+    those attribtues referred by their initials in the keystring are 
+    re-enabled. Further, if the attribute initial in the keystring is 
+    capitalized, then that attribute's data will be persisted.
+    """
+    if key_string is None:
+        return
+
+    initials = dict() # Attribute initial => attribute dict
+    for attribute in attributes:
+        initial = attribute['key'].lower()
+        initials[initial] = attribute
+        attribute['enabled'] = False # Disable all attributes first
+        attribute['persistResult'] = False
+
+    for key_raw in key_string:
+        key_low = key_raw.lower() 
+        attribute = initials[key_low] 
+        # Enable attribute since its initial is in the keystring
+        attribute['enabled'] = True
+        # Persist results if the raw key is capitalized
+        attribute['persistResult'] = (not key_raw == key_low)
+
+def get_persist_attrs(attributes):
+    persist_attrs = [] 
+    for attribute in attributes:
+        if attribute['persistResult']:
+            persist_attrs.append(attribute['name'])
+
+    return persist_attrs
