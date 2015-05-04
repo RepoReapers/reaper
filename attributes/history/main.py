@@ -6,6 +6,7 @@ import urllib
 
 
 def run(project_id, repo_path, cursor, **options):
+    id=project_id 
     query = "SELECT count(id) as total, DATEDIFF(max(created_at), min(created_at)) as Days from commits where project_id={0} and created_at>0;".format(id)
     cursor.execute(query)
     result = cursor.fetchone()
@@ -13,13 +14,13 @@ def run(project_id, repo_path, cursor, **options):
 	d2=float(result[1]) #total number of days	
     week=d2/7           #calculate total number of weeks
 	if week < 1:
-        return False
+        return 0
 	else:
 	    ans = round(d1/week)
         if ans < 2:
-        	return False
+        	return 0
         else: 
-        	return True
+        	return 1
 	    
     
 
