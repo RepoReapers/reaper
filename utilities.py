@@ -150,8 +150,8 @@ def url_to_json(url, headers={}):
 
         raw_data = response.readall().decode('utf-8')
         result = json.loads(raw_data)
-    except Exception as eu:
-        print(e)
+    except Exception as e:
+        # TODO: Properly handle error. For now, just return empty dictionary.
         result = {}
 
     return result
