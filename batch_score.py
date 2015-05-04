@@ -47,7 +47,7 @@ def process_arguments():
         dest='repositories_sample',
         help='A file containing newline-separated GHTorrent project ids'
     )
-    parser.add_argument( 
+    parser.add_argument(
         '-k',
         '--key-string',
         type=str,
@@ -70,13 +70,13 @@ def main():
     """
     args = process_arguments()
 
-    sample = [int(line) for line in args.repositories_sample] 
-    digits = len(str(len(sample))) # digits in the size of the sample
+    sample = [int(line) for line in args.repositories_sample]
+    digits = len(str(len(sample)))  # digits in the size of the sample
 
     config = process_configuration(args.config_file)
     # If a keystring exists, then this function will overwrite enabled/persist
     # states based on the keystring
-    process_key_string(config['attributes'], args.key_string) 
+    process_key_string(config['attributes'], args.key_string)
 
     persist_attrs = get_persist_attrs(config['attributes'])
     reporting = (len(persist_attrs) > 0)
@@ -90,12 +90,12 @@ def main():
 
     left = len(sample)
     for repo_id in sample:
-        # Repository path is the subdir within the id folder whose name is 
-        # NOT metadata.json. That is, the path we're interested in is the 
+        # Repository path is the subdir within the id folder whose name is
+        # NOT metadata.json. That is, the path we're interested in is the
         # downloaded git source. If no such path exists, the repository path
         # is simply the path to the id folder.
         base_path = args.repositories_dir + str(repo_id) + "/"
-        repo_path = base_path # Default to this if we can't find the git source
+        repo_path = base_path  # Default to this if we can't find the git repo
         for entry in os.listdir(base_path):
             if(entry != 'metadata.json'):
                 repo_path += entry
@@ -124,7 +124,7 @@ def main():
         # When we print the next status line, we will have finished one repo
         left -= 1
 
-        # Number of repos left to process out of the total number 
+        # Number of repos left to process out of the total number
         cur = ('{:0>' + str(digits) + 'd}').format(left)
         tot = str(len(sample))
         sid = '{: >11d}'.format(repo_id)
