@@ -13,14 +13,14 @@ def run(project_id, repo_path, cursor, **options):
     d1=float(result[0]) #total number of commits
     d2=float(result[1]) #total number of days	
     week=d2/7           #calculate total number of weeks
-	if week < 1:
+    if week < 1:
         return 0
-	else:
-	    ans = round(d1/week)
+    else:
+	ans = round(d1/week)
         if ans < 2:
-        	return 0
+            return 0
         else: 
-        	return 1
+            return 1
 	    
     
 
