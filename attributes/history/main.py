@@ -13,13 +13,13 @@ def run(project_id, repo_path, cursor, **options):
 	d2=float(result[1]) #total number of days	
     week=d2/7           #calculate total number of weeks
 	if week < 1:
-        return False,ans
+        return False
 	else:
 	    ans = round(d1/week)
         if ans < 2:
-        	return False,ans
+        	return False
         else: 
-        	return True,ans	
+        	return True
 	    
     
 
