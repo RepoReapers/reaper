@@ -16,7 +16,7 @@ class JavaScriptTestDiscoverer(TestDiscoverer):
         if utilities.search('mocha', path, include=['package.json']):
             files = utilities.search(
                 '(describe\()(.*)(function)',
-                path, whole=True, include=['*.js']
+                path, whole=True, include=['*.js'], exclude=['mocha.js']
             )
 
             if files:
