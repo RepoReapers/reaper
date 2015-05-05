@@ -97,7 +97,7 @@ def main():
         base_path = args.repositories_dir + str(repo_id) + "/"
         repo_path = base_path  # Default to this if we can't find the git repo
         for entry in os.listdir(base_path):
-            if(entry != 'metadata.json'):
+            if entry != 'metadata.json':
                 repo_path += entry
                 break
 
