@@ -1,8 +1,7 @@
 import utilities
 from attributes.unit_test.discoverer import TestDiscoverer
 
-# TODO: Include header files as well
-LANGUAGE = 'C'
+LANGUAGES = 'C,C/C++ Header'
 
 
 class CTestDiscoverer(TestDiscoverer):
@@ -15,7 +14,7 @@ class CTestDiscoverer(TestDiscoverer):
         proportion = -1
 
         files = utilities.search(
-            'glib',
+            '(g_assert*|g_test*|GTest*)',
             path, whole=True, include=['*.c*', '*.h*']
         )
 
@@ -26,10 +25,16 @@ class CTestDiscoverer(TestDiscoverer):
             # SLOC of test code
             sloc_test = utilities.get_loc(path, files=files)
 
-            if LANGUAGE in sloc_code and LANGUAGE in sloc_test:
-                proportion = (
-                    sloc_test[LANGUAGE]['sloc'] /
-                    sloc_code[LANGUAGE]['sloc']
-                )
+            _sloc_code = 0
+            _sloc_test = 0
+
+            for language in LANGUAGES.split(','):
+                if language in sloc_code:
+                    _sloc_code += sloc_code[language]['sloc']
+                if language in sloc_test:
+                    _sloc_test += sloc_test[language]['sloc']
+
+            if _sloc_code != 0:
+                proportion = _sloc_test / _sloc_code
 
         return proportion
