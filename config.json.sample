@@ -50,7 +50,8 @@
       "enabled": true,
       "weight": 50,
       "options": {
-        "threshold": 2.0
+        "threshold": 2.0,
+        "minimumWeeks": 1
       }
     },
     {
