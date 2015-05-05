@@ -65,7 +65,10 @@ def get_loc(path, files=None):
     return sloc
 
 
-def search(pattern, path, recursive=True, whole=False, include=None):
+def search(
+    pattern, path, recursive=True, whole=False, include=None,
+    exclude=None
+):
     """Search for the presence of a pattern.
 
     grep (http://www.gnu.org/software/grep/manual/grep.html) is used to
@@ -85,6 +88,9 @@ def search(pattern, path, recursive=True, whole=False, include=None):
         False.
     include : list, optional
         A list of patterns that specify the files to include in the search.
+        Default is None.
+    exclude : list, optional
+        A list of patterns that specify the files to exclude in the search.
         Default is None.
 
     Returns
@@ -110,6 +116,9 @@ def search(pattern, path, recursive=True, whole=False, include=None):
     if include:
         command += ' --include '
         command += ' --include '.join(shlex.quote(i) for i in include)
+    if exclude:
+        command += ' --exclude '
+        command += ' --exclude '.join(shlex.quote(i) for i in exclude)
 
     command += ' '
     command += shlex.quote(pattern)
