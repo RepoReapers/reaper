@@ -5,7 +5,7 @@ from attributes.unit_test.discoverer import get_test_discoverer
 from tests import REPOS_PATH
 
 
-class CppDiscovererTestCase(unittest.TestCase):
+class CppTestDiscovererTestCase(unittest.TestCase):
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_discover(self):
         discoverer = get_test_discoverer('C++')

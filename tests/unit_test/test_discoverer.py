@@ -6,7 +6,7 @@ from attributes.unit_test.discoverer import (
 )
 
 
-class DiscovererTestCase(unittest.TestCase):
+class TestDiscovererTestCase(unittest.TestCase):
     def test_get_test_discoverer(self):
         # Test: Available test discoverers
         self.assertIsInstance(
