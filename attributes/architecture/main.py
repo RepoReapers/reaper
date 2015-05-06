@@ -84,7 +84,7 @@ def build_graph(file_names, graph, lexer):
                 token_type = item[0]
                 if token_type not in [token.Name.Function, token.Name.Class]:
                     for node in graph.nodes_iter():
-                        if node.has_symbol(item[1]):
+                        if origin_node is not node and node.has_symbol(item[1]):
                             graph.add_edge(origin_node, node)
         except FileNotFoundError as e:
             print("Not found: " + origin_node.path)
@@ -99,7 +99,7 @@ def get_connectedness(graph):
     )
 
     if len(node_degrees) > 0:
-        return (1 - (zero_degrees / len(node_degrees))
+        return 1 - (zero_degrees / len(node_degrees))
     else:
         return 0
 
