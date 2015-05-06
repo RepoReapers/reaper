@@ -5,6 +5,12 @@ import subprocess
 
 
 def run(project_id, repo_path, cursor, **options):
+    language_sizes = get_loc(repo_path)
+    size = sum([value['sloc'] for value in language_sizes.values()])
+
+    if size < options.get('minimumSize', 1000):
+        return False, 0
+
     query = 'SELECT * FROM projects WHERE id = ' + str(project_id)
     cursor.execute(query)
 
@@ -92,7 +98,10 @@ def get_connectedness(graph):
         [degree for key, degree in node_degrees.items() if degree is 0]
     )
 
-    return 1 - (zero_degrees / len(node_degrees))
+    if len(node_degrees) > 0:
+        return (1 - (zero_degrees / len(node_degrees))
+    else:
+        return 0
 
 
 def find_node_by_name(graph, name):
@@ -146,9 +155,12 @@ class Node():
         )
 
 if __name__ == '__main__':
+    import importlib
     import json
     import mysql.connector
     import sys
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+    from utilities import get_loc
 
     os.environ['DEBUG'] = '1'
 
@@ -167,3 +179,5 @@ if __name__ == '__main__':
     connection.close()
 
     print(result)
+else:
+    from utilities import get_loc
