@@ -13,7 +13,9 @@ def run(project_id, repo_path, cursor, **options):
         }
     )
 
-    result = 'license' in json_response
+    result = True if 'license' in json_response \
+                     and json_response['license'] else False
+
     return result, int(result)
 
 if __name__ == '__main__':
