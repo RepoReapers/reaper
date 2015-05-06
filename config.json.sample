@@ -28,6 +28,8 @@
       "enabled": true,
       "weight": 50,
       "options": {
+      "threshold1": 5.0,
+      "threshold2": 1.0
       }
     },
     {
