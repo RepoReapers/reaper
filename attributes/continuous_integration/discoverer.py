@@ -7,6 +7,7 @@ class CiDiscoverer(object):
         self.services = [
             self.__travis__,
             self.__appveyor__,
+            self.__magnumci__,
             self.__circleci__,
             self.__houndci__,
             self.__shippable__,
@@ -34,6 +35,14 @@ class CiDiscoverer(object):
 
     def __appveyor__(self, path):
         config = os.path.join(path, 'appveyor.yml')
+
+        if os.path.exists(config) and os.path.getsize(config) > 0:
+            return True
+
+        return False
+
+    def __magnumci__(self, path):
+        config = os.path.join(path, '.magnum.yml')
 
         if os.path.exists(config) and os.path.getsize(config) > 0:
             return True
