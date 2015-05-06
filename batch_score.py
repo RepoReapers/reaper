@@ -57,7 +57,7 @@ def process_arguments():
         help='String of attribute initials. Uppercase to persist data'
     )
 
-    if len(sys.argv) < 1:
+    if len(sys.argv) < 2:
         parser.print_help()
         sys.exit(1)
 
