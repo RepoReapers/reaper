@@ -13,6 +13,7 @@
   "attributes": [
     {
       "name": "architecture",
+      "key": "a",
       "dependencies": [
         "ctags"
       ],
@@ -25,6 +26,7 @@
     },
     {
       "name": "community",
+      "key": "c",
       "enabled": true,
       "weight": 50,
       "options": {
@@ -34,6 +36,7 @@
     },
     {
       "name": "continuous_integration",
+      "key": "i",
       "enabled": true,
       "weight": 50,
       "options": {
@@ -41,6 +44,7 @@
     },
     {
       "name": "documentation",
+      "key": "d",
       "enabled": true,
       "weight": 50,
       "options": {
@@ -49,6 +53,7 @@
     },
     {
       "name": "history",
+      "key": "h",
       "enabled": true,
       "weight": 50,
       "options": {
@@ -58,12 +63,14 @@
     },
     {
       "name": "license",
+      "key": "l",
       "essential": true,
       "enabled": true,
       "weight": 50
     },
     {
       "name": "management",
+      "key": "m",
       "enabled": true,
       "weight": 50,
       "options": {
@@ -72,6 +79,7 @@
     },
     {
       "name": "unit_test",
+      "key": "u",
       "dependencies": [
         "cloc"
       ],
