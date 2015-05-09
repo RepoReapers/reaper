@@ -35,14 +35,16 @@ def init(cursor, **options):
     """
 
     # Compute the range of months each sample repository has been active
-    range_tbl = create_active_range(cursor)
+    #range_tbl = create_active_range(cursor)
     # Compute a table with rows representing months of activity in the sample
-    calendar = create_calendar(cursor, range_tbl)
+    #calendar = create_calendar(cursor, range_tbl)
 
     # Create the permanent frequency tables on the server if necessary
-    create_freq_tables(cursor)
+    #create_freq_tables(cursor)
     # Derive the freqency data for this run of the program
-    run = update_freq_tables(cursor, range_tbl, calendar)
+    #run = update_freq_tables(cursor, range_tbl, calendar)
+
+    run = get_latest_run(cursor)
 
     # Compute the median number of issues created per month
     compute_medians(cursor, run)
@@ -320,6 +322,15 @@ def compute_medians(cursor, run):
 
     global medians
     medians = df.groupby('project_id').median()
+
+def get_latest_run(cursor):
+    cursor.execute(
+        '''
+        SELECT id FROM {tbl_runs} ORDER BY id DESC LIMIT 1;
+        '''.format(tbl_runs=freq_tbl_runs)
+    )
+    run = cursor.fetchone()[0]
+    return run
 
 if __name__ == '__main__':
     with open('../../config.json', 'r') as file:
