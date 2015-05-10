@@ -123,6 +123,9 @@ def search(
     command += ' '
     command += shlex.quote(pattern)
 
+    if 'DEBUG' in os.environ:
+        print(command)
+
     process = subprocess.Popen(
         command, cwd=path, shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
