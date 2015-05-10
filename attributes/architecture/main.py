@@ -8,22 +8,40 @@ def run(project_id, repo_path, cursor, **options):
     language_sizes = get_loc(repo_path)
     size = sum([value['sloc'] for value in language_sizes.values()])
 
+    # Immediately fail the attribute if `minimumSize` is not met.
     if size < options.get('minimumSize', 1000):
         return False, 0
 
-    query = 'SELECT * FROM projects WHERE id = ' + str(project_id)
-    cursor.execute(query)
+    cursor.execute('''
+        SELECT
+            language
+        FROM
+            projects
+        WHERE
+            id = {0}
+        '''.format(project_id))
 
     record = cursor.fetchone()
-    language = record[5]
+    language = record[0]
+
+    # Edge case if the repository does not have a language defined.
+    if language is None:
+        return False, 0
 
     ctags_process = subprocess.Popen(
         ['ctags', '-Rx', "--languages={0}".format(language), repo_path],
-        stdout=subprocess.PIPE
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
-    ctags_output = ctags_process.stdout.readlines()
-    file_names = get_language_files(ctags_output)
+    # TODO: Handle errors emitted by `ctags`.
+    lines, _ = [x.decode('utf-8') for x in ctags_process.communicate()]
+
+    file_names = set()
+    for line in lines.split('\n'):
+      fields = line.split()
+      for field in fields:
+        if os.path.isfile(field):
+          file_names.add(field)
 
     graph = networkx.Graph()
     lexer = lexers.get_lexer_by_name(language)
@@ -109,17 +127,6 @@ def find_node_by_name(graph, name):
         if data['name'] is name:
             return node
     return None
-
-
-def get_language_files(ctags_output):
-    # TODO: Fix issue where ctags output has unstable fields
-    result = set()
-
-    for line in ctags_output:
-        fields = line.decode('utf-8').split()
-        result.add(fields[3])
-
-    return result
 
 
 class Node():
