@@ -3,6 +3,8 @@ import os
 import mysql.connector
 import json
 import pandas as pd
+from functools import reduce
+import operator
 
 """
 The management attribute measures the median number of commits per month
@@ -22,12 +24,12 @@ Updated:
 """
 
 # Permanent SQL table names
-sample_tbl = 'reaper_sample'
+#sample_tbl = 'reaper_sample'
 freq_tbl_runs = 'reaper_issue_freq_runs'
 freq_tbl = 'reaper_issue_freq'
 
 
-def global_init(cursor):
+def global_init(cursor, sample):
     """
     This function initializes the medians data for all projects in the sample
     via a chain of SQL statements and python pandas frame operations. This is
@@ -36,15 +38,17 @@ def global_init(cursor):
     This function must be called before any multiprocessing is started
     """
 
+    sample_tbl = create_sample_table(cursor, sample)
+
     # Compute the range of months each sample repository has been active
-    range_tbl = create_active_range(cursor)
+    range_tbl = create_active_range(cursor, sample_tbl)
     # Compute a table with rows representing months of activity in the sample
     calendar = create_calendar(cursor, range_tbl)
 
     # Create the permanent frequency tables on the server if necessary
     create_freq_tables(cursor)
     # Derive the freqency data for this run of the program
-    update_freq_tables(cursor, range_tbl, calendar)
+    update_freq_tables(cursor, sample_tbl, range_tbl, calendar)
 
 
 def init(cursor):
@@ -183,7 +187,7 @@ def create_freq_tables(cursor):
         '''.format(tbl=freq_tbl))
 
 
-def update_freq_tables(cursor, range_tbl, calendar_tbl):
+def update_freq_tables(cursor, sample_tbl, range_tbl, calendar_tbl):
     """
     This function is responsible for selecting the sparse, month-wise, issue
     creation, frequency data into the two permanent management tables.
@@ -265,8 +269,32 @@ def update_freq_tables(cursor, range_tbl, calendar_tbl):
     )
     return run
 
+def create_sample_table(cursor, sample):
+    sample_tbl = "reaper_sample_temp" 
+    cursor.execute('''
+        CREATE TEMPORARY TABLE {sample_tbl}
+          (
+            project_id INT(11) NOT NULL
+          );
+        '''.format(sample_tbl=sample_tbl))
 
-def create_active_range(cursor):
+    # True if x is last positionally in xs (and xs has no dupes)
+    last_in = lambda xs, x: not xs.index(x) < len(xs) - 1
+
+    # Returns sql VALUES clause followed by a comma (or nothing if last clause)
+    sql_of = lambda xs, x: '({}){}'.format(x, '' if last_in(xs, x) else ',')
+    
+    # Concatenate individual SQL VALUES clauses 
+    rows = reduce(operator.concat, [sql_of(sample, x) for x in sample], "")
+  
+    cursor.execute('''
+        INSERT INTO {sample_tbl} (project_id)
+        VALUES {sample_rows};
+        '''.format(sample_tbl=sample_tbl, sample_rows=rows))
+
+    return sample_tbl
+
+def create_active_range(cursor, sample_tbl):
     """
     The generation of issue month buckets, including buckets of zero issue
     months, requires us to know the range of project activity on GitHub. This
@@ -342,19 +370,22 @@ def get_latest_run(cursor):
     return run
 
 if __name__ == '__main__':
-    with open('../../config.json', 'r') as file:
+    with open('config.json', 'r') as file:
         config = json.load(file)
+
+    sample = [13418819, 4089761, 4324425, 10160358, 2554894, 10154146]
 
     mysql_config = config['options']['datasource']
 
     connection = mysql.connector.connect(**mysql_config)
     connection.connect()
-    init(connection.cursor())
+    cursor = connection.cursor()
+    global_init(cursor, sample)
+    init(cursor)
 
     global medians
     print(medians)
 
-    attr_options = config['attributes'][6]['options']
-    result = run(1536, None, None, threshold=1.0)
+    result = run(13418819, None, None, threshold=1.0)
 
     print(result)

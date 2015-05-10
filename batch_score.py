@@ -2,6 +2,7 @@
 
 import argparse
 from core import load_attribute_plugins
+from core import global_init_attribute_plugins
 from core import init_attribute_plugins
 from core import establish_database_connection
 from core import process_configuration
@@ -98,7 +99,7 @@ def main():
     load_attribute_plugins(args.plugins_dir, attributes)
 
     # Do before any multiprocessing    
-    global_init_attribute_plugins(attributes, connection
+    global_init_attribute_plugins(attributes, connection)
 
     # Do within child processes to initialize global data structures
     init_attribute_plugins(attributes, connection)
