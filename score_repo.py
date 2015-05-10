@@ -34,6 +34,14 @@ def process_arguments():
         help='Path to the configuration file.'
     )
     parser.add_argument(
+        '-p',
+        '--plugins',
+        type=is_dir,
+        default='attributes',
+        dest='plugins_dir',
+        help='Path to the folder containing your set of attribute plugins.'
+    )
+    parser.add_argument(
         'repository_id',
         type=int,
         nargs=1,
@@ -62,7 +70,7 @@ def main():
     config = process_configuration(args.config_file)
     connection = establish_database_connection(config['options']['datasource'])
     attributes = config['attributes']
-    load_attribute_plugins(attributes)
+    load_attribute_plugins(args.plugins_dir, attributes)
     init_attribute_plugins(attributes, connection)
 
     score, results = process_repository(

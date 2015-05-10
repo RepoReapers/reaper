@@ -39,6 +39,7 @@ def process_arguments():
         '-p',
         '--plugins',
         type=is_dir,
+        default='attributes',
         dest='plugins_dir',
         help='Path to the folder containing your set of plugins'
     )
