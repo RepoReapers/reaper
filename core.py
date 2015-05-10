@@ -17,10 +17,8 @@ available_tokens = queue.Queue()
 
 def init(tokens):
     global available_tokens
-
     for token in tokens:
         available_tokens.put(token)
-
 
 def get_token():
     while True:
@@ -135,7 +133,7 @@ def process_repository(project_id, repo_path, attributes, connection):
     return score, results
 
 
-def load_attribute_plugins(attributes):
+def load_attribute_plugins(plugins_dir, attributes):
     """
     Attempt to load each of the attributes as defined in the configuration
     file.
@@ -149,7 +147,7 @@ def load_attribute_plugins(attributes):
         if attribute['enabled']:
             try:
                 attribute['implementation'] = importlib.import_module(
-                    'attributes.{0}.main'.format(attribute['name'])
+                    '{0}.{1}.main'.format(plugins_dir, attribute['name'])
                 )
 
             except ImportError:
@@ -189,110 +187,45 @@ def process_configuration(config_file):
         Validated dictionary with configuration parameters.
     """
 
-    # Start with a default configuration.
-    config = {
-        'options': {
-            'threshold': 100,
-            'persistResult': False,
-            'datasource': {
-                'database': 'ghtorrent',
-                'user': 'ghtorrent',
-                'password': '',
-                'host': '127.0.0.1'
-            },
-            'githubTokens': []
-        },
-        'attributes': [
-            {
-                'name': 'architecture',
-                'enabled': False,
-                'weight': 50,
-                'dependencies': [
-                    'ctags'
-                ],
-                'options': {
-                    'threshold': 1.0
-                }
-            },
-            {
-                'name': 'community',
-                'enabled': False,
-                'weight': 50,
-                'options': {
-                }
-            },
-            {
-                'name': 'continuous_integration',
-                'enabled': True,
-                'weight': 50,
-                'options': {
-                }
-            },
-            {
-                'name': 'documentation',
-                'enabled': True,
-                'weight': 50,
-                'options': {
-                }
-            },
-            {
-                'name': 'history',
-                'enabled': True,
-                'weight': 50,
-                'options': {
-                }
-            },
-            {
-                'name': 'license',
-                'essential': True,
-                'enabled': True,
-                'weight': 50,
-                'options': {
-                }
-            },
-            {
-                'name': 'management',
-                'enabled': True,
-                'weight': 50,
-                'options': {
-                    'threshold': 1.0
-                }
-            },
-            {
-                'name': 'unit_test',
-                'enabled': True,
-                'weight': 50,
-                'options': {
-                }
-            }
-        ]
-    }
-
     try:
-        user_config = json.load(config_file)
+        config = json.load(config_file)
     except:
-        print('Error reading user configuration, proceeding with defaults.')
-        user_config = {}
+        print('Your config file is malformed, or does not exist!')
+        sys.exit(1)
     finally:
-        config.update(user_config)
-
-        for attribute in config['attributes']:
-            dependencies = [] if not attribute['enabled'] or \
-                                'dependencies' not in attribute \
-                                else attribute['dependencies']
-
-            for dependency in dependencies:
-                if not distutils.spawn.find_executable(dependency):
-                    print(
-                        'Missing dependency for attribute {0}: {1}'.format(
-                            attribute['name'], dependency
-                        )
-                    )
-                    sys.exit(1)
-
-        init(config['options'].get('githubTokens', []))
+        init(config['options'].get('github_tokens', []))
         return config
 
+def process_plugins(plugins_dir):
+    manifest = plugins_dir + '/manifest.json'
+    try:
+        with open(manifest, 'r') as f:
+            plugins = json.load(f)
+
+            attributes = plugins['attributes']
+            threshold = plugins['threshold']
+ 
+            for attribute in attributes:
+                exit_if_dep_missing(attribute)
+
+            return (threshold, attributes)
+          
+    except:
+        print('{} is malformed, or does not exist!'.format(manifest))
+        sys.exit(1)
+
+def exit_if_dep_missing(attribute):
+    if not attribute['enabled'] or 'dependencies' not in attribute:
+        dependencies = []
+    else:
+        dependencies = attribute['dependencies']
+
+    for dependency in dependencies:
+        if not distutils.spawn.find_executable(dependency):
+            print('Missing dependency for attribute {}: {}'
+                .format(attribute['name'], dependency)
+            )
+            sys.exit(1)
 
 def process_key_string(attributes, key_string):
     """Reprocesses the attribute configuration based on a keystring
@@ -312,10 +245,15 @@ def process_key_string(attributes, key_string):
 
     initials = dict()  # Attribute initial => attribute dict
     for attribute in attributes:
-        initial = attribute['key'].lower()
+        initial = attribute['initial'].lower()
         initials[initial] = attribute
         attribute['enabled'] = False  # Disable all attributes first
         attribute['persistResult'] = False
+
+    if key_string == "help":
+        for key_low, attribute in initials.items():
+            print(key_low + " " + attribute['name'])
+        sys.exit()
 
     for key_raw in key_string:
         key_low = key_raw.lower()
@@ -325,11 +263,11 @@ def process_key_string(attributes, key_string):
         # Persist results if the raw key is capitalized
         attribute['persistResult'] = (not key_raw == key_low)
 
-
 def get_persist_attrs(attributes):
     persist_attrs = []
     for attribute in attributes:
         if attribute['persistResult']:
             persist_attrs.append(attribute['name'])
 
-    return persist_attrs
+    return (len(persist_attrs) > 0, persist_attrs)
+

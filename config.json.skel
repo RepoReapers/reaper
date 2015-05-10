@@ -1,0 +1,12 @@
+{
+  "options": {
+    "datasource": {
+      "database": "ghtorrent",
+      "user": "",
+      "password": "",
+      "host": ""
+    },
+    "github_tokens": [
+    ]
+  }
+}

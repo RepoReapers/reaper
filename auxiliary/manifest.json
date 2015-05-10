@@ -1,0 +1,16 @@
+{
+  "threshold": 0,
+  "attributes": [
+    {
+      "name": "documentation_lgs",
+      "initial": "g",
+      "weight": 1,
+      "enabled": true,
+      "dependencies": [
+        "cloc"
+      ],
+      "options": {
+      }
+    }
+  ]
+}

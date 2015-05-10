@@ -1,24 +1,14 @@
 {
-  "options": {
-    "threshold": 100,
-    "persistResult": true,
-    "datasource": {
-      "database": "ghtorrent",
-      "user": "",
-      "password": "",
-      "host": ""
-    },
-    "githubTokens": []
-  },
+  "threshold": 100,
   "attributes": [
     {
       "name": "architecture",
-      "key": "a",
+      "initial": "a",
+      "weight": 50,
+      "enabled": true,
       "dependencies": [
         "ctags"
       ],
-      "enabled": true,
-      "weight": 50,
       "options": {
         "connectedness": 0.75,
         "minimumSize": 1000
@@ -26,36 +16,36 @@
     },
     {
       "name": "community",
-      "key": "c",
-      "enabled": true,
+      "initial": "c",
       "weight": 50,
+      "enabled": true,
       "options": {
-      "threshold1": 5.0,
-      "threshold2": 1.0
+        "threshold1": 5.0,
+        "threshold2": 1.0
       }
     },
     {
       "name": "continuous_integration",
-      "key": "i",
-      "enabled": true,
+      "initial": "i",
       "weight": 50,
+      "enabled": true,
       "options": {
       }
     },
     {
       "name": "documentation",
-      "key": "d",
-      "enabled": true,
+      "initial": "d",
       "weight": 50,
+      "enabled": true,
       "options": {
           "threshold": 0.2
       }
     },
     {
       "name": "history",
-      "key": "h",
-      "enabled": true,
+      "initial": "h",
       "weight": 50,
+      "enabled": true,
       "options": {
         "threshold": 2.0,
         "minimumWeeks": 1
@@ -63,28 +53,28 @@
     },
     {
       "name": "license",
-      "key": "l",
-      "essential": true,
+      "initial": "l",
+      "weight": 50,
       "enabled": true,
-      "weight": 50
+      "essential": true
     },
     {
       "name": "management",
-      "key": "m",
-      "enabled": true,
+      "initial": "m",
       "weight": 50,
+      "enabled": true,
       "options": {
           "threshold": 1.0
       }
     },
     {
       "name": "unit_test",
-      "key": "u",
+      "initial": "u",
+      "weight": 50,
+      "enabled": true,
       "dependencies": [
         "cloc"
       ],
-      "enabled": true,
-      "weight": 50,
       "options": {
         "threshold": 0.16
       }

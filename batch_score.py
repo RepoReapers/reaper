@@ -5,6 +5,7 @@ from core import load_attribute_plugins
 from core import init_attribute_plugins
 from core import establish_database_connection
 from core import process_configuration
+from core import process_plugins
 from core import process_key_string
 from core import process_repository
 from core import get_persist_attrs
@@ -32,6 +33,13 @@ def process_arguments():
         default='config.json',
         dest='config_file',
         help='Path to the configuration file.'
+    )
+    parser.add_argument(
+        '-p',
+        '--plugins',
+        type=is_dir,
+        dest='plugins_dir',
+        help='Path to the folder containing your set of plugins'
     )
     parser.add_argument(
         '-d',
@@ -63,6 +71,8 @@ def process_arguments():
 
     return parser.parse_args()
 
+def digits_in(num):
+    return len(str(num))
 
 def main():
     """
@@ -71,21 +81,21 @@ def main():
     args = process_arguments()
 
     sample = [int(line) for line in args.repositories_sample]
-    digits = len(str(len(sample)))  # digits in the size of the sample
+    digits = digits_in(len(sample)) # digits in the size of the sample
 
     config = process_configuration(args.config_file)
+    (threshold, attributes) = process_plugins(args.plugins_dir)
+
     # If a keystring exists, then this function will overwrite enabled/persist
     # states based on the keystring
-    process_key_string(config['attributes'], args.key_string)
+    process_key_string(attributes, args.key_string)
 
-    persist_attrs = get_persist_attrs(config['attributes'])
-    reporting = (len(persist_attrs) > 0)
+    (reporting, persist_attrs) = get_persist_attrs(attributes)
     report = []
 
     connection = establish_database_connection(config['options']['datasource'])
 
-    attributes = config['attributes']
-    load_attribute_plugins(attributes)
+    load_attribute_plugins(args.plugins_dir, attributes)
     init_attribute_plugins(attributes, connection)
 
     left = len(sample)
@@ -116,7 +126,7 @@ def main():
             report.append(report_entry)
 
         # Generate a green checkmark or red x using terminal escapes
-        if score > config['options']['threshold']:
+        if score > threshold:
             result_char = '\033[92m✓\033[0m'
         else:
             result_char = '\033[91m✘\033[0m'
