@@ -91,6 +91,16 @@ def init_attribute_plugins(attributes, connection):
             finally:
                 cursor.close()
 
+def global_init_attribute_plugins(attributes, connection):
+    for attribute in attributes:
+        if 'implementation' in attribute:
+            try:
+                cursor = connection.cursor()
+                attribute['implementation'].global_init(cursor)
+            except:
+                pass
+            finally:
+                cursor.close()
 
 def process_repository(project_id, repo_path, attributes, connection):
     """

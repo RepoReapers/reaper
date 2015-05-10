@@ -96,6 +96,11 @@ def main():
     connection = establish_database_connection(config['options']['datasource'])
 
     load_attribute_plugins(args.plugins_dir, attributes)
+
+    # Do before any multiprocessing    
+    global_init_attribute_plugins(attributes, connection
+
+    # Do within child processes to initialize global data structures
     init_attribute_plugins(attributes, connection)
 
     left = len(sample)
