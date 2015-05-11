@@ -1,4 +1,4 @@
-from apscheduler.schedulers.background import BackgroundScheduler
+import apscheduler.schedulers.background
 import datetime
 import distutils.spawn
 import importlib
@@ -10,44 +10,71 @@ import sys
 import pprint
 from utilities import url_to_json
 
-scheduler = BackgroundScheduler()
-scheduler.start()
-available_tokens = queue.Queue()
+tokens = []
 
+class Tokenizer():
+    def __init__(self):
+      self.have_tokens = bool(tokens)
+      self.available_tokens = queue.Queue()
+      self.scheduler = apscheduler.schedulers.background.BackgroundScheduler()
+      self.scheduler.start()
 
-def init(tokens):
-    global available_tokens
-    for token in tokens:
-        available_tokens.put(token)
+      if not self.have_tokens:
+          self.print_warning(
+              'No GitHub OAuth tokens provided. Proceeding without authentication.'
+          )
 
-def get_token():
-    while True:
-        token = available_tokens.get(block=True)
+      for token in tokens:
+          self.available_tokens.put(token)
 
-        status = url_to_json(
-            'https://api.github.com/rate_limit?access_token=%s' % token
-        )
-
-        if status['resources']['core']['remaining'] > 0:
-            available_tokens.put_nowait(token)
-            return token
+    def tokenize(self, url):
+        if url.startswith('https://api.github.com'):
+            if self.have_tokens:
+                token = self.get_token()
+                if token is not None:
+                    return '{0}?access_token={1}'.format(url, token)
+                else:
+                    return url
+            else:
+                return url
         else:
-            scheduler.add_job(
-                available_tokens.put_nowait,
-                'date',
-                args=[token],
-                run_date=datetime.datetime.fromtimestamp(
-                    status['resources']['core']['reset']
+            raise ValueError('url must be for the GitHub API')
+
+    def get_token(self):
+        while True:
+            if (len(self.scheduler.get_jobs()) == 0
+                and self.available_tokens.empty()):
+                self.print_warning('No more valid OAuth tokens available.')
+                return None
+
+            token = self.available_tokens.get(block=True)
+
+            rate_limit_url = 'https://api.github.com/rate_limit?access_token={0}'.format(token)
+            status = url_to_json(rate_limit_url)
+
+            # Throw away bad OAuth keys.
+            if 'resources' not in status:
+                self.print_warning(
+                    'Invalid OAuth token supplied. Trying again...'
                 )
-            )
+                return self.get_token()
 
+            if status['resources']['core']['remaining'] > 0:
+                self.available_tokens.put_nowait(token)
+                return token
+            else:
+                self.scheduler.add_job(
+                    self.available_tokens.put_nowait,
+                    'date',
+                    args=[token],
+                    run_date=datetime.datetime.fromtimestamp(
+                        status['resources']['core']['reset']
+                    )
+                )
 
-def tokenize(url):
-    if url.startswith('https://api.github.com'):
-        token = get_token()
-        return '{0}?access_token={1}'.format(url, token)
-    else:
-        raise ValueError('url must be for the GitHub API')
+    def print_warning(self, message):
+        formatted_message = '\033[91mWARNING\033[0m: {0}'.format(message)
+        print(formatted_message)
 
 
 def save_result(repo_id, results, cursor):
@@ -91,6 +118,7 @@ def init_attribute_plugins(attributes, connection):
             finally:
                 cursor.close()
 
+
 def global_init_attribute_plugins(attributes, connection):
     for attribute in attributes:
         if 'implementation' in attribute:
@@ -101,6 +129,7 @@ def global_init_attribute_plugins(attributes, connection):
                 pass
             finally:
                 cursor.close()
+
 
 def process_repository(project_id, repo_path, attributes, connection):
     """
@@ -196,6 +225,7 @@ def process_configuration(config_file):
     Returns:
         Validated dictionary with configuration parameters.
     """
+    global tokens
 
     try:
         config = json.load(config_file)
@@ -203,8 +233,9 @@ def process_configuration(config_file):
         print('Your config file is malformed, or does not exist!')
         sys.exit(1)
     finally:
-        init(config['options'].get('github_tokens', []))
+        tokens = config['options'].get('github_tokens', [])
         return config
+
 
 def process_plugins(plugins_dir):
     manifest = plugins_dir + '/manifest.json'
@@ -224,6 +255,7 @@ def process_plugins(plugins_dir):
         print('{} is malformed, or does not exist!'.format(manifest))
         sys.exit(1)
 
+
 def exit_if_dep_missing(attribute):
     if not attribute['enabled'] or 'dependencies' not in attribute:
         dependencies = []
@@ -236,6 +268,7 @@ def exit_if_dep_missing(attribute):
                 .format(attribute['name'], dependency)
             )
             sys.exit(1)
+
 
 def process_key_string(attributes, key_string):
     """Reprocesses the attribute configuration based on a keystring
@@ -272,6 +305,7 @@ def process_key_string(attributes, key_string):
         attribute['enabled'] = True
         # Persist results if the raw key is capitalized
         attribute['persistResult'] = (not key_raw == key_low)
+
 
 def get_persist_attrs(attributes):
     persist_attrs = []
