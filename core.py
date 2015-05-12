@@ -119,12 +119,12 @@ def init_attribute_plugins(attributes, connection):
                 cursor.close()
 
 
-def global_init_attribute_plugins(attributes, connection):
+def global_init_attribute_plugins(attributes, connection, sample):
     for attribute in attributes:
         if 'implementation' in attribute:
             try:
                 cursor = connection.cursor()
-                attribute['implementation'].global_init(cursor)
+                attribute['implementation'].global_init(cursor, sample)
             except:
                 pass
             finally:
