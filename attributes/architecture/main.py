@@ -3,6 +3,21 @@ import networkx
 import os
 import subprocess
 
+supported_languages = []
+
+
+def init(cursor, samples):
+    global supported_languages
+
+    ctags_process = subprocess.Popen(
+        ['ctags', '--list-languages'],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+
+    lines, _ = [x.decode('utf-8') for x in ctags_process.communicate()]
+    for line in lines.split('\n'):
+        supported_languages.append(line.lower())
+
 
 def run(project_id, repo_path, cursor, **options):
     language_sizes = get_loc(repo_path)
@@ -22,10 +37,10 @@ def run(project_id, repo_path, cursor, **options):
         '''.format(project_id))
 
     record = cursor.fetchone()
-    language = record[0]
+    language = record[0].lower()
 
     # Edge case if the repository does not have a language defined.
-    if language is None:
+    if language is None or language not in supported_languages:
         return False, 0
 
     ctags_process = subprocess.Popen(
@@ -180,6 +195,7 @@ if __name__ == '__main__':
     connection.connect()
 
     cursor = connection.cursor()
+    init(None, None)
     result = run(sys.argv[1], sys.argv[2], cursor, threshold=0.75)
     cursor.close()
 
