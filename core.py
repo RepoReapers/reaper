@@ -12,20 +12,23 @@ from utilities import url_to_json
 
 tokens = []
 
+
 class Tokenizer():
     def __init__(self):
-      self.have_tokens = bool(tokens)
-      self.available_tokens = queue.Queue()
-      self.scheduler = apscheduler.schedulers.background.BackgroundScheduler()
-      self.scheduler.start()
+        self.have_tokens = bool(tokens)
+        self.available_tokens = queue.Queue()
+        self.scheduler = apscheduler.schedulers.background.BackgroundScheduler(
+            )
+        self.scheduler.start()
 
-      if not self.have_tokens:
-          self.print_warning(
-              'No GitHub OAuth tokens provided. Proceeding without authentication.'
-          )
+        if not self.have_tokens:
+            self.print_warning(
+                'No GitHub OAuth tokens provided. Proceeding without '
+                'authentication.'
+            )
 
-      for token in tokens:
-          self.available_tokens.put(token)
+        for token in tokens:
+            self.available_tokens.put(token)
 
     def tokenize(self, url):
         if url.startswith('https://api.github.com'):
@@ -42,14 +45,18 @@ class Tokenizer():
 
     def get_token(self):
         while True:
-            if (len(self.scheduler.get_jobs()) == 0
-                and self.available_tokens.empty()):
+            if (
+                len(self.scheduler.get_jobs()) == 0 and
+                self.available_tokens.empty()
+            ):
                 self.print_warning('No more valid OAuth tokens available.')
                 return None
 
             token = self.available_tokens.get(block=True)
 
-            rate_limit_url = 'https://api.github.com/rate_limit?access_token={0}'.format(token)
+            rate_limit_url = (
+                'https://api.github.com/rate_limit?access_token={0}'
+            ).format(token)
             status = url_to_json(rate_limit_url)
 
             # Throw away bad OAuth keys.
@@ -314,4 +321,3 @@ def get_persist_attrs(attributes):
             persist_attrs.append(attribute['name'])
 
     return (len(persist_attrs) > 0, persist_attrs)
-
