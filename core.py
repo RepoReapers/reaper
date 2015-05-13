@@ -210,6 +210,7 @@ def establish_database_connection(config):
             Settings for the database connection.
     """
     try:
+        config['autocommit'] = True
         connection = mysql.connector.connect(**config)
         connection.connect()
         return connection
