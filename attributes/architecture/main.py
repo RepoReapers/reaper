@@ -6,7 +6,7 @@ import subprocess
 supported_languages = []
 
 
-def init(cursor, samples):
+def init(cursor):
     global supported_languages
 
     ctags_process = subprocess.Popen(
