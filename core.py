@@ -154,7 +154,7 @@ def process_repository(project_id, repo_path, attributes, connection):
                 project_id,
                 repo_path,
                 cursor,
-                **attribute['options']
+                **attribute.get('options', {})
             )
 
             cursor.close()
