@@ -188,3 +188,17 @@ def is_dir(path):
         )
     else:
         return path
+
+
+def get_repo_path(repo_id, repositories_dir):
+    # Repository path is the subdir within the id folder whose name is
+    # NOT metadata.json. That is, the path we're interested in is the
+    # downloaded git source. If no such path exists, the repository path
+    # is simply the path to the id folder.
+    base_path = repositories_dir + str(repo_id) + "/"
+    repo_path = base_path  # Default to this if we can't find the git repo
+    for entry in os.listdir(base_path):
+        if entry != 'metadata.json':
+            repo_path += entry
+            break
+    return repo_path
