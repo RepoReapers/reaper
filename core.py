@@ -42,8 +42,7 @@ class Tokenizer():
 
     def get_token(self):
         while True:
-            if (len(self.scheduler.get_jobs()) == 0
-                and self.available_tokens.empty()):
+            if not self.scheduler.get_jobs() and self.available_tokens.empty():
                 self.print_warning('No more valid OAuth tokens available.')
                 return None
 
@@ -57,7 +56,7 @@ class Tokenizer():
                 self.print_warning(
                     'Invalid OAuth token supplied. Trying again...'
                 )
-                return self.get_token()
+                continue
 
             if status['resources']['core']['remaining'] > 0:
                 self.available_tokens.put_nowait(token)
@@ -155,7 +154,7 @@ def process_repository(project_id, repo_path, attributes, connection):
                 project_id,
                 repo_path,
                 cursor,
-                **attribute['options']
+                **attribute.get('options', {})
             )
 
             cursor.close()
