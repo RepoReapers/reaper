@@ -16,7 +16,6 @@ def run(project_id, repo_path, cursor, **options):
     threshold = 0
     if 'threshold' in options:
         threshold = options['threshold']
-    proportion = discoverer.discover(repo_path)
 
     return (int(proportion != -1 and proportion >= threshold), proportion)
 
