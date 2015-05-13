@@ -100,7 +100,7 @@ def main():
     load_attribute_plugins(args.plugins_dir, attributes)
 
     # Do before any multiprocessing    
-    global_init_attribute_plugins(attributes, connection)
+    global_init_attribute_plugins(attributes, connection, sample)
 
     # Do within child processes to initialize global data structures
     init_attribute_plugins(attributes, connection)
