@@ -37,8 +37,6 @@ def get_loc(path, files=None):
     global _loc_cache
     global _cache_hits
 
-    print(path)
- 
     if files is None and path in _loc_cache.keys():
         _cache_hits += 1 
         cached = _loc_cache[path]
