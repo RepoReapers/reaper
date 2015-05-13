@@ -21,6 +21,9 @@ def run(project_id, repo_path, cursor, **options):
     # Dictionary of language => metrics dictionary
     util = utilities.get_loc(repo_path)
 
+    if util is None:
+        return (0, 0)
+
     lang_tloc = dict()
     tloc = 0 # Total lines of source or comment code, across all languages
     lloc = 0 # Lines of source or comment code, for a particular language
