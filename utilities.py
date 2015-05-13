@@ -6,6 +6,11 @@ import subprocess
 import urllib
 import urllib.request
 
+_loc_cache = dict()
+_cache_hits = 0
+
+def get_cache_hits():
+    return _cache_hits
 
 def get_loc(path, files=None):
     """Return the lines-of-code for each language.
@@ -29,10 +34,25 @@ def get_loc(path, files=None):
         as the value. The metric dictionary is keyed by 'cloc' for
         comment-lines-of-code and 'sloc' for source-lines-of-code.
     """
-    if not (os.path.exists(path) or os.path.isdir(path)):
-        raise Exception('%s is an invalid path.' % path)
+    global _loc_cache
+    global _cache_hits
 
-    sloc = None
+    print(path)
+ 
+    if files is None and path in _loc_cache.keys():
+        _cache_hits += 1 
+        cached = _loc_cache[path]
+        if isinstance(cached, Exception):
+            raise cached
+        else:
+            return cached
+        
+    if not (os.path.exists(path) or os.path.isdir(path)):
+        exception = Exception('%s is an invalid path.' % path)
+        if files is None: _loc_cache[path] = exception
+        raise exception
+
+    sloc = dict()
 
     command = 'cloc --csv '
     if files:
@@ -54,7 +74,6 @@ def get_loc(path, files=None):
             break
 
     if index != -1:
-        sloc = dict()
         for _index in range(index + 1, len(lines)):
             components = lines[_index].split(',')
             sloc[components[1]] = {
@@ -62,6 +81,7 @@ def get_loc(path, files=None):
                 'sloc': int(components[4])
             }
 
+    if files is None: _loc_cache[path] = sloc
     return sloc
 
 
