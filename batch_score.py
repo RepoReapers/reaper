@@ -166,6 +166,8 @@ def process(repo_id, repo_path, db_settings, attributes, plugins_dir,
         else:
             result_char = '\033[91m✘\033[0m'
 
+        print('[{0:>10s}] {1}'.format(str(repo_id), result_char))
+
         for attr, result in results.items():
             if attr in persist_attrs:
                 repo_result[attr] = float(result)
