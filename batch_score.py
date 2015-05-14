@@ -18,6 +18,7 @@ from core import process_plugins
 from core import process_key_string
 from core import process_repository
 from core import get_persist_attrs
+from core import save_result
 from utilities import is_dir, get_repo_path
 
 
@@ -177,6 +178,9 @@ def process(repo_id, repo_path, db_settings, attributes, plugins_dir,
         extype, exvalue, extrace = sys.exc_info()
         traceback.print_exception(extype, exvalue, extrace)
     finally:
+        cursor = connection.cursor()
+        save_result(repo_id, repo_result, cursor)
+        cursor.close()
         connection.close()
 
     return repo_result

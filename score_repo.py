@@ -81,7 +81,9 @@ def main():
     )
 
     if config['options'].get('persistResult', False):
-        save_result(args.repository_id, results, connection.cursor())
+        cursor = connection.cursor()
+        save_result(args.repository_id, results, cursor)
+        cursor.close()
         print('\rResult saved to datasource.')
     else:
         print('\rRaw score: {0}'.format(score))

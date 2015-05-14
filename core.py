@@ -97,18 +97,14 @@ def save_result(repo_id, results, cursor):
     Return:
         True if successful, False otherwise.
     """
-    return
-    # Very much under a TODO
-    try:
-        query = 'CREATE TABLE {0}'.format(
-            'results_' + time.strftime('%Y-%m-%d')
-        )
-        cursor.execute(query)
-    except mysql.connector.Error as error:
-        print('test')
-    finally:
-        query = 'INSERT INTO results () VALUES ()'
-        cursor.execute(query)
+    query = '''
+        INSERT INTO reaper_results
+            (project_id, results)
+        VALUES
+            ({0}, "{1}")
+        '''.format(repo_id, str(results))
+
+    cursor.execute(query)
 
 
 def init_attribute_plugins(attributes, connection):
