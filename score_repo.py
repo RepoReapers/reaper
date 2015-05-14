@@ -7,6 +7,7 @@ from core import load_attribute_plugins
 from core import process_configuration
 from core import process_repository
 from core import save_result
+from core import get_run_id
 import os
 import random
 import sys
@@ -82,8 +83,12 @@ def main():
 
     if config['options'].get('persistResult', False):
         cursor = connection.cursor()
-        save_result(args.repository_id, results, cursor)
+
+        run_id = get_run_id()
+        save_result(run_id, args.repository_id, results, cursor)
+
         cursor.close()
+
         print('\rResult saved to datasource.')
     else:
         print('\rRaw score: {0}'.format(score))

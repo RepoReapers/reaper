@@ -81,12 +81,30 @@ class Tokenizer():
         print(formatted_message)
 
 
-def save_result(repo_id, results, cursor):
+def get_run_id(cursor):
+    '''
+    Generate an id from the datasource that uniquely identifies the run.
+
+    Args:
+        cursor: mysql.cursor.MySQLCursor
+            Cursor object used to insert data.
+
+    Return:
+        Identifier of the run to persist.
+    '''
+    cursor.execute('INSERT INTO reaper_runs VALUES()')
+
+    return cursor.lastrowid
+
+
+def save_result(run_id, repo_id, results, cursor):
     """
     Save the results to the specified data source, creating the results table
     as necessary.
 
     Args:
+        run_id: int
+            Identifier of the run to persist.
         repo_id: int
             Identifier of the repository to save.
         results: dict
@@ -99,10 +117,10 @@ def save_result(repo_id, results, cursor):
     """
     query = '''
         INSERT INTO reaper_results
-            (project_id, results)
+            (project_id, results, run_id)
         VALUES
             ({0}, "{1}")
-        '''.format(repo_id, str(results))
+        '''.format(repo_id, str(results), run_id)
 
     cursor.execute(query)
 
