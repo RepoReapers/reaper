@@ -39,8 +39,8 @@ def run(project_id, repo_path, cursor, **options):
     record = cursor.fetchone()
     language = record[0].lower()
 
-    # Edge case if the repository does not have a language defined.
-    if language is None or language not in supported_languages:
+    # Edge case if the repository language is not supported by us.
+    if language not in supported_languages:
         return False, 0
 
     ctags_process = subprocess.Popen(
