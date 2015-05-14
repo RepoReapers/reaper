@@ -49,7 +49,9 @@ def run(project_id, repo_path, cursor, **options):
     )
 
     # TODO: Handle errors emitted by `ctags`.
-    lines, _ = [x.decode('utf-8') for x in ctags_process.communicate()]
+    lines, _ = [
+        x.decode(errors='replace') for x in ctags_process.communicate()
+    ]
 
     file_names = set()
     for line in lines.split('\n'):
@@ -114,10 +116,11 @@ def build_graph(file_names, graph, lexer):
 
             tokens = lexer.get_tokens(contents)
             for item in tokens:
+                name = item[1]
                 token_type = item[0]
                 if token_type not in [token.Name.Function, token.Name.Class]:
                     for node in graph.nodes_iter():
-                        if origin_node is not node and node.has_symbol(item[1]):
+                        if origin_node is not node and node.has_symbol(name):
                             graph.add_edge(origin_node, node)
         except FileNotFoundError as e:
             print("Not found: " + origin_node.path)
@@ -195,7 +198,7 @@ if __name__ == '__main__':
     connection.connect()
 
     cursor = connection.cursor()
-    init(None, None)
+    init(None)
     result = run(sys.argv[1], sys.argv[2], cursor, threshold=0.75)
     cursor.close()
 
