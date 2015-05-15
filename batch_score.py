@@ -3,6 +3,7 @@
 import argparse
 import copy
 import json
+import numbers
 import os
 import sys
 import time
@@ -179,7 +180,10 @@ def process(run_id, repo_id, repo_path, db_settings, attributes, plugins_dir,
 
         for attr, result in results.items():
             if attr in persist_attrs:
-                repo_result[attr] = float(result)
+                if isinstance(result, numbers.Number):
+                    repo_result[attr] = float(result)
+                else:
+                    repo_result[attr] = result
     except:
         sys.stderr.write('Exception\n\n')
         sys.stderr.write('Project:\n')
