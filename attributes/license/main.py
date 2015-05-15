@@ -25,5 +25,5 @@ def run(project_id, repo_path, cursor, **options):
 if __name__ == '__main__':
     print('Attribute plugins are not meant to be executed directly.')
 else:
-    from core import Tokenizer
-    from utilities import url_to_json
+    from lib.core import Tokenizer
+    from lib.utilities import url_to_json

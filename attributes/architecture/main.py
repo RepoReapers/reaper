@@ -185,7 +185,7 @@ if __name__ == '__main__':
     import mysql.connector
     import sys
     sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
-    from utilities import get_loc
+    from lib.utilities import get_loc
 
     os.environ['DEBUG'] = '1'
 
@@ -206,4 +206,4 @@ if __name__ == '__main__':
 
     print(result)
 else:
-    from utilities import get_loc
+    from lib.utilities import get_loc

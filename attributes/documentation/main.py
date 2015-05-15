@@ -1,4 +1,4 @@
-import utilities
+from lib import utilities
 
 """
 The documentation attribute measures the ratio of comment lines of code to
