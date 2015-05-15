@@ -26,10 +26,10 @@ def run(project_id, repo_path, cursor, **options):
     sub = options.get('sub')
     star = options.get('star')
     forks = options.get('forks')			
-    #if (subscribers_count >= sub and stargazers_count >= star) or (stargazers_count >= star and forks >= forks) or (subscribers_count >= sub and forks >= forks):
-        #return True,(subscribers_count,stargazers_count,forks)
-    #else: 					
-    return (False,(subscribers_count,stargazers_count,forks))
+    if (subscribers_count >= sub and stargazers_count >= star) or (stargazers_count >= star and forks >= forks) or (subscribers_count >= sub and forks >= forks):
+        return (True,(subscribers_count,stargazers_count,forks))
+    else: 					
+        return (False,(subscribers_count,stargazers_count,forks))
     				
     	
 
