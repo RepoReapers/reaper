@@ -1,7 +1,7 @@
 import sys
 
 from core import Tokenizer
-from utilities import url_to_jsonimport urllib
+from utilities import url_to_json
 
 
 def run(project_id, repo_path, cursor, **options):
