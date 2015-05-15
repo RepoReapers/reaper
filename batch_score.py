@@ -4,24 +4,24 @@ import argparse
 import copy
 import json
 import numbers
+import multiprocessing
 import os
 import sys
 import time
 import traceback
-from multiprocessing import Pool
 
-from core import load_attribute_plugins
-from core import global_init_attribute_plugins
-from core import init_attribute_plugins
-from core import establish_database_connection
-from core import process_configuration
-from core import process_plugins
-from core import process_key_string
-from core import process_repository
-from core import get_persist_attrs
-from core import get_run_id
-from core import save_result
-from utilities import is_dir, get_repo_path
+from lib.core import load_attribute_plugins
+from lib.core import global_init_attribute_plugins
+from lib.core import init_attribute_plugins
+from lib.core import establish_database_connection
+from lib.core import process_configuration
+from lib.core import process_plugins
+from lib.core import process_key_string
+from lib.core import process_repository
+from lib.core import get_persist_attrs
+from lib.core import get_run_id
+from lib.core import save_result
+from lib.utilities import is_dir, get_repo_path
 
 
 def process_arguments():
@@ -131,7 +131,7 @@ def main():
 
     connection.close()
 
-    with Pool(args.num_processes) as pool:
+    with multiprocessing.Pool(args.num_processes) as pool:
         report = pool.starmap(
             process,
             [(

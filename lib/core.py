@@ -8,7 +8,7 @@ import queue
 import time
 import sys
 import pprint
-from utilities import url_to_json
+from lib.utilities import url_to_json
 
 tokens = []
 

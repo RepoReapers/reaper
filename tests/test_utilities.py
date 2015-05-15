@@ -1,7 +1,7 @@
 import os
 import unittest
 
-import utilities
+from lib import utilities
 from tests import ASSETS_PATH
 
 
