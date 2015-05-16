@@ -20,8 +20,9 @@
       "weight": 50,
       "enabled": true,
       "options": {
-        "threshold1": 5.0,
-        "threshold2": 1.0
+        "sub": 0.0,
+        "star": 0.0,
+        "forks": 0.0
       }
     },
     {
