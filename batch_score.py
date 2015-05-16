@@ -120,16 +120,20 @@ def main():
 
     connection = establish_database_connection(db_settings)
 
-    # Generate a run_id with which processes are to save results
-    cursor = connection.cursor()
-    run_id = get_run_id(cursor)
-    cursor.close()
-
     # Do before any multiprocessing
     load_attribute_plugins(args.plugins_dir, attributes)
 
     # Do before any multiprocessing
     global_init_attribute_plugins(attributes, connection, sample)
+
+    # Generate a run_id with which processes are to save results
+    cursor = connection.cursor()
+    run_id = get_run_id(cursor)
+    cursor.close()
+
+    run_str = 'Beginning execution with id {0}'.format(run_id)
+    print('{0}\n{1}\n{0}'.format('=' * len(run_str), run_str))
+
     connection.close()
 
     with multiprocessing.Pool(args.num_processes) as pool:
