@@ -119,9 +119,9 @@ def save_result(run_id, repo_id, results, cursor):
         INSERT INTO reaper_results
             (project_id, results, run_id)
         VALUES
-            ({0}, "{1}", {2})
-        '''.format(repo_id, str(results), run_id)
-
+            ({0}, '{1}', {2})
+        '''.format(repo_id, json.dumps(results), run_id)
+    
     cursor.execute(query)
 
 
