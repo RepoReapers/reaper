@@ -76,7 +76,7 @@ def run(project_id, repo_path, cursor, **option):
     attr_threshold = option['threshold']
 
     attr_pass = (median >= attr_threshold)
-    return (attr_pass, median)
+    return (attr_pass, float(median))
 
 
 def create_calendar(cursor, range_tbl):
