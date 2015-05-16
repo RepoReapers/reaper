@@ -20,9 +20,9 @@
       "weight": 50,
       "enabled": true,
       "options": {
-        "sub": 0.0,
-        "star": 0.0,
-        "forks": 0.0
+        "sub": 32.4,
+        "star": 241.0,
+        "forks": 78.1 
       }
     },
     {
@@ -39,7 +39,7 @@
       "weight": 50,
       "enabled": true,
       "options": {
-          "threshold": 0.2
+          "threshold": 0.0712 
       }
     },
     {
@@ -48,7 +48,7 @@
       "weight": 50,
       "enabled": true,
       "options": {
-        "threshold": 2.0,
+        "threshold": 1.57,
         "minimumWeeks": 1
       }
     },
@@ -65,7 +65,7 @@
       "weight": 50,
       "enabled": true,
       "options": {
-          "threshold": 1.0
+          "threshold": 1.00
       }
     },
     {
@@ -77,7 +77,7 @@
         "cloc"
       ],
       "options": {
-        "threshold": 0.16
+        "threshold": 0.0134
       }
     }
   ]
