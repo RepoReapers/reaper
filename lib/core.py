@@ -169,7 +169,15 @@ def process_repository(project_id, repo_path, attributes, connection):
     results = {}
     for attribute in attributes:
         if 'implementation' in attribute:
-            cursor = connection.cursor()
+            try:
+                cursor = connection.cursor()
+            except mysql.connector.Error:
+                sys.stderr.write(
+                    'Error while creating cursor, attempting to reconnect.\n'
+                )
+                connection.reconnect()
+            finally:
+                cursor = connection.cursor()
 
             binary_result, raw_result = attribute['implementation'].run(
                 project_id,
