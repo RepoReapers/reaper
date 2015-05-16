@@ -197,4 +197,9 @@ def process(run_id, repo_id, repo_path, db_settings, attributes, plugins_dir,
     return repo_result
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(
+            '\rCaught interrupt, killing all children...'
+        )
