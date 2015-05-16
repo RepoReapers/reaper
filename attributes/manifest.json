@@ -10,7 +10,7 @@
         "ctags"
       ],
       "options": {
-        "connectedness": 0.75,
+        "connectedness": 0.175,
         "minimumSize": 1000
       }
     },
@@ -20,9 +20,9 @@
       "weight": 50,
       "enabled": true,
       "options": {
-        "sub": 32.4,
-        "star": 241.0,
-        "forks": 78.1 
+        "sub": 33,
+        "star": 241,
+        "forks": 79 
       }
     },
     {
