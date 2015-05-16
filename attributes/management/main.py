@@ -5,6 +5,10 @@ import json
 import pandas as pd
 from functools import reduce
 import operator
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+import pprint
 
 """
 The management attribute measures the median number of commits per month
@@ -95,7 +99,7 @@ def create_calendar(cursor, range_tbl):
         The name of the temporary calendar table
     """
 
-    calendar_tbl = 'reaper_calendar'  # Will be returned
+    calendar_tbl = 'temp_reaper_calendar'  # Will be returned
     calendar_proc = 'reaper_fill_calendar'
 
     # Drop existing calendar table and recreate it
@@ -111,41 +115,68 @@ def create_calendar(cursor, range_tbl):
           );
         '''.format(cal=calendar_tbl))
 
+    cursor.execute('''
+        SELECT
+          MIN(first),
+          MAX(last)
+        FROM
+          {range_tbl}
+        '''.format(range_tbl=range_tbl))
+         
+    (raw_min, raw_max) = cursor.fetchall()[0]
+    fday_min = raw_min.replace(day=1, hour=0, minute=0, second=0)
+    fday_max = raw_max.replace(day=1, hour=0, minute=0, second=0)
+   
+    reldelt = relativedelta(fday_max, fday_min)
+    months = reldelt.months + reldelt.years * 12
+
+    lst = [(fday_min + relativedelta(months=m),) for m in range(months + 1)]
+
+    cursor.executemany('''
+        INSERT INTO {calendar_tbl} (dt) VALUES (%s)
+        '''.format(calendar_tbl=calendar_tbl), lst)
+
     # Drop existing fill procedure and recreate it
-    cursor.execute('''
-        DROP PROCEDURE IF EXISTS {proc};
-        '''.format(proc=calendar_proc))
+    #cursor.execute('''
+    #    DROP PROCEDURE IF EXISTS {proc};
+    #    '''.format(proc=calendar_proc))
 
-    cursor.execute('''
-        CREATE PROCEDURE {proc} ()
-          BEGIN
-          DECLARE dt_cur, dt_last, temp DATETIME;
+    #cursor.execute('''
+    #    CREATE PROCEDURE {proc} ()
+    #      BEGIN
+    #      DECLARE dt_cur, dt_last, temp DATETIME;
 
-          -- temp is the minimum repo creation date timestamp
-          -- dt_cur is a DATETIME set to the first day of temp's month
+    #      -- temp is the minimum repo creation date timestamp
+    #      -- dt_cur is a DATETIME set to the first day of temp's month
 
-          SET temp = (SELECT MIN(first) FROM {range_tbl});
-          SET dt_cur = MAKEDATE(YEAR(temp), MONTH(temp));
+    #      SET temp = (SELECT MIN(first) FROM {range_tbl});
+    #      SET dt_cur = MAKEDATE(YEAR(temp), MONTH(temp));
 
-          -- temp is now the maximum commit date timestamp
-          -- dt_cur is a DATETIME set to the first day of temp's month
+    #      -- temp is now the maximum commit date timestamp
+    #      -- dt_cur is a DATETIME set to the first day of temp's month
 
-          SET temp = (SELECT MAX(last) FROM {range_tbl});
-          SET dt_last = MAKEDATE(YEAR(temp), MONTH(temp));
+    #      SET temp = (SELECT MAX(last) FROM {range_tbl});
+    #      SET dt_last = MAKEDATE(YEAR(temp), MONTH(temp));
 
-          -- Insert months into the calendar within the desired range
-          SET dt_last = DATE_ADD(dt_last, INTERVAL 1 MONTH);
-          -- SET dt_cur = DATE_SUB(dt_cur, INTERVAL 1 MONTH);
-          WHILE dt_cur < dt_last DO
-            INSERT INTO {cal} (dt) VALUES (dt_cur);
-            SET dt_cur = DATE_ADD(dt_cur, INTERVAL 1 MONTH);
-          END WHILE;
-        END;
-        '''.format(proc=calendar_proc, cal=calendar_tbl, range_tbl=range_tbl))
+    #      -- Insert months into the calendar within the desired range
+    #      SET dt_last = DATE_ADD(dt_last, INTERVAL 1 MONTH);
+    #      -- SET dt_cur = DATE_SUB(dt_cur, INTERVAL 1 MONTH);
+    #      WHILE dt_cur < dt_last DO
+    #        INSERT INTO {cal} (dt) VALUES (dt_cur);
+    #        SET dt_cur = DATE_ADD(dt_cur, INTERVAL 1 MONTH);
+    #      END WHILE;
+    #    END;
+    #    '''.format(proc=calendar_proc, cal=calendar_tbl, range_tbl=range_tbl))
 
-    # Fill the temporary calendar table
-    cursor.execute('CALL {proc} ();'.format(proc=calendar_proc))
+    ## Fill the temporary calendar table
+    #cursor.execute('CALL {proc} ();'.format(proc=calendar_proc))
 
+    #cursor.execute('''
+    #    SELECT * FROM {calendar_tbl};
+    #    '''.format(calendar_tbl=calendar_tbl))
+
+    #pprint.pprint(cursor.fetchall())
+    #sys.exit()
     return calendar_tbl
 
 
@@ -267,10 +298,11 @@ def update_freq_tables(cursor, sample_tbl, range_tbl, calendar_tbl):
             freq=freq_tbl, run=run
         )
     )
+
     return run
 
 def create_sample_table(cursor, sample):
-    sample_tbl = "reaper_sample_temp" 
+    sample_tbl = "temp_reaper_sample" 
     cursor.execute('''
         CREATE TEMPORARY TABLE {sample_tbl}
           (
@@ -309,7 +341,7 @@ def create_active_range(cursor, sample_tbl):
         The name of the temporary range table
     """
 
-    range_tbl = "reaper_sample_active_range"  # Name of the temp table
+    range_tbl = "temp_reaper_sample_active_range"  # Name of the temp table
 
     cursor.execute('''
         CREATE TEMPORARY TABLE {range_tbl}
@@ -373,7 +405,9 @@ if __name__ == '__main__':
     with open('config.json', 'r') as file:
         config = json.load(file)
 
-    sample = [13418819, 4089761, 4324425, 10160358, 2554894, 10154146]
+    sample = [12730185]
+    #sample = [13418819, 4089761, 4324425, 10160358, 2554894, 10154146]
+    #sample = [13418819]
 
     mysql_config = config['options']['datasource']
 
@@ -386,6 +420,6 @@ if __name__ == '__main__':
     global medians
     print(medians)
 
-    result = run(13418819, None, None, threshold=1.0)
+    result = run(12730185, None, None, threshold=1.0)
 
     print(result)
