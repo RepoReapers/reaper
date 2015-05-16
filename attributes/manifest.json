@@ -1,10 +1,10 @@
 {
-  "threshold": 100,
+  "threshold": 75,
   "attributes": [
     {
       "name": "architecture",
       "initial": "a",
-      "weight": 50,
+      "weight": 25,
       "enabled": true,
       "dependencies": [
         "ctags"
@@ -17,7 +17,7 @@
     {
       "name": "community",
       "initial": "c",
-      "weight": 50,
+      "weight": 10,
       "enabled": true,
       "options": {
         "sub": 33,
@@ -28,7 +28,7 @@
     {
       "name": "continuous_integration",
       "initial": "i",
-      "weight": 50,
+      "weight": 5,
       "enabled": true,
       "options": {
       }
@@ -36,7 +36,7 @@
     {
       "name": "documentation",
       "initial": "d",
-      "weight": 50,
+      "weight": 25,
       "enabled": true,
       "options": {
           "threshold": 0.0712 
@@ -45,7 +45,7 @@
     {
       "name": "history",
       "initial": "h",
-      "weight": 50,
+      "weight": 20,
       "enabled": true,
       "options": {
         "threshold": 1.57,
@@ -55,14 +55,14 @@
     {
       "name": "license",
       "initial": "l",
-      "weight": 50,
+      "weight": 0,
       "enabled": true,
       "essential": true
     },
     {
       "name": "management",
       "initial": "m",
-      "weight": 50,
+      "weight": 5,
       "enabled": true,
       "options": {
           "threshold": 1.00
@@ -71,7 +71,7 @@
     {
       "name": "unit_test",
       "initial": "u",
-      "weight": 50,
+      "weight": 10,
       "enabled": true,
       "dependencies": [
         "cloc"
