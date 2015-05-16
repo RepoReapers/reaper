@@ -5,12 +5,15 @@ import shlex
 import subprocess
 import urllib
 import urllib.request
+from tempfile import NamedTemporaryFile
 
 _loc_cache = dict()
 _cache_hits = 0
 
+
 def get_cache_hits():
     return _cache_hits
+
 
 def get_loc(path, files=None):
     """Return the lines-of-code for each language.
@@ -38,48 +41,73 @@ def get_loc(path, files=None):
     global _cache_hits
 
     if files is None and path in _loc_cache.keys():
-        _cache_hits += 1 
+        _cache_hits += 1
         cached = _loc_cache[path]
         if isinstance(cached, Exception):
             raise cached
         else:
             return cached
-        
+
     if not (os.path.exists(path) or os.path.isdir(path)):
         exception = Exception('%s is an invalid path.' % path)
-        if files is None: _loc_cache[path] = exception
+        if files is None:
+            _loc_cache[path] = exception
         raise exception
 
     sloc = dict()
 
-    command = 'cloc --csv '
-    if files:
-        command += ' '.join(["'{0}'".format(file_) for file_ in files])
-    else:
-        command += '.'
+    tempfile = None
+    try:
+        command = 'cloc --csv '
 
-    process = subprocess.Popen(
-        command, cwd=path, shell=True,
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    (out, err) = [x.decode() for x in process.communicate()]
+        if files:
+            # Using temporary file to overcome the character limit in bash
+            #   command line.
+            tempfile = NamedTemporaryFile()
+            with open(tempfile.name, 'w') as _tempfile:
+                for _file in files:
+                    _tempfile.write('{0}\n'.format(_file))
 
-    lines = [line for line in out.split('\n') if len(line.strip('\n')) != 0]
-    index = -1
-    for _index, _line in enumerate(lines):
-        if 'files,' in _line:
-            index = _index
-            break
+            command += '--list-file={0}'.format(tempfile.name)
+        else:
+            command += '.'
 
-    if index != -1:
-        for _index in range(index + 1, len(lines)):
-            components = lines[_index].split(',')
-            sloc[components[1]] = {
-                'cloc': int(components[3]),
-                'sloc': int(components[4])
-            }
+        if 'DEBUG' in os.environ:
+            print(command)
 
-    if files is None: _loc_cache[path] = sloc
+        process = subprocess.Popen(
+            command, cwd=path, shell=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+
+        (out, err) = [x.decode() for x in process.communicate()]
+
+        lines = [
+            line for line in out.split('\n') if len(line.strip('\n')) != 0
+        ]
+
+        index = -1
+        for _index, _line in enumerate(lines):
+            if 'files,' in _line:
+                index = _index
+                break
+
+        if index != -1:
+            for _index in range(index + 1, len(lines)):
+                components = lines[_index].split(',')
+                sloc[components[1]] = {
+                    'cloc': int(components[3]),
+                    'sloc': int(components[4])
+                }
+
+        if files is None:
+            _loc_cache[path] = sloc
+    except:
+        raise
+    finally:
+        if tempfile is not None and not tempfile.closed:
+            tempfile.close()
+
     return sloc
 
 
