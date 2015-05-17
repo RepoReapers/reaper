@@ -24,9 +24,9 @@ def run(project_id, repo_path, cursor, **options):
     full_url = tokenizer.tokenize(record[0].rstrip())
     json_response = url_to_json(full_url)
 
-    subscribers_count = json_response['subscribers_count']
-    stargazers_count = json_response['stargazers_count']
-    forks = json_response['forks']
+    subscribers_count = json_response.get('subscribers_count', 0)
+    stargazers_count = json_response.get('stargazers_count', 0)
+    forks = json_response.get('forks', 0)
 
     result = False
     if (

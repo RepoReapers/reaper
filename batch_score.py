@@ -175,7 +175,7 @@ def process(run_id, repo_id, repo_path, db_settings, attributes, plugins_dir,
         )
 
         # Generate a green checkmark or red x using terminal escapes
-        if score > threshold:
+        if score >= threshold:
             result_char = '\033[92m✓\033[0m'
         else:
             result_char = '\033[91m✘\033[0m'

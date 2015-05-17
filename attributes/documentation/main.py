@@ -13,7 +13,7 @@ Author:
     Steven Kroh skk8768@rit.edu
 
 Updated:
-    29 April 2015
+    16 May 2015
 """
 
 
@@ -27,7 +27,8 @@ def run(project_id, repo_path, cursor, **options):
         sloc += metrics['sloc']
         cloc += metrics['cloc']
 
-    ratio = cloc / (sloc + cloc)
+    t_loc = sloc + cloc
+    ratio = (cloc / t_loc) if t_loc > 0 else 0
 
     attr_threshold = options['threshold']
     attr_pass = (ratio >= attr_threshold)
