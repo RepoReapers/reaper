@@ -93,9 +93,6 @@ def process_arguments():
     return parser.parse_args()
 
 
-def digits_in(num): return len(str(num))
-
-
 def main():
     """
     Main execution flow.
@@ -103,8 +100,6 @@ def main():
     args = process_arguments()
 
     sample = [int(line) for line in args.repositories_sample]
-    # Digits in the size of the sample
-    digits = digits_in(len(sample))
 
     config = process_configuration(args.config_file)
     db_settings = config['options']['datasource']
