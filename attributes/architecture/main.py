@@ -37,7 +37,9 @@ def run(project_id, repo_path, cursor, **options):
         '''.format(project_id))
 
     record = cursor.fetchone()
-    language = record[0].lower()
+    language = record[0]
+
+    language = language.lower() if language else language
 
     # Edge case if the repository language is not supported by us.
     if language not in supported_languages:
