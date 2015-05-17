@@ -155,6 +155,7 @@ def main():
 def process(run_id, repo_id, repo_path, db_settings, attributes, plugins_dir,
             persist_attrs, threshold):
     repo_result = {"id": repo_id}
+    score = None
 
     try:
         connection = establish_database_connection(db_settings)
@@ -189,7 +190,7 @@ def process(run_id, repo_id, repo_path, db_settings, attributes, plugins_dir,
         traceback.print_exception(extype, exvalue, extrace)
     finally:
         cursor = connection.cursor()
-        save_result(run_id, repo_id, repo_result, cursor)
+        save_result(run_id, repo_id, repo_result, score, cursor)
         cursor.close()
         connection.close()
 

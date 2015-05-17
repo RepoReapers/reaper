@@ -97,7 +97,7 @@ def get_run_id(cursor):
     return cursor.lastrowid
 
 
-def save_result(run_id, repo_id, results, cursor):
+def save_result(run_id, repo_id, results, score, cursor):
     """
     Save the results to the specified data source, creating the results table
     as necessary.
@@ -109,6 +109,8 @@ def save_result(run_id, repo_id, results, cursor):
             Identifier of the repository to save.
         results: dict
             Key value pair of results to be saved.
+        score: float
+            Weighted score computed for the repository.
         cursor: mysql.cursor.MySQLCursor
             Cursor object used to insert data.
 
@@ -117,11 +119,11 @@ def save_result(run_id, repo_id, results, cursor):
     """
     query = '''
         INSERT INTO reaper_results
-            (project_id, results, run_id)
+            (project_id, results, run_id, score)
         VALUES
-            ({0}, '{1}', {2})
-        '''.format(repo_id, json.dumps(results), run_id)
-    
+            ({0}, '{1}', {2}, {3})
+        '''.format(repo_id, json.dumps(results), run_id, score)
+
     cursor.execute(query)
 
 
