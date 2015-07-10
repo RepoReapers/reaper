@@ -1,5 +1,6 @@
 import os
 import unittest
+import tempfile
 
 import utilities
 from tests import ASSETS_PATH
@@ -111,3 +112,14 @@ class UtilitiesTestCase(unittest.TestCase):
             Exception, utilities.search,
             pattern='#include <stdio.h>', path='/bin/bash',
         )
+
+    def test_download(self):
+        # Arrange
+        url = 'https://api.github.com/repos/ffmpeg/ffmpeg/tarball'
+
+        # Act
+        with tempfile.TemporaryDirectory() as directory:
+            utilities.download(url, directory)
+
+            # Assert
+            self.assertTrue(len(os.listdir(directory)) > 0)

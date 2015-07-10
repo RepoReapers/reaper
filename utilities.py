@@ -1,10 +1,12 @@
 import argparse
+import io
 import json
 import os
 import shlex
 import subprocess
 import urllib
 import urllib.request
+import tarfile
 from tempfile import NamedTemporaryFile
 
 _loc_cache = dict()
@@ -248,3 +250,19 @@ def get_repo_path(repo_id, repositories_dir):
             repo_path += entry
             break
     return repo_path
+
+
+def download(url, directory, headers={}):
+    """Download and extract the snapshot of a GitHub repository.
+
+    Parameters
+    ----------
+    url : string
+        URL of the GitHub repository to download.
+    directory : string
+        Absolute path of a directory to extract the downloaded repository to.
+    """
+    req = urllib.request.Request(url=url, headers=headers)
+    res = urllib.request.urlopen(req)
+    with tarfile.open(mode='r:gz', fileobj=io.BytesIO(res.read())) as file_:
+        file_.extractall(directory)
