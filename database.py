@@ -23,69 +23,49 @@ class Database(object):
             self._connection = mysql.connector.connect(**self.settings)
             self._connection.connect()
         except mysql.connector.Error as e:
-            message = (
-                'Unable to establish database connection. Error: {0}'
-            ).format(str(e))
-            raise DatabaseError(message)
+            msg = 'Failure in connecting to database. Error: {0}'.format(e)
+            raise DatabaseError(msg)
 
     def disconnect(self):
         try:
             if self._connection and self._connection.is_connected():
                 self._connection.disconnect()
         except mysql.connector.Error as e:
-            message = (
-                'Unable to disconnect from database. Error: {0}'
-            ).format(str(e))
-            raise DatabaseError(message)
+            msg = 'Failure in disconnecting from database. Error: {0}'.format(
+                e
+            )
+            raise DatabaseError(msg)
 
-    def getone(self, query):
-        return self._get(query, count=1)
+    def get(self, query):
+        try:
+            rows = list()
+            with self.cursor() as cursor:
+                cursor.execute(query)
+                for row in cursor.fetchall():
+                    rows.append(row)
+            return rows
+        except mysql.connector.Error as e:
+            msg = 'Failure in executing query {0}. Error: {1}'.format(query, e)
+            raise DatabaseError(msg)
 
-    def getmany(self, query):
-        return self._get(query)
-
-    def execute(self, query):
-        if self._connection:
-            try:
-                with self._get_cursor() as cursor:
-                    cursor.execute(query)
-            except mysql.connector.Error as e:
-                message = (
-                    'Failed executing query {0}. Error: {1}'
-                ).format(sql, str(e))
-                raise DatabaseError(message)
-            finally:
-                if cursor:
-                    cursor.close()
-        else:
-            raise DatabaseError('Not connnected to the database.')
+    def post(self, query):
+        try:
+            with self.cursor() as cursor:
+                cursor.execute(query)
+        except mysql.connector.Error as e:
+            msg = 'Failure in executing query {0}. Error: {1}'.format(query, e)
+            raise DatabaseError(msg)
+        finally:
+            if cursor:
+                cursor.close()
 
     @contextlib.contextmanager
-    def _get_cursor(self):
-        cursor = self._connection.cursor()
-        try:
-            yield cursor
-        finally:
-            cursor.close()
-
-    def _get(self, query, count=None):
-        if self._connection:
+    def cursor(self):
+        if self._connection and self._connection.is_connected():
+            cursor = self._connection.cursor()
             try:
-                rows = list()
-                with self._get_cursor() as cursor:
-                    cursor.execute(query)
-                    for row in cursor.fetchall():
-                        rows.append(row)
-
-                if count is None:
-                    return rows
-                else:
-                    if len(rows) >= 1 and len(rows[0]) >= 1:
-                        return rows[0][0]
-            except mysql.connector.Error as e:
-                message = (
-                    'Failed executing query {0}. Error: {1}'
-                ).format(query, str(e))
-                raise DatabaseError(message)
+                yield cursor
+            finally:
+                cursor.close()
         else:
-            raise DatabaseError('Not connnected to the database.')
+            raise DatabaseError('No connection to the database.')
