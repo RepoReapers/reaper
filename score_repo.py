@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 import argparse
-from core import establish_database_connection
-from core import init_attribute_plugins
-from core import load_attribute_plugins
-from core import process_configuration
-from core import process_repository
-from core import save_result
-from core import get_run_id
+from lib.core import establish_database_connection
+from lib.core import init_attribute_plugins
+from lib.core import load_attribute_plugins
+from lib.core import process_configuration
+from lib.core import process_repository
+from lib.core import save_result
+from lib.core import get_run_id
 import os
 import random
 import sys
 import threading
 import time
-from utilities import is_dir
+from lib.utilities import is_dir
 
 
 def process_arguments():

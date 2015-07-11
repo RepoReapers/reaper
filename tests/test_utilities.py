@@ -2,7 +2,7 @@ import os
 import unittest
 import tempfile
 
-import utilities
+from lib import utilities
 from tests import ASSETS_PATH
 
 
