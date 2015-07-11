@@ -1,4 +1,4 @@
-import utilities
+from lib import utilities
 from attributes.unit_test.discoverer import TestDiscoverer
 
 LANGUAGES = 'Objective C,Objective C++,C/C++ Header'

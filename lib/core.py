@@ -8,13 +8,15 @@ import queue
 import time
 import sys
 import pprint
-from utilities import url_to_json
+from lib.utilities import url_to_json
 
-tokens = []
+config = {}
 
 
 class Tokenizer():
     def __init__(self):
+        tokens = config.get('options', {}).get('github_tokens', [])
+
         self.have_tokens = bool(tokens)
         self.available_tokens = queue.Queue()
         self.scheduler = apscheduler.schedulers.background.BackgroundScheduler(
@@ -254,16 +256,14 @@ def process_configuration(config_file):
     Returns:
         Validated dictionary with configuration parameters.
     """
-    global tokens
+    global config
 
     try:
         config = json.load(config_file)
+        return config
     except:
         print('Your config file is malformed, or does not exist!')
         sys.exit(1)
-    finally:
-        tokens = config['options'].get('github_tokens', [])
-        return config
 
 
 def process_plugins(plugins_dir):
