@@ -37,13 +37,40 @@ class Attributes(object):
         self._parse_attributes(attributes)
         self._parse_keystring(keystring)
 
-    def ginit(self):
-        pass
+    def global_init(self, samples):
+        for attribute in self.attributes:
+            with self.database.cursor() as cursor:
+                attribute.reference.global_init(cursor, samples)
+
+    def run(self, project_id, repository_root):
+        invalidated = False
+        score = 0
+        rresults = dict()
+
+        for attribute in self.attributes:
+            with self.database.cursor() as cursor:
+                attribute.reference.init(cursor)
+
+            with self.database.cursor() as cursor:
+                (bresult, rresult) = attribute.reference.run(
+                    project_id, repository_path, cursor, attribute.options
+                )
+
+            rrresults[attribute.name] = rresult
+
+            if not bresult and attribute.essential:
+                score = 0
+                invalidated = True
+
+            if not invalidated:
+                score += bresult * attribute.weight
+
+        return (score, rresults)
 
     def _parse_attributes(self, attributes):
         if attributes:
             self.attributes = list()
-            for attribute in attributes:
+            for (identifier, attribute) in enumerate(attributes):
                 self.attributes.append(Attribute(attribute))
 
     def _disable_attributes(self):
