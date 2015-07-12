@@ -114,12 +114,32 @@ class UtilitiesTestCase(unittest.TestCase):
         )
 
     def test_download(self):
-        # Arrange
-        url = 'https://api.github.com/repos/ffmpeg/ffmpeg/tarball'
-
-        # Act
         with tempfile.TemporaryDirectory() as directory:
-            utilities.download(url, directory)
+            # Arrange
+            url = 'https://api.github.com/repos/ffmpeg/ffmpeg/tarball'
+            expected = os.path.join(directory, 'FFmpeg-FFmpeg-')
+
+            # Act
+            actual = utilities.download(url, directory)
 
             # Assert
             self.assertTrue(len(os.listdir(directory)) > 0)
+            self.assertTrue(expected in actual)
+
+    def test_read(self):
+        # Arrange
+        path = os.path.join(ASSETS_PATH, 'test.json')
+        expected = {'message': 'hello world!!!'}
+
+        # Act
+        actual = utilities.read(open(path))
+
+        # Assert
+        self.assertEqual(expected, actual)
+
+    def test_read_error(self):
+        # Arrange
+        path = os.path.join(ASSETS_PATH, 'test.txt')
+
+        # Assert
+        self.assertRaises(Exception, utilities.read, open(path))

@@ -261,8 +261,45 @@ def download(url, directory, headers={}):
         URL of the GitHub repository to download.
     directory : string
         Absolute path of a directory to extract the downloaded repository to.
+
+    Returns
+    -------
+    path : string
+        Absolute path of the directory created when the repository is
+        downloaded and extract.
     """
+    path = directory
+
     req = urllib.request.Request(url=url, headers=headers)
     res = urllib.request.urlopen(req)
     with tarfile.open(mode='r:gz', fileobj=io.BytesIO(res.read())) as file_:
         file_.extractall(directory)
+        path = os.path.join(path, os.path.commonprefix(file_.getnames()))
+
+    return path
+
+
+def read(jsonfile):
+    """Read a JSON file.
+
+    Parameters
+    ----------
+    jsonfile : file object
+        An open file handle to a JSON file.
+
+    Return
+    ------
+    jsondata : dict
+        A dictionary returned by the json.load()
+    """
+    jsondata = dict()
+    try:
+        if jsonfile:
+            jsondata = json.load(jsonfile)
+        return jsondata
+    except:
+        raise Exception('Failure in loading JSON data {0}'.format(
+            jsonfile.name
+        ))
+    finally:
+        jsonfile.close()
