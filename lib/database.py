@@ -43,6 +43,10 @@ class Database(object):
                 cursor.execute(query)
                 for row in cursor.fetchall():
                     rows.append(row)
+            
+            if len(rows) == 1:
+                rows = rows[0]
+
             return rows
         except mysql.connector.Error as e:
             msg = 'Failure in executing query {0}. Error: {1}'.format(query, e)
@@ -65,6 +69,8 @@ class Database(object):
             cursor = self._connection.cursor()
             try:
                 yield cursor
+            except:
+                raise
             finally:
                 cursor.close()
         else:

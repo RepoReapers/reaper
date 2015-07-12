@@ -2,7 +2,7 @@ import json
 import os
 import unittest
 
-import database
+from lib import database
 
 
 class DatabaseTestCase(unittest.TestCase):
@@ -54,7 +54,7 @@ class DatabaseTestCase(unittest.TestCase):
     def test_get_single(self):
         # Arrange
         query = 'SELECT id, name FROM projects WHERE id = 1'
-        expected = [(1, 'ruote-kit')]
+        expected = (1, 'ruote-kit')
 
         # Act
         self.database.connect()
@@ -79,7 +79,7 @@ class DatabaseTestCase(unittest.TestCase):
         # Arrange
         tname = 'foo'
         query = 'CREATE TABLE {0} (bar INT)'.format(tname)
-        expected = [(tname,)]
+        expected = (tname,)
 
         # Act
         self.database.connect()
