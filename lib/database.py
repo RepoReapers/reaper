@@ -43,9 +43,11 @@ class Database(object):
                 cursor.execute(query)
                 for row in cursor.fetchall():
                     rows.append(row)
-            
+
             if len(rows) == 1:
                 rows = rows[0]
+                if len(rows) == 1:
+                    rows = rows[0]
 
             return rows
         except mysql.connector.Error as e:

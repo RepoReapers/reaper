@@ -79,7 +79,7 @@ class DatabaseTestCase(unittest.TestCase):
         # Arrange
         tname = 'foo'
         query = 'CREATE TABLE {0} (bar INT)'.format(tname)
-        expected = (tname,)
+        expected = tname
 
         # Act
         self.database.connect()
