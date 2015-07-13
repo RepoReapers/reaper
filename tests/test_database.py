@@ -29,7 +29,7 @@ class DatabaseTestCase(unittest.TestCase):
         self.database.connect()
 
         # Assert
-        self.assertTrue(self.database._connection.is_connected())
+        self.assertTrue(self.database._connected)
 
     def test_disconnect(self):
         # Act
@@ -37,7 +37,7 @@ class DatabaseTestCase(unittest.TestCase):
         self.database.disconnect()
 
         # Assert
-        self.assertFalse(self.database._connection.is_connected())
+        self.assertFalse(self.database._connected)
 
     def test_get_empty(self):
         # Arrange
