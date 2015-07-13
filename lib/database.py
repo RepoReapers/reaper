@@ -28,8 +28,9 @@ class Database(object):
 
     def disconnect(self):
         try:
-            if self._connection and self._connection.is_connected():
+            if self._connected:
                 self._connection.disconnect()
+                self._connection = None
         except mysql.connector.Error as e:
             msg = 'Failure in disconnecting from database. Error: {0}'.format(
                 e
@@ -58,6 +59,10 @@ class Database(object):
         try:
             with self.cursor() as cursor:
                 cursor.execute(query)
+
+                if cursor.lastrowid is not None:
+                    return cursor.lastrowid
+                return cursor.rowcount
         except mysql.connector.Error as e:
             msg = 'Failure in executing query {0}. Error: {1}'.format(query, e)
             raise DatabaseError(msg)
@@ -67,13 +72,20 @@ class Database(object):
 
     @contextlib.contextmanager
     def cursor(self):
-        if self._connection and self._connection.is_connected():
-            cursor = self._connection.cursor()
-            try:
-                yield cursor
-            except:
-                raise
-            finally:
-                cursor.close()
-        else:
-            raise DatabaseError('No connection to the database.')
+        if not self._connected:
+            self.connect()
+
+        cursor = self._connection.cursor()
+        try:
+            yield cursor
+        except:
+            raise
+        finally:
+            cursor.close()
+
+    @property
+    def _connected(self):
+        connected = False
+        if self._connection is not None and self._connection.is_connected():
+            connected = True
+        return connected
