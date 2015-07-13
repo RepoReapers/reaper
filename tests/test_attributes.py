@@ -2,37 +2,40 @@ import json
 import numbers
 import os
 import pickle
+import tempfile
 import types
 import unittest
 
-import database
-from attributes import Attributes
+from lib.attributes import Attributes
+from lib.database import Database
 
 
 class AttributesTestCase(unittest.TestCase):
     def setUp(self):
-        path = (
-            os.path.join(
-                os.path.abspath(
-                    os.path.join(
-                        os.path.dirname(os.path.realpath(__file__)),
-                        os.pardir
-                    )
-                ),
-                'attributes',
-                'manifest.json'
+        parentpath = (
+            os.path.abspath(
+                os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    os.pardir
+                )
             )
         )
-        self.raw = None
-        with open(path, 'r') as file_:
-            self.raw = json.load(file_)['attributes']
+        manifestpath = os.path.join(parentpath, 'manifest.json')
+        self.rawattributes = None
+        with open(manifestpath, 'r') as file_:
+            self.rawattributes = json.load(file_)['attributes']
+
+        configpath = os.path.join(parentpath, 'config.json')
+        self.rawsettings = None
+        with open(configpath, 'r') as file_:
+            self.rawsettings = json.load(file_)['options']['datasource']
 
     def test_init(self):
         # Arrange
-        expected = len(self.raw)
+        expected = len(self.rawattributes)
 
         # Act
-        attributes = Attributes(self.raw, database=None)
+        attributes = Attributes(self.rawattributes, database=None)
 
         # Assert
         self.assertEqual(expected, len(attributes.attributes))
@@ -49,7 +52,7 @@ class AttributesTestCase(unittest.TestCase):
 
     def test_pickling(self):
         # Arrange
-        attributes = Attributes(self.raw, database=None)
+        attributes = Attributes(self.rawattributes, database=None)
         expected = len(attributes.attributes)
 
         # Act
@@ -75,7 +78,9 @@ class AttributesTestCase(unittest.TestCase):
         keystring = 'DuAlIcH'
 
         # Act
-        attributes = Attributes(self.raw, database=None, keystring=keystring)
+        attributes = Attributes(
+            self.rawattributes, database=None, keystring=keystring
+        )
 
         # Assert
         for attribute in attributes.attributes:
@@ -88,3 +93,28 @@ class AttributesTestCase(unittest.TestCase):
                     self.assertTrue(attribute.persist)
                 else:
                     self.assertFalse(attribute.persist)
+
+    def test_init_repository(self):
+        with tempfile.TemporaryDirectory() as directory:
+            # Arrange
+            project_id = 788
+            repository_path = os.path.join(directory, str(project_id))
+            expected = os.path.join(
+                directory, str(project_id), 'FFmpeg-FFmpeg-'
+            )
+
+            # Act
+            attributes = Attributes(
+                self.rawattributes, database=Database(self.rawsettings)
+            )
+            try:
+                attributes.database.connect()
+                actual = attributes._init_repository(
+                    project_id, repository_path
+                )
+
+                # Assert
+                self.assertTrue(len(os.listdir(repository_path)) > 0)
+                self.assertTrue(expected in actual)
+            finally:
+                attributes.database.disconnect()
