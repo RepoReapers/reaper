@@ -53,6 +53,7 @@ class Run(object):
 
     def _process(self, project_id):
         score = 0.0
+        rresults = dict()
 
         try:
             (score, rresults) = self.attributes.run(project_id, self.repo_root)
@@ -69,7 +70,8 @@ class Run(object):
             extype, exvalue, extrace = sys.exc_info()
             traceback.print_exception(extype, exvalue, extrace)
         finally:
-            self._save(project_id, score, rresults)
+            if rresults:
+                self._save(project_id, score, rresults)
 
     def _save(self, project_id, score, rresults):
         if self.run_id is not None:
