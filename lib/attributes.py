@@ -3,6 +3,7 @@ import importlib
 import os
 import sys
 import types
+import traceback
 
 import attributes
 
@@ -91,6 +92,11 @@ class Attributes(object):
 
                     if not invalidated:
                         score += bresult * attribute.weight
+        except:
+            sys.stderr.write('Exception\n\n')
+            sys.stderr.write('  Project ID   {0}\n'.format(project_id))
+            extype, exvalue, extrace = sys.exc_info()
+            traceback.print_exception(extype, exvalue, extrace)
         finally:
             self.database.disconnect()
             return (score, rresults)
@@ -135,7 +141,14 @@ class Attributes(object):
             if sha:
                 url += '/{0}'.format(sha)
 
-            repository_path = utilities.download(url, repository_path)
+            # TODO: Remove
+            url += '?access_token=563ffe4afe38ca48404e441cf98223a87c4596ab'
+
+            # TODO: Remove after July 21, 2015
+            headers = {
+                'Accept': 'application/vnd.github.quicksilver-preview+json'
+            }
+            repository_path = utilities.download(url, repository_path, headers)
 
         return repository_path
 
