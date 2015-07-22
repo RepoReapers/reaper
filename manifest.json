@@ -20,9 +20,7 @@
       "weight": 10,
       "enabled": true,
       "options": {
-        "sub": 33,
-        "star": 241,
-        "forks": 79 
+        "threshold": 1
       }
     },
     {
