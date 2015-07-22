@@ -3,18 +3,20 @@ import warnings
 import sys
 import traceback
 
-QUERY_SAVE = (
-    'INSERT INTO reaper_results('
-    'run_id, project_id, architecture, forks, subscribers, stargazers, '
-    'continuous_integration, documentation, history, license, management, '
-    'unit_test, score'
-    ') VALUES ('
-    '%(run_id)d, %(project_id)d, %(architecture)5.2f, %(forks)d, '
-    '%(subscribers)d, %(stargazers)d, %(continuous_integration)d, '
-    '%(documentation)5.2f, %(history)5.2f, %(license)d, '
-    '%(management)5.2f, %(unit_test)5.2f, %(score)5.2f'
-    ')'
-)
+QUERY_SAVE = '''
+    INSERT INTO reaper_results
+    (
+      run_id, project_id, architecture, community,
+      continuous_integration, documentation, history,
+      license, management, unit_test, score
+    )
+    VALUES
+    (
+      %(run_id)d, %(project_id)d, %(architecture)5.2f, %(community)d,
+      %(continuous_integration)d, %(documentation)5.2f, %(history)5.2f,
+      %(license)d, %(management)5.2f, %(unit_test)5.2f, %(score)5.2f
+    )
+'''
 
 
 class Run(object):
@@ -80,21 +82,9 @@ class Run(object):
             }
 
             for key in rresults:
-                # Starting off with default values
-                if 'community' in key:
-                    data['subscribers'] = None
-                    data['stargazers'] = None
-                    data['forks'] = None
-                else:
-                    data[key] = None
-
+                data[key] = None
                 if self.attributes.get(key).persist:
-                    if 'community' in key:
-                        data['subscribers'] = rresults[key]['sub']
-                        data['stargazers'] = rresults[key]['star']
-                        data['forks'] = rresults[key]['forks']
-                    else:
-                        data[key] = rresults[key]
+                    data[key] = rresults[key]
             try:
                 self.database.connect()
                 self.database.post(QUERY_SAVE % data)
