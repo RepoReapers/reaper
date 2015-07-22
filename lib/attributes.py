@@ -130,13 +130,14 @@ class Attributes(object):
             url += '/tarball'
 
             sha = self.database.get(
-                (
-                    'SELECT sha '
-                    'FROM commits '
-                    'WHERE project_id = {0} '
-                    'ORDER BY created_at DESC '
-                    'LIMIT 1'
-                ).format(project_id)
+                '''
+                    SELECT c.sha
+                    FROM project_commits pc
+                        JOIN commits c ON c.id = pc.commit_id
+                    WHERE pc.project_id = {0}
+                    ORDER BY c.created_at DESC
+                    LIMIT 1
+                '''.format(project_id)
             )
             if sha:
                 url += '/{0}'.format(sha)
