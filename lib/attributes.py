@@ -144,11 +144,7 @@ class Attributes(object):
             # TODO: Remove
             url += '?access_token=563ffe4afe38ca48404e441cf98223a87c4596ab'
 
-            # TODO: Remove after July 21, 2015
-            headers = {
-                'Accept': 'application/vnd.github.quicksilver-preview+json'
-            }
-            repository_path = utilities.download(url, repository_path, headers)
+            repository_path = utilities.download(url, repository_path)
 
         return repository_path
 
