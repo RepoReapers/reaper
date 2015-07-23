@@ -1,36 +1,36 @@
 import sys
-import json
-import mysql.connector
-import os
-import urllib
+
+from dateutil import relativedelta
 
 
 def run(project_id, repo_path, cursor, **options):
-    cursor.execute('''
-        SELECT
-            count(id),
-            DATEDIFF(max(created_at), min(created_at))
-        FROM
-            commits
-        WHERE
-            project_id={0} and created_at > 0
-        '''.format(project_id))
+    cursor.execute(
+        '''
+            SELECT COUNT(c.id), MIN(c.created_at), MAX(c.created_at)
+            FROM commits c
+                JOIN project_commits pc ON pc.commit_id = c.id
+            WHERE pc.project_id = {0} and c.created_at > 0
+        '''.format(project_id)
+    )
 
     result = cursor.fetchone()
+    num_commits = result[0]
+    first_commit_date = result[1]
+    last_commit_date = result[2]
 
-    total_commits = int(result[0])
-    total_days = int(result[1])
-    total_weeks = total_days / 7
+    # Compute the number of months between the first and last commit
+    delta = relativedelta.relativedelta(last_commit_date, first_commit_date)
+    num_months = delta.years * 12 + delta.months
 
-    min_weeks = options.get('minimumWeeks', 1)
-    commits_per_week = total_commits / total_weeks if total_weeks > 0 else 0
-
-    if total_weeks < min_weeks:
-        return False, commits_per_week
+    avg_commits = None
+    if num_months > options.get('minimumDurationInMonths', 0):
+        avg_commits = num_commits / num_months
+    else:
+        return False, avg_commits
 
     threshold = options.get('threshold', 2)
-
-    return commits_per_week > threshold, commits_per_week
+    return avg_commits > threshold, avg_commits
 
 if __name__ == '__main__':
     print('Attribute plugins are not meant to be executed directly.')
+    sys.exit(1)
