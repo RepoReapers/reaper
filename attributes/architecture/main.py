@@ -1,22 +1,39 @@
-from pygments import lexers, token, util
-import networkx
 import os
+import re
 import subprocess
 
-supported_languages = []
+import networkx
+from pygments import lexers, token, util
+
+SUPPORTED_LANGUAGES = []
+
+# Regular expression to parse the list of languages supported by ack as listed
+#  by ack --help-types
+#  Pattern: "    --[no]python"
+RE_ACK_LANGUAGES = re.compile('(?:^\s{4}--\[no\])(\w*)')
+
+# Map GHTorrent's projects.language to ACK compatible language (if necessary).
+ACK_LANGUAGE_MAP = {
+    'c': 'cc',
+    'c++': 'cpp',
+    'c#': 'csharp',
+    'objective-c': 'objc',
+    'ojective-c++': 'objcpp',
+}
 
 
 def init(cursor):
-    global supported_languages
+    global SUPPORTED_LANGUAGES
 
-    ctags_process = subprocess.Popen(
-        ['ctags', '--list-languages'],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ack_process = subprocess.Popen(
+        ['ack', '--help-types'], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
-    lines, _ = [x.decode('utf-8') for x in ctags_process.communicate()]
+    lines, _ = [x.decode('utf-8') for x in ack_process.communicate()]
     for line in lines.split('\n'):
-        supported_languages.append(line.lower())
+        match = RE_ACK_LANGUAGES.match(line)
+        if match:
+            SUPPORTED_LANGUAGES.append(match.group(1))
 
 
 def run(project_id, repo_path, cursor, **options):
@@ -40,37 +57,36 @@ def run(project_id, repo_path, cursor, **options):
     language = record[0]
 
     language = language.lower() if language else language
+    ack_language = language
+    if ack_language in ACK_LANGUAGE_MAP:
+        ack_language = ACK_LANGUAGE_MAP[ack_language]
 
     # Edge case if the repository language is not supported by us.
-    if language not in supported_languages:
+    if ack_language not in SUPPORTED_LANGUAGES:
         return False, 0
 
-    ctags_process = subprocess.Popen(
-        ['ctags', '-Rx', "--languages={0}".format(language), repo_path],
+    ack_process = subprocess.Popen(
+        ['ack', '-f', "--{0}".format(ack_language), repo_path],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
-    # TODO: Handle errors emitted by `ctags`.
     lines, _ = [
-        x.decode(errors='replace') for x in ctags_process.communicate()
+        x.decode(errors='replace') for x in ack_process.communicate()
     ]
 
-    file_names = set()
+    file_paths = list()
     for line in lines.split('\n'):
-        fields = line.split()
-        for field in fields:
-            if os.path.isfile(field):
-                file_names.add(field)
+        file_paths.append(line)
 
     graph = networkx.Graph()
     lexer = lexers.get_lexer_by_name(language)
-    build_graph(file_names, graph, lexer)
+    build_graph(file_paths, graph, lexer)
 
     result = get_connectedness(graph)
     return result > options.get('connectedness', 0.75), result
 
 
-def build_graph(file_names, graph, lexer):
+def build_graph(file_paths, graph, lexer):
     """
     for each file in the set of files
         create a node and add it to the graph
@@ -92,11 +108,11 @@ def build_graph(file_names, graph, lexer):
                 create a relationship from the current file to the node with
                 the symbol definition
     """
-    for file_name in file_names:
-        node = Node(file_name)
+    for file_path in file_paths:
+        node = Node(file_path)
         graph.add_node(node)
         try:
-            with open(file_name, 'r', encoding='utf-8') as file:
+            with open(file_path, 'r', encoding='utf-8') as file:
                 contents = file.read()
 
             tokens = lexer.get_tokens(contents)
