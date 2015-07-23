@@ -102,8 +102,11 @@ def build_graph(file_names, graph, lexer):
             tokens = lexer.get_tokens(contents)
             for item in tokens:
                 token_type = item[0]
+                symbol = item[1]
                 if token_type in [token.Name.Function, token.Name.Class]:
-                    node.add_symbol(item[1], token_type)
+                    node.defines.add(symbol)
+                else:
+                    node.references.add(symbol)
             if 'DEBUG' in os.environ:
                 print(node)
         except FileNotFoundError as e:
@@ -111,23 +114,11 @@ def build_graph(file_names, graph, lexer):
         except UnicodeDecodeError:
             continue
 
-    for origin_node in graph.nodes():
-        try:
-            with open(origin_node.path, 'r', encoding='utf-8') as file:
-                contents = file.read()
-
-            tokens = lexer.get_tokens(contents)
-            for item in tokens:
-                name = item[1]
-                token_type = item[0]
-                if token_type not in [token.Name.Function, token.Name.Class]:
-                    for node in graph.nodes_iter():
-                        if origin_node is not node and node.has_symbol(name):
-                            graph.add_edge(origin_node, node)
-        except FileNotFoundError as e:
-            print("Not found: " + origin_node.path)
-        except UnicodeDecodeError:
-            continue
+    for caller in graph.nodes_iter():
+        for reference in caller.references:
+            for callee in graph.nodes_iter():
+                if callee is not caller and reference in callee.defines:
+                    graph.add_edge(caller, callee, symbol=reference)
 
 
 def get_connectedness(graph):
@@ -145,16 +136,8 @@ def get_connectedness(graph):
 class Node():
     def __init__(self, path):
         self.path = path
-        self.symbols = set()
-
-    def add_symbol(self, symbol, symbol_type=token.Generic):
-        self.symbols.add((symbol_type, symbol))
-
-    def has_symbol(self, item):
-        for symbol in self.symbols:
-            if item == symbol[1]:
-                return True
-        return False
+        self.defines = set()
+        self.references = set()
 
     def __hash__(self):
         return hash(self.path)
@@ -163,15 +146,9 @@ class Node():
         return self.path == other.path
 
     def __str__(self):
-        result = '\r'
-        for symbol in self.symbols:
-            symbol_str = '{0}: {1}\n'.format(symbol[0], symbol[1])
-            result += symbol_str
-
+        symbol_str = '\r' + '\n'.join(self.defines)
         return "{0}\n{1}\n{2}".format(
-            self.path,
-            '=' * len(self.path),
-            result
+            self.path, '=' * len(self.path), symbol_str
         )
 
 if __name__ == '__main__':
