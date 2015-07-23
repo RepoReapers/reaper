@@ -2,6 +2,7 @@ import os
 import unittest
 import tempfile
 
+from dateutil.relativedelta import relativedelta
 from lib import utilities
 from tests import ASSETS_PATH
 
@@ -143,3 +144,45 @@ class UtilitiesTestCase(unittest.TestCase):
 
         # Assert
         self.assertRaises(Exception, utilities.read, open(path))
+
+    def test_parse_datetime_delta(self):
+        # Arrange
+        datetime_deltas = [
+            '1y',
+            '1y1m',
+            '1y1m1d',
+            '1y1m1d1H',
+            '1y1m1d1H1M',
+            '1y1m1d1H1M1S',
+            '1m1d1H1M1S',
+            '1d1H1M1S',
+            '1H1M1S',
+            '1M1S',
+            '1S',
+            'ymdHMS',
+            '11y11m11d11H11M11S'
+        ]
+        rd = relativedelta  # Alias for improved readability
+        expected = [
+            rd(years=1, months=0, days=0, hours=0, minutes=0, seconds=0),
+            rd(years=1, months=1, days=0, hours=0, minutes=0, seconds=0),
+            rd(years=1, months=1, days=1, hours=0, minutes=0, seconds=0),
+            rd(years=1, months=1, days=1, hours=1, minutes=0, seconds=0),
+            rd(years=1, months=1, days=1, hours=1, minutes=1, seconds=0),
+            rd(years=1, months=1, days=1, hours=1, minutes=1, seconds=1),
+            rd(years=0, months=1, days=1, hours=1, minutes=1, seconds=1),
+            rd(years=0, months=0, days=1, hours=1, minutes=1, seconds=1),
+            rd(years=0, months=0, days=0, hours=1, minutes=1, seconds=1),
+            rd(years=0, months=0, days=0, hours=0, minutes=1, seconds=1),
+            rd(years=0, months=0, days=0, hours=0, minutes=0, seconds=1),
+            rd(years=0, months=0, days=0, hours=0, minutes=0, seconds=0),
+            rd(years=11, months=11, days=11, hours=11, minutes=11, seconds=11),
+        ]
+
+        # Act
+        actual = list()
+        for datetime_delta in datetime_deltas:
+            actual.append(utilities.parse_datetime_delta(datetime_delta))
+
+        # Assert
+        self.assertCountEqual(expected, actual)

@@ -6,8 +6,11 @@ import shlex
 import subprocess
 import urllib
 import urllib.request
+import re
 import tarfile
 from tempfile import NamedTemporaryFile
+
+from dateutil import relativedelta
 
 _loc_cache = dict()
 _cache_hits = 0
@@ -303,3 +306,49 @@ def read(jsonfile):
         ))
     finally:
         jsonfile.close()
+
+
+def parse_datetime_delta(datetime_delta):
+    """Parse specification of datetime delta of the form nynmndnHnMnS
+
+    Parameters
+    ----------
+    datetime_delta : str
+        A string of the form nynmndnHnMnS. All components of the
+        specification are optional. Note that the component specifiers are
+        case-sensitive.
+
+    Returns
+    -------
+    relativedelta : dateutil.relativedelta.relativedelta
+        An instance of dateutil.relativedelta.relativedelta representing the
+        datetime delta specified in the argument to this function. A value of
+        zero is set for each component that is not specfied in the argument.
+    """
+    delta = relativedelta.relativedelta()
+
+    match = re.search('(\d+)y', datetime_delta)
+    if match:
+        delta.years = int(match.group(1))
+
+    match = re.search('(\d+)m', datetime_delta)
+    if match:
+        delta.months = int(match.group(1))
+
+    match = re.search('(\d+)d', datetime_delta)
+    if match:
+        delta.days = int(match.group(1))
+
+    match = re.search('(\d+)H', datetime_delta)
+    if match:
+        delta.hours = int(match.group(1))
+
+    match = re.search('(\d+)M', datetime_delta)
+    if match:
+        delta.minutes = int(match.group(1))
+
+    match = re.search('(\d+)S', datetime_delta)
+    if match:
+        delta.seconds = int(match.group(1))
+
+    return delta
