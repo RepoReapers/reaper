@@ -57,10 +57,10 @@ def run(project_id, repo_path, cursor, **options):
 
     file_names = set()
     for line in lines.split('\n'):
-      fields = line.split()
-      for field in fields:
-        if os.path.isfile(field):
-          file_names.add(field)
+        fields = line.split()
+        for field in fields:
+            if os.path.isfile(field):
+                file_names.add(field)
 
     graph = networkx.Graph()
     lexer = lexers.get_lexer_by_name(language)
@@ -140,13 +140,6 @@ def get_connectedness(graph):
         return 1 - (zero_degrees / len(node_degrees))
     else:
         return 0
-
-
-def find_node_by_name(graph, name):
-    for node, data in graph.nodes_iter(data=True):
-        if data['name'] is name:
-            return node
-    return None
 
 
 class Node():
