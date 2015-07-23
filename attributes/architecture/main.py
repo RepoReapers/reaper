@@ -122,15 +122,15 @@ def build_graph(file_names, graph, lexer):
 
 
 def get_connectedness(graph):
-    node_degrees = graph.degree()
-    zero_degrees = len(
-        [degree for key, degree in node_degrees.items() if degree is 0]
-    )
+    components = list(networkx.connected_component_subgraphs(graph))
+    components.sort(key=lambda i: len(i.nodes()), reverse=True)
+    largest_component = components[0]
 
-    if len(node_degrees) > 0:
-        return 1 - (zero_degrees / len(node_degrees))
-    else:
-        return 0
+    connectedness = 0
+    if graph.nodes() and len(graph.nodes()) > 0:
+        connectedness = len(largest_component.nodes()) / len(graph.nodes())
+
+    return connectedness
 
 
 class Node():
