@@ -1,22 +1,39 @@
-from pygments import lexers, token, util
-import networkx
 import os
+import re
 import subprocess
 
-supported_languages = []
+import networkx
+from pygments import lexers, token, util
+
+SUPPORTED_LANGUAGES = []
+
+# Regular expression to parse the list of languages supported by ack as listed
+#  by ack --help-types
+#  Pattern: "    --[no]python"
+RE_ACK_LANGUAGES = re.compile('(?:^\s{4}--\[no\])(\w*)')
+
+# Map GHTorrent's projects.language to ACK compatible language (if necessary).
+ACK_LANGUAGE_MAP = {
+    'c': 'cc',
+    'c++': 'cpp',
+    'c#': 'csharp',
+    'objective-c': 'objc',
+    'ojective-c++': 'objcpp',
+}
 
 
 def init(cursor):
-    global supported_languages
+    global SUPPORTED_LANGUAGES
 
-    ctags_process = subprocess.Popen(
-        ['ctags', '--list-languages'],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ack_process = subprocess.Popen(
+        ['ack', '--help-types'], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
-    lines, _ = [x.decode('utf-8') for x in ctags_process.communicate()]
+    lines, _ = [x.decode('utf-8') for x in ack_process.communicate()]
     for line in lines.split('\n'):
-        supported_languages.append(line.lower())
+        match = RE_ACK_LANGUAGES.match(line)
+        if match:
+            SUPPORTED_LANGUAGES.append(match.group(1))
 
 
 def run(project_id, repo_path, cursor, **options):
@@ -40,37 +57,36 @@ def run(project_id, repo_path, cursor, **options):
     language = record[0]
 
     language = language.lower() if language else language
+    ack_language = language
+    if ack_language in ACK_LANGUAGE_MAP:
+        ack_language = ACK_LANGUAGE_MAP[ack_language]
 
     # Edge case if the repository language is not supported by us.
-    if language not in supported_languages:
+    if ack_language not in SUPPORTED_LANGUAGES:
         return False, 0
 
-    ctags_process = subprocess.Popen(
-        ['ctags', '-Rx', "--languages={0}".format(language), repo_path],
+    ack_process = subprocess.Popen(
+        ['ack', '-f', "--{0}".format(ack_language), repo_path],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
-    # TODO: Handle errors emitted by `ctags`.
     lines, _ = [
-        x.decode(errors='replace') for x in ctags_process.communicate()
+        x.decode(errors='replace') for x in ack_process.communicate()
     ]
 
-    file_names = set()
+    file_paths = list()
     for line in lines.split('\n'):
-      fields = line.split()
-      for field in fields:
-        if os.path.isfile(field):
-          file_names.add(field)
+        file_paths.append(line)
 
     graph = networkx.Graph()
     lexer = lexers.get_lexer_by_name(language)
-    build_graph(file_names, graph, lexer)
+    build_graph(file_paths, graph, lexer)
 
     result = get_connectedness(graph)
     return result > options.get('connectedness', 0.75), result
 
 
-def build_graph(file_names, graph, lexer):
+def build_graph(file_paths, graph, lexer):
     """
     for each file in the set of files
         create a node and add it to the graph
@@ -92,18 +108,21 @@ def build_graph(file_names, graph, lexer):
                 create a relationship from the current file to the node with
                 the symbol definition
     """
-    for file_name in file_names:
-        node = Node(file_name)
+    for file_path in file_paths:
+        node = Node(file_path)
         graph.add_node(node)
         try:
-            with open(file_name, 'r', encoding='utf-8') as file:
+            with open(file_path, 'r', encoding='utf-8') as file:
                 contents = file.read()
 
             tokens = lexer.get_tokens(contents)
             for item in tokens:
                 token_type = item[0]
+                symbol = item[1]
                 if token_type in [token.Name.Function, token.Name.Class]:
-                    node.add_symbol(item[1], token_type)
+                    node.defines.add(symbol)
+                else:
+                    node.references.add(symbol)
             if 'DEBUG' in os.environ:
                 print(node)
         except FileNotFoundError as e:
@@ -111,57 +130,30 @@ def build_graph(file_names, graph, lexer):
         except UnicodeDecodeError:
             continue
 
-    for origin_node in graph.nodes():
-        try:
-            with open(origin_node.path, 'r', encoding='utf-8') as file:
-                contents = file.read()
-
-            tokens = lexer.get_tokens(contents)
-            for item in tokens:
-                name = item[1]
-                token_type = item[0]
-                if token_type not in [token.Name.Function, token.Name.Class]:
-                    for node in graph.nodes_iter():
-                        if origin_node is not node and node.has_symbol(name):
-                            graph.add_edge(origin_node, node)
-        except FileNotFoundError as e:
-            print("Not found: " + origin_node.path)
-        except UnicodeDecodeError:
-            continue
+    for caller in graph.nodes_iter():
+        for reference in caller.references:
+            for callee in graph.nodes_iter():
+                if callee is not caller and reference in callee.defines:
+                    graph.add_edge(caller, callee, symbol=reference)
 
 
 def get_connectedness(graph):
-    node_degrees = graph.degree()
-    zero_degrees = len(
-        [degree for key, degree in node_degrees.items() if degree is 0]
-    )
+    components = list(networkx.connected_component_subgraphs(graph))
+    components.sort(key=lambda i: len(i.nodes()), reverse=True)
+    largest_component = components[0]
 
-    if len(node_degrees) > 0:
-        return 1 - (zero_degrees / len(node_degrees))
-    else:
-        return 0
+    connectedness = 0
+    if graph.nodes() and len(graph.nodes()) > 0:
+        connectedness = len(largest_component.nodes()) / len(graph.nodes())
 
-
-def find_node_by_name(graph, name):
-    for node, data in graph.nodes_iter(data=True):
-        if data['name'] is name:
-            return node
-    return None
+    return connectedness
 
 
 class Node():
     def __init__(self, path):
         self.path = path
-        self.symbols = set()
-
-    def add_symbol(self, symbol, symbol_type=token.Generic):
-        self.symbols.add((symbol_type, symbol))
-
-    def has_symbol(self, item):
-        for symbol in self.symbols:
-            if item == symbol[1]:
-                return True
-        return False
+        self.defines = set()
+        self.references = set()
 
     def __hash__(self):
         return hash(self.path)
@@ -170,15 +162,9 @@ class Node():
         return self.path == other.path
 
     def __str__(self):
-        result = '\r'
-        for symbol in self.symbols:
-            symbol_str = '{0}: {1}\n'.format(symbol[0], symbol[1])
-            result += symbol_str
-
+        symbol_str = '\r' + '\n'.join(self.defines)
         return "{0}\n{1}\n{2}".format(
-            self.path,
-            '=' * len(self.path),
-            result
+            self.path, '=' * len(self.path), symbol_str
         )
 
 if __name__ == '__main__':
