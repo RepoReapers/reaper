@@ -10,7 +10,7 @@ import re
 import tarfile
 from tempfile import NamedTemporaryFile
 
-from dateutil import relativedelta
+from lib import dateutil
 
 _loc_cache = dict()
 _cache_hits = 0
@@ -320,12 +320,12 @@ def parse_datetime_delta(datetime_delta):
 
     Returns
     -------
-    relativedelta : dateutil.relativedelta.relativedelta
-        An instance of dateutil.relativedelta.relativedelta representing the
-        datetime delta specified in the argument to this function. A value of
-        zero is set for each component that is not specfied in the argument.
+    relativedelta : lib.dateutil.relativedelta
+        An instance of lib.dateutil.relativedelta representing the datetime
+        delta specified in the argument to this function. A value of zero is
+        set for each component that is not specfied in the argument.
     """
-    delta = relativedelta.relativedelta()
+    delta = dateutil.relativedelta()
 
     match = re.search('(\d+)y', datetime_delta)
     if match:
