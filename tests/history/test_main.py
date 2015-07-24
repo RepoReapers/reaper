@@ -45,7 +45,7 @@ class MainTestCase(unittest.TestCase):
         # Assert
         self.assertTrue(result)
         self.assertLess(0, value)
-        
+
         # Arrange
         project_id = 581  # torvalds/linux
         options = {
@@ -64,7 +64,7 @@ class MainTestCase(unittest.TestCase):
         # Assert
         self.assertTrue(result)
         self.assertLess(0, value)
-        
+
         # Arrange
         project_id = 66  # libraM/django-request-signer
         options = {
