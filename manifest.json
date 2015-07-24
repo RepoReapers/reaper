@@ -67,6 +67,16 @@
       }
     },
     {
+      "name": "state",
+      "initial": "s",
+      "weight": 0,
+      "enabled": true,
+      "options": {
+        "threshold": "6m",
+        "today": "2015-04-01"
+      }
+    },
+    {
       "name": "unit_test",
       "initial": "u",
       "weight": 10,
