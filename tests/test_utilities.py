@@ -160,7 +160,8 @@ class UtilitiesTestCase(unittest.TestCase):
             '1M1S',
             '1S',
             'ymdHMS',
-            '11y11m11d11H11M11S'
+            '11y11m11d11H11M11S',
+            ''
         ]
         rd = relativedelta  # Alias for improved readability
         expected = [
@@ -177,6 +178,7 @@ class UtilitiesTestCase(unittest.TestCase):
             rd(years=0, months=0, days=0, hours=0, minutes=0, seconds=1),
             rd(years=0, months=0, days=0, hours=0, minutes=0, seconds=0),
             rd(years=11, months=11, days=11, hours=11, minutes=11, seconds=11),
+            rd(years=0, months=0, days=0, hours=0, minutes=0, seconds=0),
         ]
 
         # Act
