@@ -20,7 +20,8 @@
       "weight": 10,
       "enabled": true,
       "options": {
-        "threshold": 1
+        "threshold": 1,
+        "cutoff": 0.8
       }
     },
     {
