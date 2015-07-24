@@ -143,3 +143,36 @@ class RelativeDeltaTestCase(unittest.TestCase):
 
         # Assert
         self.assertEqual(expected, actual)
+
+    def test_total_hours(self):
+        # Arrange
+        delta = dateutil.relativedelta(years=1, months=6)
+        expected = 13080
+
+        # Act
+        actual = delta.total_hours()
+
+        # Assert
+        self.assertEqual(expected, actual)
+
+    def test_total_minutes(self):
+        # Arrange
+        delta = dateutil.relativedelta(hours=10)
+        expected = 60
+
+        # Act
+        actual = delta.total_hours()
+
+        # Assert
+        self.assertEqual(expected, actual)
+
+    def test_total_seconds(self):
+        # Arrange
+        delta = dateutil.relativedelta(hours=10, minutes=10, seconds=1)
+        expected = 36601
+
+        # Act
+        actual = delta.total_hours()
+
+        # Assert
+        self.assertEqual(expected, actual)
