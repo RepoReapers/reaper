@@ -1,7 +1,7 @@
 import contextlib
 import sys
 
-import mysql.connector
+import mysql.connector as mysql
 
 
 class DatabaseError(Exception):
@@ -20,18 +20,17 @@ class Database(object):
 
     def connect(self):
         try:
-            self._connection = mysql.connector.connect(**self.settings)
-            self._connection.connect()
-        except mysql.connector.Error as e:
+            self._connection = mysql.connect(**self.settings)
+        except mysql.Error as e:
             msg = 'Failure in connecting to database. Error: {0}'.format(e)
             raise DatabaseError(msg)
 
     def disconnect(self):
         try:
-            if self._connected:
+            if self._connection:
                 self._connection.disconnect()
-                self._connection = None
-        except mysql.connector.Error as e:
+            self._connection = None
+        except mysql.Error as e:
             msg = 'Failure in disconnecting from database. Error: {0}'.format(
                 e
             )
@@ -51,7 +50,7 @@ class Database(object):
                     rows = rows[0]
 
             return rows
-        except mysql.connector.Error as e:
+        except mysql.Error as e:
             msg = 'Failure in executing query {0}. Error: {1}'.format(query, e)
             raise DatabaseError(msg)
 
@@ -63,12 +62,9 @@ class Database(object):
                 if cursor.lastrowid is not None:
                     return cursor.lastrowid
                 return cursor.rowcount
-        except mysql.connector.Error as e:
+        except mysql.Error as e:
             msg = 'Failure in executing query {0}. Error: {1}'.format(query, e)
             raise DatabaseError(msg)
-        finally:
-            if cursor:
-                cursor.close()
 
     @contextlib.contextmanager
     def cursor(self):
@@ -89,3 +85,15 @@ class Database(object):
         if self._connection is not None and self._connection.is_connected():
             connected = True
         return connected
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        if isinstance(self._connection, mysql.connection.MySQLConnection):
+            self.disconnect()
+            state['_connection'] = ''
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if isinstance(self._connection, str):
+            self.connect()

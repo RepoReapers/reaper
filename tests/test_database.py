@@ -1,7 +1,9 @@
 import json
 import os
+import pickle
 import unittest
 
+import mysql.connector as mysql
 from lib import database
 
 
@@ -23,6 +25,21 @@ class DatabaseTestCase(unittest.TestCase):
             settings = json.load(file_)['options']['datasource']
 
         self.database = database.Database(settings)
+
+    def test_pickling(self):
+        # Arrange
+        self.database.connect()
+
+        # Act
+        pickled = pickle.dumps(self.database)
+        unpickled = pickle.loads(pickled)
+
+        # Assert
+        self.assertIsInstance(unpickled, database.Database)
+        self.assertIsInstance(
+            unpickled._connection, mysql.connection.MySQLConnection
+        )
+        self.assertTrue(unpickled._connected)
 
     def test_connect(self):
         # Act
