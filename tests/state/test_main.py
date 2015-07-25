@@ -30,7 +30,6 @@ class MainTestCase(unittest.TestCase):
         # Arrange
         project_id = 284
         options = {'threshold': '6m'}
-        expected = 'active'
 
         # Act
         try:
@@ -42,12 +41,11 @@ class MainTestCase(unittest.TestCase):
 
         # Assert
         self.assertIsInstance(value, dateutil.relativedelta)
-        self.assertEqual(expected, actual)
+        self.assertTrue(actual)
 
         # Arrange
         project_id = 66
         options = {'threshold': '6m'}
-        expected = 'dormant'
 
         # Act
         try:
@@ -59,4 +57,4 @@ class MainTestCase(unittest.TestCase):
 
         # Assert
         self.assertIsInstance(value, dateutil.relativedelta)
-        self.assertEqual(expected, actual)
+        self.assertFalse(actual)
