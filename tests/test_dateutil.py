@@ -158,10 +158,10 @@ class RelativeDeltaTestCase(unittest.TestCase):
     def test_total_minutes(self):
         # Arrange
         delta = dateutil.relativedelta(hours=10)
-        expected = 60
+        expected = 600
 
         # Act
-        actual = delta.total_hours()
+        actual = delta.total_minutes()
 
         # Assert
         self.assertEqual(expected, actual)
@@ -172,7 +172,7 @@ class RelativeDeltaTestCase(unittest.TestCase):
         expected = 36601
 
         # Act
-        actual = delta.total_hours()
+        actual = delta.total_seconds()
 
         # Assert
         self.assertEqual(expected, actual)
