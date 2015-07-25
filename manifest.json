@@ -10,6 +10,7 @@
         "ack"
       ],
       "options": {
+        "timeout": "2H",
         "connectedness": 0.175,
         "minimumSize": 1000
       }

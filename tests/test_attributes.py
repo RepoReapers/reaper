@@ -1,3 +1,4 @@
+import copy
 import json
 import numbers
 import os
@@ -94,6 +95,29 @@ class AttributesTestCase(unittest.TestCase):
                 else:
                     self.assertFalse(attribute.persist)
 
+    def test_is_persitence_enabled(self):
+        # Arrange
+        keystring = 'dualmichs'
+
+        # Act
+        attributes = Attributes(
+            self.rawattributes, database=None, keystring=keystring
+        )
+
+        # Assert
+        self.assertFalse(attributes.is_persistence_enabled)
+
+        # Arrange
+        keystring = 'dualMichs'
+
+        # Act
+        attributes = Attributes(
+            self.rawattributes, database=None, keystring=keystring
+        )
+
+        # Assert
+        self.assertTrue(attributes.is_persistence_enabled)
+
     def test_init_repository(self):
         with tempfile.TemporaryDirectory() as directory:
             # Arrange
@@ -116,5 +140,31 @@ class AttributesTestCase(unittest.TestCase):
                 # Assert
                 self.assertTrue(len(os.listdir(repository_path)) > 0)
                 self.assertTrue(expected in actual)
+            finally:
+                attributes.database.disconnect()
+
+    def test_run_timeout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            # Arrange
+            project_id = 10868464
+            repository_path = directory
+            rawattributes = copy.deepcopy(self.rawattributes)
+            for attribute in rawattributes:
+                if 'architecture' in attribute['name']:
+                    attribute['options']['timeout'] = '1S'  # Sabotage
+            expected = (0, {'architecture': None})
+
+            # Act
+            attributes = Attributes(
+                rawattributes,
+                database=Database(self.rawsettings),
+                keystring='a'
+            )
+            try:
+                attributes.database.connect()
+                actual = attributes.run(project_id, repository_path)
+
+                # Assert
+                self.assertEqual(expected, actual)
             finally:
                 attributes.database.disconnect()

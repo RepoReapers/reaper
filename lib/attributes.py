@@ -1,5 +1,6 @@
 import distutils
 import importlib
+import multiprocessing.pool
 import os
 import sys
 import types
@@ -37,9 +38,10 @@ class Attribute(object):
 
 
 class Attributes(object):
-    def __init__(self, attributes, database, keystring=None):
+    def __init__(self, attributes, database, keystring=None, timeout='30M'):
         self.attributes = None
         self.database = database
+        self.timeout = timeout
 
         self._parse_attributes(attributes)
         self._parse_keystring(keystring)
@@ -65,6 +67,8 @@ class Attributes(object):
         rresults = dict()
 
         try:
+            _pool = multiprocessing.pool.ThreadPool(processes=1)
+
             self.database.connect()
 
             repository_path = os.path.join(repository_root, str(project_id))
@@ -72,7 +76,8 @@ class Attributes(object):
                 project_id, repository_path
             )
             for attribute in self.attributes:
-                rresults[attribute.name] = None
+                bresult = False
+                rresult = None
 
                 if attribute.enabled:
                     with self.database.cursor() as cursor:
@@ -80,10 +85,26 @@ class Attributes(object):
                             attribute.reference.init(cursor)
 
                     with self.database.cursor() as cursor:
-                        (bresult, rresult) = attribute.reference.run(
-                            project_id, repository_path,
-                            cursor, **attribute.options
+                        async_result = _pool.apply_async(
+                            func=attribute.reference.run,
+                            args=(project_id, repository_path, cursor),
+                            kwds=attribute.options
                         )
+                        try:
+                            timeout = utilities.parse_datetime_delta(
+                                attribute.options.get(
+                                    'timeout', self.timeout
+                                )
+                            )
+                            (bresult, rresult) = async_result.get(
+                                timeout=timeout.total_seconds()
+                            )
+                        except multiprocessing.TimeoutError:
+                            sys.stderr.write(
+                                '[{0:10d}] {1} timed out\n'.format(
+                                    project_id, attribute.name
+                                )
+                            )
                     rresults[attribute.name] = rresult
 
                     if not bresult and attribute.essential:
@@ -105,6 +126,13 @@ class Attributes(object):
         for attribute in self.attributes:
             if attribute.name == name:
                 return attribute
+
+    @property
+    def is_persistence_enabled(self):
+        for attribute in self.attributes:
+            if attribute.persist:
+                return True
+        return False
 
     def _init_repository(self, project_id, repository_home):
         repository_path = repository_home  # Default
