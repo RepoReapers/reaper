@@ -27,7 +27,7 @@ def run(project_id, repo_path, cursor, **options):
     delta = dateutil.relativedelta(today, last_commit_date)
 
     threshold = utilities.parse_datetime_delta(options.get('threshold', ''))
-    return delta <= threshold, delta
+    return delta <= threshold, 'active' if delta <= threshold else 'dormant'
 
 if __name__ == '__main__':
     print('Attribute plugins are not meant to be executed directly.')

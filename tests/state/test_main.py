@@ -30,31 +30,31 @@ class MainTestCase(unittest.TestCase):
         # Arrange
         project_id = 284
         options = {'threshold': '6m'}
+        expected = (True, 'active')
 
         # Act
         try:
             self.database.connect()
             with self.database.cursor() as cursor:
-                (actual, value) = main.run(project_id, '', cursor, **options)
+                actual = main.run(project_id, '', cursor, **options)
         finally:
             self.database.disconnect()
 
         # Assert
-        self.assertIsInstance(value, dateutil.relativedelta)
-        self.assertTrue(actual)
+        self.assertEqual(expected, actual)
 
         # Arrange
         project_id = 66
         options = {'threshold': '6m'}
+        expected = (False, 'dormant')
 
         # Act
         try:
             self.database.connect()
             with self.database.cursor() as cursor:
-                (actual, value) = main.run(project_id, '', cursor, **options)
+                actual = main.run(project_id, '', cursor, **options)
         finally:
             self.database.disconnect()
 
         # Assert
-        self.assertIsInstance(value, dateutil.relativedelta)
-        self.assertFalse(actual)
+        self.assertEqual(expected, actual)
