@@ -54,10 +54,10 @@ class Database(object):
             msg = 'Failure in executing query {0}. Error: {1}'.format(query, e)
             raise DatabaseError(msg)
 
-    def post(self, query):
+    def post(self, query, data=None):
         try:
             with self.cursor() as cursor:
-                cursor.execute(query)
+                cursor.execute(query, params=data)
 
                 if cursor.lastrowid is not None:
                     return cursor.lastrowid
