@@ -367,8 +367,10 @@ def create_active_range(cursor, sample_tbl):
             FROM
               {sample_tbl} JOIN projects ON {sample_tbl}.project_id=projects.id
           ) AS p
-        JOIN commits as c
-          ON p.project_id=c.project_id
+        JOIN project_commits as pc
+          ON p.project_id=pc.project_id
+        JOIN commits AS c
+          ON c.id = pc.commit_id
         GROUP BY p.project_id;
         '''.format(range_tbl=range_tbl, sample_tbl=sample_tbl))
 
