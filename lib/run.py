@@ -3,20 +3,7 @@ import warnings
 import sys
 import traceback
 
-QUERY_SAVE = '''
-    INSERT INTO reaper_results
-    (
-      run_id, project_id, architecture, community,
-      continuous_integration, documentation, history,
-      license, management, unit_test, score
-    )
-    VALUES
-    (
-      %(run_id)d, %(project_id)d, %(architecture)5.2f, %(community)d,
-      %(continuous_integration)d, %(documentation)5.2f, %(history)5.2f,
-      %(license)d, %(management)5.2f, %(unit_test)5.2f, %(score)5.2f
-    )
-'''
+QUERY_SAVE = 'INSERT INTO reaper_results({columns}) VALUES ({placeholders})'
 
 
 class Run(object):
@@ -28,22 +15,26 @@ class Run(object):
         self.threshold = threshold
         self.processes = processes
 
-        # Generating identifier for this run in the reaper_runs table
-        try:
-            self.database.connect()
-            self.run_id = self.database.post(
-                'INSERT INTO reaper_runs VALUES()'
-            )
-        finally:
-            self.database.disconnect()
+        if self.attributes.is_persistence_enabled:
+            # Generating identifier for this run in the reaper_runs table if at
+            #   least one attribute has persistence enabled.
+            try:
+                self.database.connect()
+                self.run_id = self.database.post(
+                    'INSERT INTO reaper_runs VALUES()'
+                )
+            finally:
+                self.database.disconnect()
 
-        if self.run_id is None:
-            warnings.warn('No run_id. Results will not be saved')
+            if self.run_id is None:
+                warnings.warn('No run_id. Results will not be saved')
 
     def run(self, samples):
         try:
             print('#' * 25)
-            print('{0}'.format(str.center('Run {0}'.format(self.run_id), 25)))
+            print('{0}'.format(str.center(
+                'Run {0}'.format(self.run_id if self.run_id else '-'), 25
+            )))
             print('#' * 25)
             self.attributes.global_init(samples)
             with multiprocessing.Pool(self.processes) as pool:
@@ -72,21 +63,25 @@ class Run(object):
             extype, exvalue, extrace = sys.exc_info()
             traceback.print_exception(extype, exvalue, extrace)
         finally:
-            if rresults:
+            if self.attributes.is_persistence_enabled and rresults is not None:
                 self._save(project_id, score, rresults)
 
     def _save(self, project_id, score, rresults):
         if self.run_id is not None:
-            data = {
-                'run_id': self.run_id, 'project_id': project_id, 'score': score
-            }
+            columns = ('run_id', 'project_id', 'score')
+            values = (self.run_id, project_id, score)
 
             for key in rresults:
-                data[key] = None
                 if self.attributes.get(key).persist:
-                    data[key] = rresults[key]
+                    if rresults[key] is not None:
+                        columns += (key,)
+                        values += (rresults[key],)
             try:
+                query = QUERY_SAVE.format(
+                    columns=','.join(columns),
+                    placeholders=','.join(['%s' for i in range(len(columns))])
+                )
                 self.database.connect()
-                self.database.post(QUERY_SAVE % data)
+                self.database.post(query, values)
             finally:
                 self.database.disconnect()
