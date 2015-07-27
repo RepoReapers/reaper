@@ -117,7 +117,7 @@ def get_loc(path, files=None):
 
 
 def search(
-    pattern, path, recursive=True, whole=False, include=None,
+    pattern, path, recursive=True, whole=False, ignorecase=False, include=None,
     exclude=None
 ):
     """Search for the presence of a pattern.
@@ -137,6 +137,8 @@ def search(
     whole : bool, optional
         Indicates if the search should use whole word matching. Default is
         False.
+    ignorecase : bool, optional
+        Indicates if the serach should be insensitive to case.
     include : list, optional
         A list of patterns that specify the files to include in the search.
         Default is None.
@@ -164,6 +166,8 @@ def search(
         command += ' -r'
     if whole:
         command += ' -w'
+    if ignorecase:
+        command += ' -i'
     if include:
         command += ' --include '
         command += ' --include '.join(shlex.quote(i) for i in include)
