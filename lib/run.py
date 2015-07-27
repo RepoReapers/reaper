@@ -38,7 +38,7 @@ class Run(object):
             print('#' * 25)
             self.attributes.global_init(samples)
             with multiprocessing.Pool(self.processes) as pool:
-                pool.map(self._process, samples)
+                pool.map(self._process, samples, chunksize=1)
             print('#' * 25)
         except Exception as e:
             extype, exvalue, extrace = sys.exc_info()
