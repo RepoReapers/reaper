@@ -23,7 +23,7 @@ def run(project_id, repo_path, cursor, **options):
     num_months = delta.years * 12 + delta.months
 
     avg_commits = None
-    if num_months > options.get('minimumDurationInMonths', 0):
+    if num_months >= options.get('minimumDurationInMonths', 0):
         avg_commits = num_commits / num_months
     else:
         return False, avg_commits
