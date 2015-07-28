@@ -1,3 +1,26 @@
+from lib import utilities
+
+LICENSE_PATTERNS = [
+    'http://unlicense.org/',                           # The Unlicense
+    'http://mozilla.org/MPL',                          # Mozilla Public License
+    'The MIT License (MIT)',                           # The MIT License
+    'GNU LESSER GENERAL PUBLIC LICENSE',               # GNU LGPL
+    (
+        'THE SOFTWARE IS PROVIDED \"AS IS\" AND THE '
+        'AUTHOR DISCLAIMS ALL WARRANTIES'
+    ),                                                 # ISC
+    'GNU GENERAL PUBLIC LICENSE',                      # GNU GPL
+    'Eclipse Public License',                          # Eclipse Public License
+    (
+        'THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT '
+        'HOLDERS AND CONTRIBUTORS \"AS IS\"'
+    ),                                                 # BSD 3- and 2-clause
+    'Artistic License',                                # Artistic License
+    'http://www.apache.org/licenses',                  # Apache License
+    'GNU AFFERO GENERAL PUBLIC LICENSE',               # GNU AGPL
+]
+
+
 def run(project_id, repo_path, cursor, **options):
     cursor.execute('''
         SELECT
@@ -19,6 +42,12 @@ def run(project_id, repo_path, cursor, **options):
 
     result = True if 'license' in json_response \
                      and json_response['license'] else False
+
+    if not result:
+        for pattern in LICENSE_PATTERNS:
+            if utilities.search(pattern, repo_path, ignorecase=True):
+                result = True
+                break
 
     return result, int(result)
 
