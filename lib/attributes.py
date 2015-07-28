@@ -1,10 +1,11 @@
 import distutils
 import importlib
-import multiprocessing.pool
 import os
 import sys
 import types
 import traceback
+from multiprocessing import TimeoutError
+from multiprocessing.pool import ThreadPool
 
 import attributes
 
@@ -67,8 +68,6 @@ class Attributes(object):
         rresults = dict()
 
         try:
-            _pool = multiprocessing.pool.ThreadPool(processes=1)
-
             self.database.connect()
 
             repository_path = os.path.join(repository_root, str(project_id))
@@ -85,26 +84,28 @@ class Attributes(object):
                             attribute.reference.init(cursor)
 
                     with self.database.cursor() as cursor:
-                        async_result = _pool.apply_async(
-                            func=attribute.reference.run,
-                            args=(project_id, repository_path, cursor),
-                            kwds=attribute.options
-                        )
-                        try:
-                            timeout = utilities.parse_datetime_delta(
-                                attribute.options.get(
-                                    'timeout', self.timeout
+                        with ThreadPool(processes=1) as pool:
+                            async_result = pool.apply_async(
+                                func=attribute.reference.run,
+                                args=(project_id, repository_path, cursor),
+                                kwds=attribute.options
+                            )
+                            try:
+                                timeout = utilities.parse_datetime_delta(
+                                    attribute.options.get(
+                                        'timeout', self.timeout
+                                    )
                                 )
-                            )
-                            (bresult, rresult) = async_result.get(
-                                timeout=timeout.total_seconds()
-                            )
-                        except multiprocessing.TimeoutError:
-                            sys.stderr.write(
-                                '[{0:10d}] {1} timed out\n'.format(
-                                    project_id, attribute.name
+                                (bresult, rresult) = async_result.get(
+                                    timeout=timeout.total_seconds()
                                 )
-                            )
+                            except TimeoutError:
+                                sys.stderr.write(
+                                    (
+                                        ' \033[91mWARNING\033[0m [{0:10d}] '
+                                        '{1} timed out\n'
+                                    ).format(project_id, attribute.name)
+                                )
                     rresults[attribute.name] = rresult
 
                     if not bresult and attribute.essential:
@@ -172,7 +173,6 @@ class Attributes(object):
 
             # TODO: Remove
             url += '?access_token=563ffe4afe38ca48404e441cf98223a87c4596ab'
-
             repository_path = utilities.download(url, repository_path)
 
         return repository_path
