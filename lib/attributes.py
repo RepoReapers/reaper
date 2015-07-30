@@ -149,14 +149,16 @@ class Attributes(object):
                     repository_path = itempath
                     break
         else:
-            url = self.database.get(
-                'SELECT url FROM projects WHERE id = {0}'.format(
-                    project_id
-                )
+            (repo_owner, repo_name) = self.database.get(
+                '''
+                    SELECT u.login, p.name
+                    FROM projects p
+                        JOIN users u ON u.id = p.owner_id
+                    WHERE p.id = {0}
+                '''.format(project_id)
             )
-            if not url:
+            if not (repo_owner or repo_name):
                 raise ValueError('Invalid project ID {0}.'.format(project_id))
-            url += '/tarball'
 
             sha = self.database.get(
                 '''
@@ -168,12 +170,10 @@ class Attributes(object):
                     LIMIT 1
                 '''.format(project_id)
             )
-            if sha:
-                url += '/{0}'.format(sha)
 
-            # TODO: Remove
-            url += '?access_token=563ffe4afe38ca48404e441cf98223a87c4596ab'
-            repository_path = utilities.download(url, repository_path)
+            repository_path = utilities.clone(
+                repo_owner, repo_name, sha, repository_path
+            )
 
         return repository_path
 

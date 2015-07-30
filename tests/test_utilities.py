@@ -1,6 +1,7 @@
 import os
 import unittest
 import tempfile
+import subprocess
 
 from dateutil.relativedelta import relativedelta
 from lib import utilities
@@ -114,18 +115,39 @@ class UtilitiesTestCase(unittest.TestCase):
             pattern='#include <stdio.h>', path='/bin/bash',
         )
 
-    def test_download(self):
+    def test_clone(self):
         with tempfile.TemporaryDirectory() as directory:
             # Arrange
-            url = 'https://api.github.com/repos/ffmpeg/ffmpeg/tarball'
-            expected = os.path.join(directory, 'FFmpeg-FFmpeg-')
+            owner = 'andymeneely'
+            name = 'squib'
+            sha = 'ad15e0f93335de3195c16ecc3313a56b46f343ea'
+            expected = os.path.join(directory, 'squib')
 
             # Act
-            actual = utilities.download(url, directory)
+            actual = utilities.clone(owner, name, sha, directory)
 
             # Assert
             self.assertTrue(len(os.listdir(directory)) > 0)
             self.assertTrue(expected in actual)
+            process = subprocess.Popen(
+                'git log -1 --pretty=oneline', cwd=actual, shell=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+            (out, err) = [i.decode() for i in process.communicate()]
+            self.assertTrue(sha in out)
+
+    def test_clone_exceptions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            # Arrange
+            owner = 'andymeneely'
+            name = 'squib'
+            sha = 'ad15e0f93335de3195c16ecc3313a56b46f343e5'
+            expected = os.path.join(directory, 'squib')
+
+            # Act
+            self.assertRaises(
+                Exception, utilities.clone, owner, name, sha, directory
+            )
 
     def test_read(self):
         # Arrange
