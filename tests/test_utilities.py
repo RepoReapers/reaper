@@ -120,34 +120,32 @@ class UtilitiesTestCase(unittest.TestCase):
             # Arrange
             owner = 'andymeneely'
             name = 'squib'
-            sha = 'ad15e0f93335de3195c16ecc3313a56b46f343ea'
-            expected = os.path.join(directory, 'squib')
+            date = '2015-03-31 19:24:28'
+
+            repository_root = directory
+            repository_home = os.path.join(repository_root, '10868464')
+            os.mkdir(repository_home)
+            expected = {
+                'sha': '784a0dcb90e798859ab24b69d4b8c12c200ed85d',
+                'repository_path': os.path.join(repository_home, 'squib')
+                }
 
             # Act
-            actual = utilities.clone(owner, name, sha, directory)
+            actual = dict()
+            actual['repository_path'] = utilities.clone(
+                owner, name, date, repository_home
+            )
 
             # Assert
             self.assertTrue(len(os.listdir(directory)) > 0)
-            self.assertTrue(expected in actual)
             process = subprocess.Popen(
-                'git log -1 --pretty=oneline', cwd=actual, shell=True,
+                'git log -1 --pretty="format:%H"',
+                cwd=actual['repository_path'], shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
             (out, err) = [i.decode() for i in process.communicate()]
-            self.assertTrue(sha in out)
-
-    def test_clone_exceptions(self):
-        with tempfile.TemporaryDirectory() as directory:
-            # Arrange
-            owner = 'andymeneely'
-            name = 'squib'
-            sha = 'ad15e0f93335de3195c16ecc3313a56b46f343e5'
-            expected = os.path.join(directory, 'squib')
-
-            # Act
-            self.assertRaises(
-                Exception, utilities.clone, owner, name, sha, directory
-            )
+            actual['sha'] = out
+            self.assertEqual(expected, actual)
 
     def test_read(self):
         # Arrange

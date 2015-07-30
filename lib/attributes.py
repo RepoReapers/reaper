@@ -171,9 +171,9 @@ class Attributes(object):
             if not (repo_owner or repo_name):
                 raise ValueError('Invalid project ID {0}.'.format(project_id))
 
-            sha = self.database.get(
+            last_commit_date = self.database.get(
                 '''
-                    SELECT c.sha
+                    SELECT DATE(c.created_at)
                     FROM project_commits pc
                         JOIN commits c ON c.id = pc.commit_id
                     WHERE pc.project_id = {0}
@@ -183,7 +183,7 @@ class Attributes(object):
             )
 
             repository_path = utilities.clone(
-                repo_owner, repo_name, sha, repository_path
+                repo_owner, repo_name, last_commit_date, repository_path
             )
 
         return repository_path

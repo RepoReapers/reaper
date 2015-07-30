@@ -259,7 +259,7 @@ def get_repo_path(repo_id, repositories_dir):
     return repo_path
 
 
-def clone(owner, name, sha, directory):
+def clone(owner, name, date, directory):
     """Clone a GitHub repository and reset its state to a specific commit.
 
     Parameters
@@ -268,9 +268,9 @@ def clone(owner, name, sha, directory):
         User name of the owner of the repository.
     name : string
         Name of the repository to clone.
-    sha : string
-        A valid git SHA that will be used to identify the commit to which the
-        state of the repository will be reset to.
+    date : string
+        A date used to identify the commit to which the state of the repository
+        will be reset to.
     directory : string
         Absolute path of a directory to clone the repository to.
 
@@ -296,6 +296,22 @@ def clone(owner, name, sha, directory):
 
     # Reset
     path = os.path.join(path, name)
+    command = (
+        'git log -1 --before="{0} 23:59:59" --pretty="format:%H"'.format(date)
+    )
+    if 'DEBUG' in os.environ:
+        print(command)
+
+    process = subprocess.Popen(
+        command, cwd=path, shell=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    (out, err) = [i.decode() for i in process.communicate()]
+
+    if process.returncode != 0:
+        raise Exception('Failed to execute {0}'.format(command))
+
+    sha = out
     command = 'git reset --hard {0}'.format(sha)
     if 'DEBUG' in os.environ:
         print(command)
