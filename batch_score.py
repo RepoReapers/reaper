@@ -20,6 +20,12 @@ def process_arguments():
         description='Calculate the scores of a set of repositories.'
     )
     parser.add_argument(
+        '--cleanup',
+        action='store_true',
+        dest='cleanup',
+        help='Delete cloned repositories from the disk when done.'
+    )
+    parser.add_argument(
         '-c',
         '--config',
         type=argparse.FileType('r'),
@@ -93,7 +99,7 @@ def main():
 
         database = Database(config['options']['datasource'])
         attributes = Attributes(
-            manifest['attributes'], database, args.key_string
+            manifest['attributes'], database, args.cleanup, args.key_string
         )
 
         _run = run.Run(

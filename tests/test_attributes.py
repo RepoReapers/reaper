@@ -121,10 +121,10 @@ class AttributesTestCase(unittest.TestCase):
     def test_init_repository(self):
         with tempfile.TemporaryDirectory() as directory:
             # Arrange
-            project_id = 788
+            project_id = 10868464
             repository_path = os.path.join(directory, str(project_id))
             expected = os.path.join(
-                directory, str(project_id), 'FFmpeg-FFmpeg-'
+                directory, str(project_id), 'squib'
             )
 
             # Act
@@ -140,6 +140,26 @@ class AttributesTestCase(unittest.TestCase):
                 # Assert
                 self.assertTrue(len(os.listdir(repository_path)) > 0)
                 self.assertTrue(expected in actual)
+            finally:
+                attributes.database.disconnect()
+
+    def test_cleanup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            # Arrange
+            project_id = 10868464
+            repository_home = os.path.join(directory, str(project_id))
+            attributes = Attributes(
+                self.rawattributes, database=Database(self.rawsettings)
+            )
+            try:
+                attributes.database.connect()
+                attributes._init_repository(project_id, repository_home)
+
+                # Act
+                attributes._cleanup(repository_home)
+
+                # Assert
+                self.assertFalse(os.path.exists(repository_home))
             finally:
                 attributes.database.disconnect()
 

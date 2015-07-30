@@ -1,6 +1,7 @@
 import distutils
 import importlib
 import os
+import shutil
 import sys
 import types
 import traceback
@@ -39,9 +40,14 @@ class Attribute(object):
 
 
 class Attributes(object):
-    def __init__(self, attributes, database, keystring=None, timeout='30M'):
+    def __init__(
+            self, attributes, database, cleanup=False, keystring=None,
+            timeout='30M'
+    ):
+
         self.attributes = None
         self.database = database
+        self.cleanup = cleanup
         self.timeout = timeout
 
         self._parse_attributes(attributes)
@@ -66,54 +72,54 @@ class Attributes(object):
         invalidated = False
         score = 0
         rresults = dict()
+        repository_home = os.path.join(repository_root, str(project_id))
 
         try:
             self.database.connect()
 
-            repository_path = os.path.join(repository_root, str(project_id))
             repository_path = self._init_repository(
-                project_id, repository_path
+                project_id, repository_home
             )
             for attribute in self.attributes:
                 bresult = False
                 rresult = None
 
-                if attribute.enabled:
-                    with self.database.cursor() as cursor:
-                        if hasattr(attribute.reference, 'init'):
-                            attribute.reference.init(cursor)
+                if not attribute.enabled:
+                    continue
 
-                    with self.database.cursor() as cursor:
-                        with ThreadPool(processes=1) as pool:
-                            async_result = pool.apply_async(
-                                func=attribute.reference.run,
-                                args=(project_id, repository_path, cursor),
-                                kwds=attribute.options
-                            )
-                            try:
-                                timeout = utilities.parse_datetime_delta(
-                                    attribute.options.get(
-                                        'timeout', self.timeout
-                                    )
-                                )
-                                (bresult, rresult) = async_result.get(
-                                    timeout=timeout.total_seconds()
-                                )
-                            except TimeoutError:
-                                sys.stderr.write(
-                                    (
-                                        ' \033[91mWARNING\033[0m [{0:10d}] '
-                                        '{1} timed out\n'
-                                    ).format(project_id, attribute.name)
-                                )
-                    rresults[attribute.name] = rresult
+                with self.database.cursor() as cursor:
+                    if hasattr(attribute.reference, 'init'):
+                        attribute.reference.init(cursor)
 
-                    if not bresult and attribute.essential:
-                        score = 0
-                        invalidated = True
+                with self.database.cursor() as cursor, ThreadPool(1) as pool:
+                    async_result = pool.apply_async(
+                        func=attribute.reference.run,
+                        args=(project_id, repository_path, cursor),
+                        kwds=attribute.options
+                    )
+                    try:
+                        timeout = utilities.parse_datetime_delta(
+                            attribute.options.get('timeout', self.timeout)
+                        )
+                        (bresult, rresult) = async_result.get(
+                            timeout=timeout.total_seconds()
+                        )
+                    except TimeoutError:
+                        sys.stderr.write(
+                            (
+                                ' \033[91mWARNING\033[0m [{0:10d}] '
+                                '{1} timed out\n'
+                            ).format(project_id, attribute.name)
+                        )
 
-                    if not invalidated:
-                        score += bresult * attribute.weight
+                rresults[attribute.name] = rresult
+
+                if not bresult and attribute.essential:
+                    score = 0
+                    invalidated = True
+
+                if not invalidated:
+                    score += bresult * attribute.weight
         except:
             sys.stderr.write('Exception\n\n')
             sys.stderr.write('  Project ID   {0}\n'.format(project_id))
@@ -121,6 +127,8 @@ class Attributes(object):
             traceback.print_exception(extype, exvalue, extrace)
         finally:
             self.database.disconnect()
+            if self.cleanup:
+                self._cleanup(repository_home)
             return (score, rresults)
 
     def get(self, name):
@@ -134,6 +142,9 @@ class Attributes(object):
             if attribute.persist:
                 return True
         return False
+
+    def _cleanup(self, repository_home):
+        shutil.rmtree(repository_home, ignore_errors=True)
 
     def _init_repository(self, project_id, repository_home):
         repository_path = repository_home  # Default
