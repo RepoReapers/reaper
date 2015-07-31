@@ -121,7 +121,7 @@ def build_graph(file_paths, graph, lexer):
                 symbol = item[1]
                 if token_type in [token.Name.Function, token.Name.Class]:
                     node.defines.add(symbol)
-                elif token_type is token.Name:
+                else:
                     node.references.add(symbol)
             if 'DEBUG' in os.environ:
                 print(node)
