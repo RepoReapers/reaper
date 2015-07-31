@@ -13,7 +13,7 @@ class CSharpTestDiscoverer(TestDiscoverer):
         ]
 
     def __nunit__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             'using NUnit.Framework;',
@@ -36,7 +36,7 @@ class CSharpTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __vs_unit_testing__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             'using Microsoft.VisualStudio.TestTools.UnitTesting;',
@@ -59,7 +59,7 @@ class CSharpTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __xunit__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             'using Xunit;',

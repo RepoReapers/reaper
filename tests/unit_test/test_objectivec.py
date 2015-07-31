@@ -20,7 +20,7 @@ class ObjectiveCTestDiscovererTestCase(unittest.TestCase):
         proportion = discoverer.discover(
             os.path.join(REPOS_PATH, 'MJExtension')
         )
-        self.assertEqual(-1, proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_xctest(self):
@@ -36,7 +36,7 @@ class ObjectiveCTestDiscovererTestCase(unittest.TestCase):
         proportion = discoverer.__xctest__(
             os.path.join(REPOS_PATH, 'WebScraper-iOS')
         )
-        self.assertEqual(-1, proportion)
+        self.assertEqual(0, proportion)
 
         # Bug Fix Tests
 

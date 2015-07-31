@@ -11,7 +11,7 @@ class PhpTestDiscoverer(TestDiscoverer):
         ]
 
     def __phpunit__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             'PHPUnit_(Framework|Extensions_Database)_TestCase',

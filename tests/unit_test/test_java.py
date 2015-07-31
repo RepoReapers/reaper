@@ -21,7 +21,7 @@ class JavaTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.discover(
             os.path.join(REPOS_PATH, 'MPAndroidChart')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_junit(self):
@@ -41,7 +41,7 @@ class JavaTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__junit__(
             os.path.join(REPOS_PATH, 'MPAndroidChart')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_testng(self):
@@ -55,4 +55,4 @@ class JavaTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__testng__(
             os.path.join(REPOS_PATH, 'maven')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)

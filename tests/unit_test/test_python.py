@@ -21,7 +21,7 @@ class PythonTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.discover(
             os.path.join(REPOS_PATH, 'curriculum')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_django_test(self):
@@ -35,7 +35,7 @@ class PythonTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__django_test__(
             os.path.join(REPOS_PATH, 'ansible')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_nose(self):
@@ -49,7 +49,7 @@ class PythonTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__nose__(
             os.path.join(REPOS_PATH, 'django-crispy-forms')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_unittest(self):
@@ -63,4 +63,4 @@ class PythonTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__unittest__(
             os.path.join(REPOS_PATH, 'django-crispy-forms')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)

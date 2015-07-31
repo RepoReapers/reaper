@@ -14,7 +14,7 @@ class CTestDiscoverer(TestDiscoverer):
         ]
 
     def __assert__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '#include <assert.h>',
@@ -43,7 +43,7 @@ class CTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __clar__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '#include "clar.h"',
@@ -72,7 +72,7 @@ class CTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __glib__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '(g_assert*|g_test*|GTest*)',
@@ -101,7 +101,7 @@ class CTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __picotest__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '#include "picotest.h"',

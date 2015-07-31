@@ -21,7 +21,7 @@ class CSharpTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.discover(
             os.path.join(REPOS_PATH, 'ShareX')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_nunit(self):
@@ -35,7 +35,7 @@ class CSharpTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__nunit__(
             os.path.join(REPOS_PATH, 'Epic.Numbers')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_vs_unit_testing(self):
@@ -49,7 +49,7 @@ class CSharpTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__vs_unit_testing__(
             os.path.join(REPOS_PATH, 'choco')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_xunit(self):
@@ -63,4 +63,4 @@ class CSharpTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__xunit__(
             os.path.join(REPOS_PATH, 'choco')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)

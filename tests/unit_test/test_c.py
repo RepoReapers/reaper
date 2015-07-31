@@ -21,7 +21,7 @@ class CTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.discover(
             os.path.join(REPOS_PATH, 'grs')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_assert(self):
@@ -35,7 +35,7 @@ class CTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__assert__(
             os.path.join(REPOS_PATH, 'grs')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_clar(self):
@@ -49,7 +49,7 @@ class CTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__clar__(
             os.path.join(REPOS_PATH, 'lwan')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_glib(self):
@@ -63,7 +63,7 @@ class CTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__glib__(
             os.path.join(REPOS_PATH, 'grs')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_picotest(self):
@@ -77,4 +77,4 @@ class CTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__picotest__(
             os.path.join(REPOS_PATH, 'grs')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)

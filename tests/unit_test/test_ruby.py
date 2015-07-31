@@ -21,7 +21,7 @@ class RubyTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.discover(
             os.path.join(REPOS_PATH, 'shenzhen')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_minitest(self):
@@ -40,7 +40,7 @@ class RubyTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__minitest__(
             os.path.join(REPOS_PATH, 'ruby-git')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_rspec(self):
@@ -54,8 +54,8 @@ class RubyTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__rspec__(
             os.path.join(REPOS_PATH, 'ruby-git')
         )
-        self.assertIsNone(proportion)
-    
+        self.assertEqual(0, proportion)
+
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_ruby_unit_testing(self):
         # Test: Project using Ruby Unit Testing
@@ -68,4 +68,4 @@ class RubyTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__ruby_unit_testing__(
             os.path.join(REPOS_PATH, 'squib')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)

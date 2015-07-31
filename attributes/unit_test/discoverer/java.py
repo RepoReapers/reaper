@@ -12,7 +12,7 @@ class JavaTestDiscoverer(TestDiscoverer):
         ]
 
     def __junit__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             'import (org.junit|junit.framework)',
@@ -35,7 +35,7 @@ class JavaTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __testng__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             'import org.testng',

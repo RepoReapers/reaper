@@ -15,7 +15,7 @@ class CppTestDiscoverer(TestDiscoverer):
         ]
 
     def __assert__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '#include <assert.h>',
@@ -44,7 +44,7 @@ class CppTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __boost__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '(BOOST_TEST_ALTERNATIVE_INIT_API|boost/test/unit_test.hpp|'
@@ -74,7 +74,7 @@ class CppTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __catch__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '#include "catch.hpp"',
@@ -103,7 +103,7 @@ class CppTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __gtest__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '#include (<|")(gtest/)?gtest.h(>|")',
@@ -132,7 +132,7 @@ class CppTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __stout_gtest__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '#include <stout/gtest.hpp>',

@@ -13,7 +13,7 @@ class RubyTestDiscoverer(TestDiscoverer):
         ]
 
     def __minitest__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '(MiniTest::Unit::TestCase|Minitest::Test)',
@@ -36,7 +36,7 @@ class RubyTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __rspec__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '(describe)(.*)(do)',
@@ -59,7 +59,7 @@ class RubyTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __ruby_unit_testing__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             'Test::Unit::TestCase',

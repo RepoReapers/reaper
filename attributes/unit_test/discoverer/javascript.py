@@ -11,7 +11,7 @@ class JavaScriptTestDiscoverer(TestDiscoverer):
         ]
 
     def __mocha__(self, path):
-        proportion = -1
+        proportion = 0
 
         if utilities.search('mocha', path, include=['package.json']):
             files = utilities.search(

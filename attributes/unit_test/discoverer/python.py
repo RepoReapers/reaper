@@ -13,7 +13,7 @@ class PythonTestDiscoverer(TestDiscoverer):
         ]
 
     def __django_test__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '((from|import)(\s)(django\.test))',
@@ -35,7 +35,7 @@ class PythonTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __nose__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '((from|import)(\s)(nose))',
@@ -57,7 +57,7 @@ class PythonTestDiscoverer(TestDiscoverer):
         return proportion
 
     def __unittest__(self, path):
-        proportion = None
+        proportion = 0
 
         files = utilities.search(
             '((from|import)(\s)(unittest))',

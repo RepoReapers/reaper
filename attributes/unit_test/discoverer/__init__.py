@@ -81,7 +81,7 @@ class TestDiscoverer(object):
         for framework in self.frameworks:
             proportion = framework(path)
 
-            if proportion is not None:
+            if proportion != 0:
                 return proportion
 
-        return None
+        return 0

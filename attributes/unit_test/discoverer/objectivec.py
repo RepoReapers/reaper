@@ -11,7 +11,7 @@ class ObjectiveCTestDiscoverer(TestDiscoverer):
         ]
 
     def __xctest__(self, path):
-        proportion = -1
+        proportion = 0
 
         files = utilities.search(
             'XCTest.h',

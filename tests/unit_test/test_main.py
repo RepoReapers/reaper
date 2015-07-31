@@ -10,17 +10,19 @@ class MainTestCase(unittest.TestCase):
     def test_main(self):
         # Test: Project using Mocha
         (result, value) = main.run(
-            0, os.path.join(REPOS_PATH, 'superagent'), MockCursor()
+            0, os.path.join(REPOS_PATH, 'superagent'), MockCursor(),
+            threshold=0.1
         )
         self.assertTrue(result)
         self.assertLess(0, value)
 
         # Test: Project with no unit tests (when these tests were written)
         (result, value) = main.run(
-            0, os.path.join(REPOS_PATH, 'javascript'), MockCursor()
+            0, os.path.join(REPOS_PATH, 'javascript'), MockCursor(),
+            threshold=0.1
         )
         self.assertFalse(result)
-        self.assertEqual(-1, value)
+        self.assertEqual(0, value)
 
 
 class MockCursor(object):

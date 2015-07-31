@@ -21,7 +21,7 @@ class PhpTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.discover(
             os.path.join(REPOS_PATH, 'daux.io')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_phpunit(self):
@@ -41,4 +41,4 @@ class PhpTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__phpunit__(
             os.path.join(REPOS_PATH, 'laravel')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)

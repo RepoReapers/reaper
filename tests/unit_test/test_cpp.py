@@ -21,7 +21,7 @@ class CppTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.discover(
             os.path.join(REPOS_PATH, 'electron')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_assert(self):
@@ -35,7 +35,7 @@ class CppTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__assert__(
             os.path.join(REPOS_PATH, 'electron')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_boost(self):
@@ -49,7 +49,7 @@ class CppTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__boost__(
             os.path.join(REPOS_PATH, 'openage')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_catch(self):
@@ -63,7 +63,7 @@ class CppTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__catch__(
             os.path.join(REPOS_PATH, 'electron')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_gtest(self):
@@ -77,7 +77,7 @@ class CppTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__gtest__(
             os.path.join(REPOS_PATH, 'electron')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_stout_gtest(self):
@@ -91,4 +91,4 @@ class CppTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.__boost__(
             os.path.join(REPOS_PATH, 'electron')
         )
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
