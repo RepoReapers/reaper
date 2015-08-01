@@ -133,7 +133,7 @@ class UtilitiesTestCase(unittest.TestCase):
             # Act
             actual = dict()
             actual['repository_path'] = utilities.clone(
-                owner, name, date, repository_home
+                owner, name, repository_home, date
             )
 
             # Assert

@@ -259,7 +259,7 @@ def get_repo_path(repo_id, repositories_dir):
     return repo_path
 
 
-def clone(owner, name, date, directory):
+def clone(owner, name, directory, date=None):
     """Clone a GitHub repository and reset its state to a specific commit.
 
     Parameters
@@ -294,35 +294,38 @@ def clone(owner, name, date, directory):
     if process.returncode != 0:
         raise Exception('Failed to execute {0}'.format(command))
 
-    # Reset
-    path = os.path.join(path, name)
-    command = (
-        'git log -1 --before="{0} 23:59:59" --pretty="format:%H"'.format(date)
-    )
-    if 'DEBUG' in os.environ:
-        print(command)
+    if date is not None:
+        # Reset
+        path = os.path.join(path, name)
+        command = (
+            'git log -1 --before="{0} 23:59:59" --pretty="format:%H"'.format(
+                date
+            )
+        )
+        if 'DEBUG' in os.environ:
+            print(command)
 
-    process = subprocess.Popen(
-        command, cwd=path, shell=True,
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    (out, err) = [i.decode() for i in process.communicate()]
+        process = subprocess.Popen(
+            command, cwd=path, shell=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        (out, err) = [i.decode() for i in process.communicate()]
 
-    if process.returncode != 0:
-        raise Exception('Failed to execute {0}'.format(command))
+        if process.returncode != 0:
+            raise Exception('Failed to execute {0}'.format(command))
 
-    sha = out
-    command = 'git reset --hard {0}'.format(sha)
-    if 'DEBUG' in os.environ:
-        print(command)
+        sha = out
+        command = 'git reset --hard {0}'.format(sha)
+        if 'DEBUG' in os.environ:
+            print(command)
 
-    process = subprocess.Popen(
-        command, cwd=path, shell=True,
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-    )
-    process.wait()
-    if process.returncode != 0:
-        raise Exception('Failed to execute {0}'.format(command))
+        process = subprocess.Popen(
+            command, cwd=path, shell=True,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        process.wait()
+        if process.returncode != 0:
+            raise Exception('Failed to execute {0}'.format(command))
 
     return path
 
