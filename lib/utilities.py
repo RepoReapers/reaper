@@ -279,9 +279,12 @@ def clone(owner, name, directory, date=None):
         Absolute path of the directory containing the repository just cloned.
     """
     path = directory
+    url = 'https://github.com/{0}/{1}'.format(owner, name)
+    if not is_OK(url):
+        raise Exception('{0} is no longer activer'.format(url))
 
     # Clone
-    command = 'git clone https://github.com/{0}/{1}'.format(owner, name)
+    command = 'git clone {0}'.format(url)
     if 'DEBUG' in os.environ:
         print(command)
 
