@@ -1,4 +1,5 @@
 import copy
+import datetime
 import json
 import numbers
 import os
@@ -29,14 +30,20 @@ class AttributesTestCase(unittest.TestCase):
         configpath = os.path.join(parentpath, 'config.json')
         self.rawsettings = None
         with open(configpath, 'r') as file_:
-            self.rawsettings = json.load(file_)['options']['datasource']
+            contents = json.load(file_)
+            self.rawsettings = contents['options']['datasource']
+            self.rawgoptions = {
+                'today': contents['options']['datasource']
+            }
 
     def test_init(self):
         # Arrange
         expected = len(self.rawattributes)
 
         # Act
-        attributes = Attributes(self.rawattributes, database=None)
+        attributes = Attributes(
+            self.rawattributes, database=None, goptions=self.rawgoptions
+        )
 
         # Assert
         self.assertEqual(expected, len(attributes.attributes))
@@ -53,7 +60,9 @@ class AttributesTestCase(unittest.TestCase):
 
     def test_pickling(self):
         # Arrange
-        attributes = Attributes(self.rawattributes, database=None)
+        attributes = Attributes(
+            self.rawattributes, database=None, goptions=self.rawgoptions
+        )
         expected = len(attributes.attributes)
 
         # Act
@@ -80,7 +89,8 @@ class AttributesTestCase(unittest.TestCase):
 
         # Act
         attributes = Attributes(
-            self.rawattributes, database=None, keystring=keystring
+            self.rawattributes, database=None, keystring=keystring,
+            goptions=self.rawgoptions
         )
 
         # Assert
@@ -101,7 +111,8 @@ class AttributesTestCase(unittest.TestCase):
 
         # Act
         attributes = Attributes(
-            self.rawattributes, database=None, keystring=keystring
+            self.rawattributes, database=None, keystring=keystring,
+            goptions=self.rawgoptions
         )
 
         # Assert
@@ -129,7 +140,8 @@ class AttributesTestCase(unittest.TestCase):
 
             # Act
             attributes = Attributes(
-                self.rawattributes, database=Database(self.rawsettings)
+                self.rawattributes, database=Database(self.rawsettings),
+                goptions=self.rawgoptions
             )
             try:
                 attributes.database.connect()
@@ -149,7 +161,8 @@ class AttributesTestCase(unittest.TestCase):
             project_id = 10868464
             repository_home = os.path.join(directory, str(project_id))
             attributes = Attributes(
-                self.rawattributes, database=Database(self.rawsettings)
+                self.rawattributes, database=Database(self.rawsettings),
+                goptions=self.rawgoptions
             )
             try:
                 attributes.database.connect()
@@ -178,7 +191,8 @@ class AttributesTestCase(unittest.TestCase):
             attributes = Attributes(
                 rawattributes,
                 database=Database(self.rawsettings),
-                keystring='a'
+                keystring='a',
+                goptions=self.rawgoptions
             )
             try:
                 attributes.database.connect()

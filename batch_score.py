@@ -98,8 +98,13 @@ def main():
         core.config = config
 
         database = Database(config['options']['datasource'])
+        globaloptions = {
+            'today': config['options']['today'],
+            'timeout': config['options']['timeout']
+        }
         attributes = Attributes(
-            manifest['attributes'], database, args.cleanup, args.key_string
+            manifest['attributes'], database, args.cleanup, args.key_string,
+            **globaloptions
         )
 
         _run = run.Run(

@@ -5,6 +5,7 @@ import shutil
 import sys
 import types
 import traceback
+from datetime import datetime
 from multiprocessing import TimeoutError
 from multiprocessing.pool import ThreadPool
 
@@ -14,7 +15,7 @@ from lib import utilities
 
 
 class Attribute(object):
-    def __init__(self, attribute):
+    def __init__(self, attribute, **goptions):
         self.name = attribute.get('name', '')
         self.initial = attribute.get('initial', '').lower()
         self.weight = attribute.get('weight', 0.0)
@@ -22,7 +23,8 @@ class Attribute(object):
         self.essential = attribute.get('essential', False)
         self.persist = attribute.get('persist', True)
         self.dependencies = attribute.get('dependencies', list())
-        self.options = attribute.get('options', dict())
+        self.options = goptions
+        self.options.update(attribute.get('options', dict()))
         self.reference = importlib.import_module('{0}.main'.format(self.name))
 
     def __getstate__(self):
@@ -41,16 +43,15 @@ class Attribute(object):
 
 class Attributes(object):
     def __init__(
-            self, attributes, database, cleanup=False, keystring=None,
-            timeout='30M'
+        self, attributes, database, cleanup=False, keystring=None, **goptions
     ):
-
         self.attributes = None
         self.database = database
+        self.today = goptions.get('today', str(datetime.today().date()))
+        self.timeout = goptions.get('timeout', '30M')
         self.cleanup = cleanup
-        self.timeout = timeout
 
-        self._parse_attributes(attributes)
+        self._parse_attributes(attributes, **goptions)
         self._parse_keystring(keystring)
 
     def global_init(self, samples):
@@ -182,17 +183,20 @@ class Attributes(object):
                 '''.format(project_id)
             )
 
+            if last_commit_date is None:
+                last_commit_date = self.today
+
             repository_path = utilities.clone(
-                repo_owner, repo_name, last_commit_date, repository_path
+                repo_owner, repo_name, repository_path, last_commit_date
             )
 
         return repository_path
 
-    def _parse_attributes(self, attributes):
+    def _parse_attributes(self, attributes, **goptions):
         if attributes:
             self.attributes = list()
-            for (identifier, attribute) in enumerate(attributes):
-                self.attributes.append(Attribute(attribute))
+            for attribute in attributes:
+                self.attributes.append(Attribute(attribute, **goptions))
 
     def _disable_attributes(self):
         for attribute in self.attributes:

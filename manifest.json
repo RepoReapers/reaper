@@ -1,5 +1,4 @@
 {
-  "threshold": 60,
   "attributes": [
     {
       "name": "architecture",
@@ -10,7 +9,7 @@
         "ack"
       ],
       "options": {
-        "timeout": "2H",
+        "timeout": "10H",
         "connectedness": 0.175,
         "minimumSize": 1000
       }
@@ -74,8 +73,7 @@
       "weight": 0,
       "enabled": true,
       "options": {
-        "threshold": "6m",
-        "today": "2015-04-01"
+        "threshold": "6m"
       }
     },
     {

@@ -1,11 +1,14 @@
 {
   "options": {
+    "threshold": n,
     "datasource": {
       "database": "ghtorrent",
       "user": "",
       "password": "",
       "host": ""
     },
+    "today": "yyyy-mm-dd",
+    "timeout": "nynmndnHnMnS",
     "github_tokens": [
     ]
   }
