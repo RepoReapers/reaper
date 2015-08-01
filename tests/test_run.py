@@ -24,15 +24,15 @@ class RunTestCase(unittest.TestCase):
         configpath = os.path.join(parentpath, 'config.json')
         rawsettings = None
         with open(configpath, 'r') as file_:
-            rawsettings = json.load(file_)['options']['datasource']
-        self.database = Database(rawsettings)
+            rawsettings = json.load(file_)
+        self.database = Database(rawsettings['options']['datasource'])
 
         rawmanifest = None
         with open(manifestpath, 'r') as file_:
             rawmanifest = json.load(file_)
         self.attributes = Attributes(rawmanifest['attributes'], self.database)
 
-        self.threshold = rawmanifest['threshold']
+        self.threshold = rawsettings['options']['threshold']
         self.processes = 2
 
     def test_init(self):
@@ -91,7 +91,7 @@ class RunTestCase(unittest.TestCase):
                 self.assertEqual(9.9, actual[7])
                 self.assertEqual(9.9, actual[8])
                 self.assertEqual('active', actual[9])
-                self.assertEqual(99.99, actual[10])
+                self.assertEqual(99.989998, actual[10])
             finally:
                 self.database.post(
                     'DELETE FROM reaper_runs WHERE id = {0}'.format(run.run_id)
