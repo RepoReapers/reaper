@@ -4,7 +4,6 @@ import json
 import os
 import shlex
 import subprocess
-import urllib
 import urllib.request
 import re
 import tarfile
@@ -400,3 +399,28 @@ def parse_datetime_delta(datetime_delta):
         delta.seconds = int(match.group(1))
 
     return delta
+
+
+def is_OK(url):
+    """Verify if a resource identified by a URL is available.
+
+    Parameters
+    ----------
+    url : str
+        URL of a resource to check for availability.
+
+    Returns
+    -------
+    is_ok : bool
+        True if the resource is available, False otherwise.
+    """
+    is_ok = True
+
+    request = urllib.request.Request(url, method='HEAD')
+    try:
+        urllib.request.urlopen(request)
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            is_ok = False
+
+    return is_ok

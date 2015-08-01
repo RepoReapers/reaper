@@ -208,3 +208,22 @@ class UtilitiesTestCase(unittest.TestCase):
 
         # Assert
         self.assertCountEqual(expected, actual)
+
+    def test_is_OK(self):
+        # Arrange
+        url = 'https://github.com/ffmpeg/ffmpeg'
+
+        # Act
+        actual = utilities.is_OK(url)
+
+        # Assert
+        self.assertTrue(actual)
+
+        # Arrange
+        url = 'https://github.com/ffmpeg/ffmpe'
+
+        # Act
+        actual = utilities.is_OK(url)
+
+        # Assert
+        self.assertFalse(actual)
