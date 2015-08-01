@@ -59,14 +59,13 @@ class DatabaseTestCase(unittest.TestCase):
     def test_get_empty(self):
         # Arrange
         query = 'SELECT id, name FROM projects WHERE id = 111111111'
-        expected = []
 
         # Act
         self.database.connect()
         actual = self.database.get(query)
 
         # Assert
-        self.assertCountEqual(expected, actual)
+        self.assertIsNone(actual)
 
     def test_get_single(self):
         # Arrange

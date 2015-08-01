@@ -38,16 +38,18 @@ class Database(object):
 
     def get(self, query):
         try:
-            rows = list()
+            rows = None
             with self.cursor() as cursor:
                 cursor.execute(query)
-                for row in cursor.fetchall():
-                    rows.append(row)
-
-            if len(rows) == 1:
-                rows = rows[0]
-                if len(rows) == 1:
-                    rows = rows[0]
+                _rows = cursor.fetchall()
+                if _rows:
+                    rows = list()
+                    for row in _rows:
+                        rows.append(row)
+                    if len(rows) == 1:
+                        rows = rows[0]
+                        if len(rows) == 1:
+                            rows = rows[0]
 
             return rows
         except mysql.Error as e:
