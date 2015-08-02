@@ -1,7 +1,8 @@
 import multiprocessing
-import warnings
+import os
 import sys
 import traceback
+import warnings
 
 QUERY_SAVE = 'INSERT INTO reaper_results({columns}) VALUES ({placeholders})'
 
@@ -63,11 +64,11 @@ class Run(object):
             extype, exvalue, extrace = sys.exc_info()
             traceback.print_exception(extype, exvalue, extrace)
         finally:
-            if self.attributes.is_persistence_enabled and rresults is not None:
+            if rresults is not None:
                 self._save(project_id, score, rresults)
 
     def _save(self, project_id, score, rresults):
-        if self.run_id is not None:
+        if self.attributes.is_persistence_enabled and self.run_id is not None:
             columns = ('run_id', 'project_id', 'score')
             values = (self.run_id, project_id, score)
 
@@ -85,3 +86,9 @@ class Run(object):
                 self.database.post(query, values)
             finally:
                 self.database.disconnect()
+        else:
+            if 'DEBUG' in os.environ:
+                for (attribute, result) in rresults.items():
+                    print('[{0:10d}] {1:25s} {2}'.format(
+                        project_id, attribute, result
+                    ))
