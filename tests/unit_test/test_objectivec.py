@@ -2,39 +2,43 @@ import os
 import unittest
 
 from attributes.unit_test.discoverer import get_test_discoverer
-from tests import REPOS_PATH
+from tests import get_lsloc, REPOS_PATH
 
 
 class ObjectiveCTestDiscovererTestCase(unittest.TestCase):
+    def setUp(self):
+        self.discoverer = get_test_discoverer('Objective-C')
+
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_discover(self):
-        discoverer = get_test_discoverer('Objective-C')
-
         # Test: Project using XCTest
-        proportion = discoverer.discover(
-            os.path.join(REPOS_PATH, 'Sparkle')
-        )
+        path = os.path.join(REPOS_PATH, 'Sparkle')
+        proportion = self.discoverer.discover(path)
         self.assertLess(0, proportion)
 
         # Test: Project with no unit tests (when these tests were written)
-        proportion = discoverer.discover(
-            os.path.join(REPOS_PATH, 'MJExtension')
-        )
+        path = os.path.join(REPOS_PATH, 'MJExtension')
+        proportion = self.discoverer.discover(path)
         self.assertEqual(0, proportion)
+
+        # Test: Project in Ruby to simulate a project with no C source code
+        path = os.path.join(REPOS_PATH, 'squib')
+        proportion = self.discoverer.discover(path)
+        self.assertIsNone(proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_xctest(self):
-        discoverer = get_test_discoverer('Objective-C')
-
         # Test: Project using XCTest
-        proportion = discoverer.__xctest__(
-            os.path.join(REPOS_PATH, 'Sparkle')
+        path = os.path.join(REPOS_PATH, 'Sparkle')
+        proportion = self.discoverer.__xctest__(
+            path, get_lsloc(path, self.discoverer.languages)
         )
         self.assertLess(0, proportion)
 
         # Test: Project not using XCTest
-        proportion = discoverer.__xctest__(
-            os.path.join(REPOS_PATH, 'WebScraper-iOS')
+        path = os.path.join(REPOS_PATH, 'WebScraper-iOS')
+        proportion = self.discoverer.__xctest__(
+            path, get_lsloc(path, self.discoverer.languages)
         )
         self.assertEqual(0, proportion)
 
@@ -42,10 +46,10 @@ class ObjectiveCTestDiscovererTestCase(unittest.TestCase):
 
         # Bug: If relative file paths in the input to utilities.loc() contained
         #   spaces then cloc would fail causing loc() to return None.
-        proportion = discoverer.__xctest__(
-            os.path.join(
-                REPOS_PATH,
-                'UITableViewController-Challenge-Solution'
-            )
+        path = os.path.join(
+            REPOS_PATH, 'UITableViewController-Challenge-Solution'
+        )
+        proportion = self.discoverer.__xctest__(
+            path, get_lsloc(path, self.discoverer.languages)
         )
         self.assertLess(0, proportion)

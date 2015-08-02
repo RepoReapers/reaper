@@ -24,6 +24,13 @@ class MainTestCase(unittest.TestCase):
         self.assertFalse(result)
         self.assertEqual(0, value)
 
+        # Test: Project in Ruby but database says JavaScript
+        (result, value) = main.run(
+            0, os.path.join(REPOS_PATH, 'squib'), MockCursor(), threshold=0.1
+        )
+        self.assertFalse(result)
+        self.assertIsNone(value)
+
 
 class MockCursor(object):
     def __init__(self):

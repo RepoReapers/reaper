@@ -1,3 +1,5 @@
+from lib import utilities
+
 TEST_DISCOVERERS = {
     'c': (
         'attributes.unit_test.discoverer.c',
@@ -73,15 +75,46 @@ class TestDiscoverer(object):
     """Base class for all TestDiscoverer classes"""
     def __init__(self):
         self.frameworks = None
+        self.languages = None
+        self.extensions = None
 
     def discover(self, path):
-        if not self.frameworks:
-            raise Exception('No unit test frameworks configured.')
+        if not (self.frameworks and self.languages and self.extensions):
+            raise Exception(
+                '{0} is not appropriately configured.'.format(
+                    self.__class__.__name__
+                )
+            )
 
-        for framework in self.frameworks:
-            proportion = framework(path)
+        # SLOC of source code
+        _sloc = utilities.get_loc(path)
+        sloc = 0
+        for language in self.languages:
+            if language in _sloc:
+                sloc += _sloc[language]['sloc']
 
-            if proportion != 0:
-                return proportion
+        proportion = None
 
-        return 0
+        if sloc > 0:
+            proportion = 0
+            for framework in self.frameworks:
+                proportion += framework(path, sloc)
+
+        return proportion
+
+    def measure(self, path, sloc, pattern, whole=False):
+        proportion = 0
+
+        files = utilities.search(
+            pattern, path, whole=whole, include=self.extensions
+        )
+        if files:
+            # SLOC of test code
+            _slotc = utilities.get_loc(path, files=files)
+            slotc = 0
+            for language in self.languages:
+                if language in _slotc:
+                    slotc += _slotc[language]['sloc']
+            proportion = slotc / sloc
+
+        return proportion
