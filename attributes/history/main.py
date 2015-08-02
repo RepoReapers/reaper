@@ -4,6 +4,8 @@ from dateutil import relativedelta
 
 
 def run(project_id, repo_path, cursor, **options):
+    avg_commits = None
+
     cursor.execute(
         '''
             SELECT COUNT(c.id), MIN(c.created_at), MAX(c.created_at)
@@ -18,11 +20,13 @@ def run(project_id, repo_path, cursor, **options):
     first_commit_date = result[1]
     last_commit_date = result[2]
 
+    if first_commit_date is None or last_commit_date is None:
+        return False, avg_commits
+
     # Compute the number of months between the first and last commit
     delta = relativedelta.relativedelta(last_commit_date, first_commit_date)
     num_months = delta.years * 12 + delta.months
 
-    avg_commits = None
     if num_months >= options.get('minimumDurationInMonths', 0):
         avg_commits = num_commits / num_months
     else:

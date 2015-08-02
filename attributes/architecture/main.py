@@ -37,12 +37,14 @@ def init(cursor):
 
 
 def run(project_id, repo_path, cursor, **options):
+    result = None
+
     language_sizes = get_loc(repo_path)
     size = sum([value['sloc'] for value in language_sizes.values()])
 
     # Immediately fail the attribute if `minimumSize` is not met.
     if size < options.get('minimumSize', 1000):
-        return False, 0
+        return False, result
 
     cursor.execute('''
         SELECT
@@ -63,7 +65,7 @@ def run(project_id, repo_path, cursor, **options):
 
     # Edge case if the repository language is not supported by us.
     if ack_language not in SUPPORTED_LANGUAGES:
-        return False, 0
+        return False, result
 
     ack_process = subprocess.Popen(
         ['ack', '-f', "--{0}".format(ack_language), repo_path],

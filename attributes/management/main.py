@@ -1,20 +1,8 @@
-import sys
-import os
-import mysql.connector
-import json
-import pandas as pd
-from functools import reduce
-import operator
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-
-import pprint
-
 """
 The management attribute measures the median number of commits per month
 for each repository in the sample of GitHub repositories.
 
-This module uses an init function to generate an in-memory table of medians.
+This module uses an init function to generate an in-memory table of MEDIANS.
 The table is a pandas data frame, which is constructed via an SQL query over
 the python MySQL connector. Before this can happen though, frequency tables
 must be updated on the MySQL server. See the functions invoked by init() to
@@ -27,8 +15,22 @@ Updated:
     10 May 2015
 """
 
+import json
+import os
+import operator
+import pprint
+import sys
+from datetime import datetime
+from functools import reduce
+
+import mysql.connector
+import pandas as pd
+from dateutil.relativedelta import relativedelta
+
 freq_tbl_runs = 'reaper_issue_freq_runs'
 freq_tbl = 'reaper_issue_freq'
+
+MEDIANS = None
 
 
 def global_init(cursor, sample):
@@ -47,10 +49,11 @@ def global_init(cursor, sample):
     # Compute a table with rows representing months of activity in the sample
     calendar = create_calendar(cursor, range_tbl)
 
-    # Create the permanent frequency tables on the server if necessary
-    create_freq_tables(cursor)
-    # Derive the freqency data for this run of the program
-    update_freq_tables(cursor, sample_tbl, range_tbl, calendar)
+    if calendar is not None:
+        # Create the permanent frequency tables on the server if necessary
+        create_freq_tables(cursor)
+        # Derive the freqency data for this run of the program
+        update_freq_tables(cursor, sample_tbl, range_tbl, calendar)
 
 
 def init(cursor):
@@ -71,14 +74,14 @@ def run(project_id, repo_path, cursor, **option):
     This information comes from the medians data frame in memory. For this
     global table to exist, the init function must have been run first.
     """
+    median = None
+    if MEDIANS is None or project_id not in MEDIANS.index:
+        return False, median
 
-    global medians
-    median = medians.loc[project_id, 'count']
-
+    median = MEDIANS.loc[project_id, 'count']
     attr_threshold = option['threshold']
-
     attr_pass = (median >= attr_threshold)
-    return (int(attr_pass), float(median))
+    return bool(attr_pass), float(median)
 
 
 def create_calendar(cursor, range_tbl):
@@ -122,19 +125,23 @@ def create_calendar(cursor, range_tbl):
         '''.format(range_tbl=range_tbl))
 
     (raw_min, raw_max) = cursor.fetchall()[0]
-    fday_min = raw_min.replace(day=1, hour=0, minute=0, second=0)
-    fday_max = raw_max.replace(day=1, hour=0, minute=0, second=0)
+    if raw_min is not None and raw_max is not None:
+        fday_min = raw_min.replace(day=1, hour=0, minute=0, second=0)
+        fday_max = raw_max.replace(day=1, hour=0, minute=0, second=0)
 
-    reldelt = relativedelta(fday_max, fday_min)
-    months = reldelt.months + reldelt.years * 12
+        reldelt = relativedelta(fday_max, fday_min)
+        months = reldelt.months + reldelt.years * 12
 
-    lst = [(fday_min + relativedelta(months=m),) for m in range(months + 1)]
+        lst = [
+            (fday_min + relativedelta(months=m),) for m in range(months + 1)
+        ]
 
-    cursor.executemany('''
-        INSERT INTO {calendar_tbl} (dt) VALUES (%s)
-        '''.format(calendar_tbl=calendar_tbl), lst)
+        cursor.executemany('''
+            INSERT INTO {calendar_tbl} (dt) VALUES (%s)
+            '''.format(calendar_tbl=calendar_tbl), lst)
 
-    return calendar_tbl
+        return calendar_tbl
+    return None
 
 
 def create_freq_tables(cursor):
@@ -269,13 +276,13 @@ def create_sample_table(cursor, sample):
         '''.format(sample_tbl=sample_tbl))
 
     # True if x is last positionally in xs (and xs has no dupes)
-    last_in = lambda xs, x: not xs.index(x) < len(xs) - 1
+    def last_in(xs, x): return not xs.index(x) < len(xs) - 1
 
     # Returns sql VALUES clause followed by a comma (or nothing if last clause)
-    sql_of = lambda xs, x: '({}){}'.format(x, '' if last_in(xs, x) else ',')
+    def sql_of(xs, x): return '({}){}'.format(x, '' if last_in(xs, x) else ',')
 
     # Concatenate individual SQL VALUES clauses
-    rows = reduce(operator.concat, [sql_of(sample, x) for x in sample], "")
+    rows = reduce(operator.concat, [sql_of(sample, x) for x in sample], '')
 
     cursor.execute('''
         INSERT INTO {sample_tbl} (project_id)
@@ -349,9 +356,9 @@ def compute_medians(cursor, run):
     df = pd.read_sql('''
         SELECT project_id, count FROM {freq_tbl} WHERE run={run};
         '''.format(freq_tbl=freq_tbl, run=run), con=cursor._connection)
-
-    global medians
-    medians = df.groupby('project_id').median()
+    if not df.empty:
+        global MEDIANS
+        MEDIANS = df.groupby('project_id').median()
 
 
 def get_latest_run(cursor):
@@ -364,7 +371,7 @@ def get_latest_run(cursor):
     return run
 
 if __name__ == '__main__':
-    with open('config.json', 'r') as file:
+    with open('../../config.json', 'r') as file:
         config = json.load(file)
 
     sample = [12730185]
@@ -379,8 +386,7 @@ if __name__ == '__main__':
     global_init(cursor, sample)
     init(cursor)
 
-    global medians
-    print(medians)
+    print(MEDIANS)
 
     result = run(12730185, None, None, threshold=1.0)
 

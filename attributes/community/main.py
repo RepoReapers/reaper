@@ -1,3 +1,4 @@
+import collections
 import sys
 
 from lib.core import Tokenizer
@@ -16,16 +17,21 @@ QUERY = '''
 
 
 def run(project_id, repo_path, cursor, **options):
-    num_core_contributors = 0
+    num_core_contributors = None
 
-    commits = dict()
     cursor.execute(QUERY.format(project_id))
-    for row in cursor:
+    rows = cursor.fetchall()
+    if cursor.rowcount == 0:    # Non-existent history
+        return False, num_core_contributors
+
+    commits = collections.OrderedDict()
+    for row in rows:
         commits[row[0]] = row[1]
     num_commits = sum(commits.values())
 
     cutoff = options.get('cutoff', 1.0)
     aggregate = 0
+    num_core_contributors = 0
     for (_, v) in commits.items():
         num_core_contributors += 1
         aggregate += v

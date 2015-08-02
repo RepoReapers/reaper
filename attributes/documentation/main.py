@@ -18,6 +18,8 @@ Updated:
 
 
 def run(project_id, repo_path, cursor, **options):
+    ratio = None
+
     # Dictionary of language => metrics dictionary
     util = utilities.get_loc(repo_path)
 
@@ -26,6 +28,9 @@ def run(project_id, repo_path, cursor, **options):
     for lang, metrics in util.items():
         sloc += metrics['sloc']
         cloc += metrics['cloc']
+
+    if sloc == 0:   # No source code
+        return False, ratio
 
     t_loc = sloc + cloc
     ratio = (cloc / t_loc) if t_loc > 0 else 0

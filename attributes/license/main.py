@@ -49,7 +49,7 @@ def run(project_id, repo_path, cursor, **options):
                 result = True
                 break
 
-    return result, int(result)
+    return result, result
 
 if __name__ == '__main__':
     print('Attribute plugins are not meant to be executed directly.')
