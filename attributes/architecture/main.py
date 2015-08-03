@@ -5,6 +5,24 @@ import subprocess
 import networkx
 from pygments import lexers, token, util
 
+TOKENTYPE_WHITELIST = [
+    token.Name,
+    token.Name.Attribute,
+    token.Name.Builtin,
+    token.Name.Builtin.Pseudo,
+    token.Name.Constant,
+    token.Name.Decorator,
+    token.Name.Entity,
+    token.Name.Exception,
+    token.Name.Label,
+    token.Name.Namespace,
+    token.Name.Other,
+    token.Name.Tag,
+    token.Name.Variable,
+    token.Name.Variable.Class,
+    token.Name.Variable.Global,
+    token.Name.Variable.Instance
+]
 SUPPORTED_LANGUAGES = []
 
 # Regular expression to parse the list of languages supported by ack as listed
@@ -123,7 +141,7 @@ def build_graph(file_paths, graph, lexer):
                 symbol = item[1]
                 if token_type in [token.Name.Function, token.Name.Class]:
                     node.defines.add(symbol)
-                else:
+                elif token_type in TOKENTYPE_WHITELIST:
                     node.references.add(symbol)
             if 'DEBUG' in os.environ:
                 print(node)
