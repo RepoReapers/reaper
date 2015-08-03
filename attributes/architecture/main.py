@@ -57,13 +57,6 @@ def init(cursor):
 def run(project_id, repo_path, cursor, **options):
     result = None
 
-    language_sizes = get_loc(repo_path)
-    size = sum([value['sloc'] for value in language_sizes.values()])
-
-    # Immediately fail the attribute if `minimumSize` is not met.
-    if size < options.get('minimumSize', 1000):
-        return False, result
-
     cursor.execute('''
         SELECT
             language
@@ -94,9 +87,11 @@ def run(project_id, repo_path, cursor, **options):
         x.decode(errors='replace') for x in ack_process.communicate()
     ]
 
-    file_paths = list()
-    for line in lines.split('\n'):
-        file_paths.append(line)
+    file_paths = [line for line in lines.split('\n') if line.strip()]
+
+    # Immediately fail the attribute if `minimumFiles` is not met.
+    if len(file_paths) < options.get('minimumFiles', 2):
+        return False, result
 
     graph = networkx.Graph()
     lexer = lexers.get_lexer_by_name(language)

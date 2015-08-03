@@ -11,7 +11,7 @@
       "options": {
         "timeout": "10H",
         "connectedness": 0.175,
-        "minimumSize": 1000
+        "minimumFiles": 2
       }
     },
     {
