@@ -3,6 +3,7 @@ from attributes.unit_test.discoverer import TestDiscoverer
 
 class CSharpTestDiscoverer(TestDiscoverer):
     def __init__(self):
+        self.language = 'C#'
         self.languages = ['C#']
         self.extensions = ['*.cs']
         self.frameworks = [

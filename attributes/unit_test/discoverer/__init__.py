@@ -1,4 +1,8 @@
+import os
+
 from lib import utilities
+
+TEST_DIRECTORIES = ['test', 'tests', 'spec']
 
 TEST_DISCOVERERS = {
     'c': (
@@ -95,8 +99,37 @@ class TestDiscoverer(object):
 
         proportion = 0
         if sloc > 0:
+            # Pass 1: Look for a unit testing frameworks
             for framework in self.frameworks:
                 proportion += framework(path, sloc)
+
+            # Pass 2: Look for files in conventional test directories
+            # NOTE: Second pass is necessary only when the proportion of unit
+            # tests from Pass 1 is less than 1%
+            if proportion < 0.01:
+                _path = None
+                done = False
+                for (root, dnames, _) in os.walk(path):
+                    for item in TEST_DIRECTORIES:
+                        if item in dnames:
+                            _path = os.path.join(root, item)
+                            done = True
+                            break
+                    if done:
+                        break
+
+                files = None
+                if _path:
+                    files = utilities.get_files(_path, self.language)
+                    if files:
+                        # SLOC of test code
+                        _slotc = utilities.get_loc(path, files=files)
+                        slotc = 0
+                        for language in self.languages:
+                            if language in _slotc:
+                                slotc += _slotc[language]['sloc']
+                        proportion = max(proportion, slotc / sloc)
+
         return proportion
 
     def measure(self, path, sloc, pattern, whole=False):

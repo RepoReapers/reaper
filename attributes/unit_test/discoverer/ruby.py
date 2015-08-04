@@ -3,6 +3,7 @@ from attributes.unit_test.discoverer import TestDiscoverer
 
 class RubyTestDiscoverer(TestDiscoverer):
     def __init__(self):
+        self.language = 'Ruby'
         self.languages = ['Ruby']
         self.extensions = ['*.rb']
         self.frameworks = [

@@ -3,6 +3,7 @@ from attributes.unit_test.discoverer import TestDiscoverer
 
 class CppTestDiscoverer(TestDiscoverer):
     def __init__(self):
+        self.language = 'C++'
         self.languages = ['C++', 'C/C++ Header']
         self.extensions = ['*.c*', '*.h*']
         self.frameworks = [

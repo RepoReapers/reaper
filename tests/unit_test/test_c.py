@@ -17,11 +17,6 @@ class CTestDiscovererTestCase(unittest.TestCase):
         proportion = self.discoverer.discover(path)
         self.assertLess(0, proportion)
 
-        # Test: Project with no unit tests (when these tests were written)
-        path = os.path.join(REPOS_PATH, 'grs')
-        proportion = self.discoverer.discover(path)
-        self.assertEqual(0, proportion)
-
         # Test: Project in Ruby to simulate a project with no C source code
         path = os.path.join(REPOS_PATH, 'squib')
         proportion = self.discoverer.discover(path)

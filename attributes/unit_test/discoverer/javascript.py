@@ -3,6 +3,7 @@ from attributes.unit_test.discoverer import TestDiscoverer
 
 class JavaScriptTestDiscoverer(TestDiscoverer):
     def __init__(self):
+        self.language = 'Javascript'
         self.languages = ['Javascript']
         self.extensions = ['*.js']
         self.frameworks = [

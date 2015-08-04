@@ -3,6 +3,7 @@ from attributes.unit_test.discoverer import TestDiscoverer
 
 class PythonTestDiscoverer(TestDiscoverer):
     def __init__(self):
+        self.language = 'Python'
         self.languages = ['Python']
         self.extensions = ['*.py']
         self.frameworks = [

@@ -3,6 +3,7 @@ from attributes.unit_test.discoverer import TestDiscoverer
 
 class PhpTestDiscoverer(TestDiscoverer):
     def __init__(self):
+        self.language = 'PHP'
         self.languages = ['PHP']
         self.extensions = ['*.php']
         self.frameworks = [

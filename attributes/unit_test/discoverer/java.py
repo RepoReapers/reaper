@@ -3,6 +3,7 @@ from attributes.unit_test.discoverer import TestDiscoverer
 
 class JavaTestDiscoverer(TestDiscoverer):
     def __init__(self):
+        self.language = 'Java'
         self.languages = ['Java']
         self.extensions = ['*.java']
         self.frameworks = [
