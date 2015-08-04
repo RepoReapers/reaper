@@ -149,7 +149,7 @@ def build_graph(file_paths, graph, lexer):
         for reference in caller.references:
             for callee in graph.nodes_iter():
                 if callee is not caller and reference in callee.defines:
-                    graph.add_edge(caller, callee, symbol=reference)
+                    graph.add_edge(caller, callee)
 
 
 def get_connectedness(graph):
