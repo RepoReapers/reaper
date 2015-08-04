@@ -18,7 +18,7 @@ def run(project_id, repo_path, cursor, **options):
     result = cursor.fetchone()
     last_commit_date = result[0]
 
-    # Compute the number of months between the last commit and today
+    # Compute the delta between the last commit in the database and today.
     # Note: today may be the date the GHTorrent dump was published by
     #       ghtorrent.org
     today = options.get('today', datetime.today().date())

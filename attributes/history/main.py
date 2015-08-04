@@ -33,7 +33,7 @@ def run(project_id, repo_path, cursor, **options):
         return False, avg_commits
 
     threshold = options['threshold']
-    return avg_commits > threshold, avg_commits
+    return avg_commits >= threshold, avg_commits
 
 if __name__ == '__main__':
     print('Attribute plugins are not meant to be executed directly.')
