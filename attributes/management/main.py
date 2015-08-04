@@ -74,7 +74,7 @@ def run(project_id, repo_path, cursor, **option):
     This information comes from the medians data frame in memory. For this
     global table to exist, the init function must have been run first.
     """
-    median = None
+    median = 0
     if MEDIANS is None or project_id not in MEDIANS.index:
         return False, median
 

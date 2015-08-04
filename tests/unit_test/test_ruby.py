@@ -24,7 +24,7 @@ class RubyTestDiscovererTestCase(unittest.TestCase):
         # Test: Project in C to simulate a project with no Ruby source code
         path = os.path.join(REPOS_PATH, 'gnome-vfs')
         proportion = self.discoverer.discover(path)
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_minitest(self):

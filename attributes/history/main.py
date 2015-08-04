@@ -4,7 +4,7 @@ from dateutil import relativedelta
 
 
 def run(project_id, repo_path, cursor, **options):
-    avg_commits = None
+    avg_commits = 0
 
     cursor.execute(
         '''

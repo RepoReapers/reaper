@@ -18,7 +18,7 @@ Updated:
 
 
 def run(project_id, repo_path, cursor, **options):
-    ratio = None
+    ratio = 0
 
     # Dictionary of language => metrics dictionary
     util = utilities.get_loc(repo_path)

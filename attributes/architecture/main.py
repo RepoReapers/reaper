@@ -55,7 +55,7 @@ def init(cursor):
 
 
 def run(project_id, repo_path, cursor, **options):
-    result = None
+    result = 0
 
     cursor.execute('''
         SELECT

@@ -17,7 +17,7 @@ QUERY = '''
 
 
 def run(project_id, repo_path, cursor, **options):
-    num_core_contributors = None
+    num_core_contributors = 0
 
     cursor.execute(QUERY.format(project_id))
     rows = cursor.fetchall()
@@ -31,7 +31,6 @@ def run(project_id, repo_path, cursor, **options):
 
     cutoff = options.get('cutoff', 1.0)
     aggregate = 0
-    num_core_contributors = 0
     for (_, v) in commits.items():
         num_core_contributors += 1
         aggregate += v

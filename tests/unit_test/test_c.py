@@ -25,7 +25,7 @@ class CTestDiscovererTestCase(unittest.TestCase):
         # Test: Project in Ruby to simulate a project with no C source code
         path = os.path.join(REPOS_PATH, 'squib')
         proportion = self.discoverer.discover(path)
-        self.assertIsNone(proportion)
+        self.assertEqual(0, proportion)
 
     @unittest.skipIf(not os.path.exists(REPOS_PATH), 'setup.sh not run.')
     def test_assert(self):

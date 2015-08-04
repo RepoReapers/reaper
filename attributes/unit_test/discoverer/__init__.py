@@ -93,18 +93,14 @@ class TestDiscoverer(object):
             if language in _sloc:
                 sloc += _sloc[language]['sloc']
 
-        proportion = None
-
+        proportion = 0
         if sloc > 0:
-            proportion = 0
             for framework in self.frameworks:
                 proportion += framework(path, sloc)
-
         return proportion
 
     def measure(self, path, sloc, pattern, whole=False):
         proportion = 0
-
         files = utilities.search(
             pattern, path, whole=whole, include=self.extensions
         )

@@ -29,7 +29,7 @@ class MainTestCase(unittest.TestCase):
             0, os.path.join(REPOS_PATH, 'squib'), MockCursor(), threshold=0.1
         )
         self.assertFalse(result)
-        self.assertIsNone(value)
+        self.assertEqual(0, value)
 
 
 class MockCursor(object):
