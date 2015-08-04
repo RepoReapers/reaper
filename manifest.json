@@ -10,7 +10,7 @@
       ],
       "options": {
         "timeout": "10H",
-        "connectedness": 0.175,
+        "threshold": 0.175,
         "minimumFiles": 2
       }
     },
