@@ -11,7 +11,7 @@ def run(project_id, repo_path, cursor, **options):
     discoverer = get_test_discoverer(language=record[0])
     proportion = discoverer.discover(repo_path)
 
-    threshold = options.get('threshold', 0)
+    threshold = options['threshold']
 
     return (proportion is not None and proportion >= threshold), proportion
 

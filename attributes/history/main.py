@@ -32,7 +32,7 @@ def run(project_id, repo_path, cursor, **options):
     else:
         return False, avg_commits
 
-    threshold = options.get('threshold', 2)
+    threshold = options['threshold']
     return avg_commits > threshold, avg_commits
 
 if __name__ == '__main__':

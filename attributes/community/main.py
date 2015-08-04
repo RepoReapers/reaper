@@ -37,7 +37,7 @@ def run(project_id, repo_path, cursor, **options):
         if (aggregate / num_commits) >= cutoff:
             break
 
-    threshold = options.get('threshold', 1)
+    threshold = options['threshold']
     return (num_core_contributors >= threshold, num_core_contributors)
 
 

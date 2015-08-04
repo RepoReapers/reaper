@@ -26,7 +26,7 @@ def run(project_id, repo_path, cursor, **options):
         today = datetime.strptime(today, '%Y-%m-%d')
     delta = dateutil.relativedelta(today, last_commit_date)
 
-    threshold = utilities.parse_datetime_delta(options.get('threshold', ''))
+    threshold = utilities.parse_datetime_delta(options['threshold'])
     return delta <= threshold, 'active' if delta <= threshold else 'dormant'
 
 if __name__ == '__main__':
