@@ -227,3 +227,18 @@ class UtilitiesTestCase(unittest.TestCase):
 
         # Assert
         self.assertFalse(actual)
+
+    def test_get_files(self):
+        # Arrange
+        path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), os.pardir, 'attributes', 'license'
+            )
+        )
+        expected = [os.path.join(path, 'main.py')]
+
+        # Act
+        actual = utilities.get_files(path, language='Python')
+
+        # Assert
+        self.assertCountEqual(expected, actual)

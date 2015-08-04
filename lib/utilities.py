@@ -11,6 +11,15 @@ from tempfile import NamedTemporaryFile
 
 from lib import dateutil
 
+# Map GHTorrent's projects.language to ACK compatible language (if necessary).
+ACK_LANGUAGE_MAP = {
+    'c': 'cc',
+    'c++': 'cpp',
+    'c#': 'csharp',
+    'objective-c': 'objc',
+    'ojective-c++': 'objcpp',
+}
+
 _loc_cache = dict()
 _cache_hits = 0
 
@@ -427,3 +436,39 @@ def is_OK(url):
             is_ok = False
 
     return is_ok
+
+
+def get_files(path, language):
+    """Return list of absolute paths to files in a specified language.
+
+    Parameters
+    ----------
+    path : str
+        Absolute path of the directory to search for files in.
+    language : str
+        Programming language as stored in GHTorrent's database.
+
+    Returns
+    -------
+    files : list
+        A list of absolute paths to files in a specified programming language
+        (if any), None otherwise.
+    """
+    files = None
+
+    language = language.lower()
+    if language in ACK_LANGUAGE_MAP:
+        language = ACK_LANGUAGE_MAP[language]
+
+    command = ['ack', '-f', "--{0}".format(language), path]
+    process = subprocess.Popen(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+
+    if 'DEBUG' in os.environ:
+        print(' '.join(command))
+
+    out, _ = [x.decode(errors='ignore') for x in process.communicate()]
+    files = [line for line in out.split('\n') if line.strip()]
+
+    return files
