@@ -3,24 +3,24 @@
     {
       "name": "architecture",
       "initial": "a",
-      "weight": 25,
+      "weight": 20,
       "enabled": true,
       "dependencies": [
         "ack"
       ],
       "options": {
         "timeout": "10H",
-        "threshold": 0.175,
+        "threshold": 0.649123,
         "minimumFiles": 2
       }
     },
     {
       "name": "community",
       "initial": "c",
-      "weight": 10,
+      "weight": 20,
       "enabled": true,
       "options": {
-        "threshold": 1,
+        "threshold": 2,
         "cutoff": 0.8
       }
     },
@@ -35,10 +35,10 @@
     {
       "name": "documentation",
       "initial": "d",
-      "weight": 25,
+      "weight": 20,
       "enabled": true,
       "options": {
-          "threshold": 0.0712 
+          "threshold": 0.001866 
       }
     },
     {
@@ -47,7 +47,7 @@
       "weight": 20,
       "enabled": true,
       "options": {
-        "threshold": 1.57,
+        "threshold": 2.089552,
         "minimumDurationInMonths": 1
       }
     },
@@ -64,7 +64,7 @@
       "weight": 5,
       "enabled": true,
       "options": {
-          "threshold": 1.00
+          "threshold": 0.5
       }
     },
     {
@@ -85,7 +85,7 @@
         "cloc"
       ],
       "options": {
-        "threshold": 0.0134
+        "threshold": 0.001016
       }
     }
   ]
