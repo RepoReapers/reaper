@@ -96,6 +96,7 @@ def main():
 
         # TODO: Refactor
         core.config = config
+        utilities.TOKENIZER = core.Tokenizer()
 
         database = Database(config['options']['datasource'])
         globaloptions = {

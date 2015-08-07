@@ -11,6 +11,9 @@ from tempfile import NamedTemporaryFile
 
 from lib import dateutil
 
+# GitHub OAuth token issuer
+TOKENIZER = None
+
 # Map GHTorrent's projects.language to ACK compatible language (if necessary).
 ACK_LANGUAGE_MAP = {
     'c': 'cc',
