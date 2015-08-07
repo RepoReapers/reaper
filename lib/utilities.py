@@ -293,7 +293,7 @@ def clone(owner, name, directory, date=None):
     path = directory
     url = 'https://github.com/{0}/{1}'.format(owner, name)
     if not is_OK(url):
-        raise Exception('{0} is no longer activer'.format(url))
+        raise Exception('{0} is no longer active.'.format(url))
 
     # Clone
     command = 'git clone {0}'.format(url)
