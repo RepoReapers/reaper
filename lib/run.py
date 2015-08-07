@@ -32,15 +32,15 @@ class Run(object):
 
     def run(self, samples):
         try:
-            print('#' * 25)
-            print('{0}'.format(str.center(
+            sys.stdout.write('{0}\n'.format('#' * 25))
+            sys.stdout.write('{0}\n'.format(str.center(
                 'Run {0}'.format(self.run_id if self.run_id else '-'), 25
             )))
-            print('#' * 25)
+            sys.stdout.write('{0}\n'.format('#' * 25))
             self.attributes.global_init(samples)
             with multiprocessing.Pool(self.processes) as pool:
                 pool.map(self._process, samples, chunksize=1)
-            print('#' * 25)
+            sys.stdout.write('{0}\n'.format('#' * 25))
         except Exception as e:
             extype, exvalue, extrace = sys.exc_info()
             traceback.print_exception(extype, exvalue, extrace)
@@ -57,7 +57,9 @@ class Run(object):
             if score < self.threshold:
                 cresult = '\033[91m✘\033[0m'
 
-            print(' [{0:>10d}] {1} {2}'.format(project_id, score, cresult))
+            sys.stdout.write(
+                ' [{0:>10d}] {1} {2}\n'.format(project_id, score, cresult)
+            )
         except:
             sys.stderr.write('Exception\n\n')
             sys.stderr.write('  Project ID   {0}\n'.format(project_id))
