@@ -290,10 +290,12 @@ def clone(owner, name, directory, date=None):
     path : string
         Absolute path of the directory containing the repository just cloned.
     """
+    (cloneable, reason) = is_cloneable(owner, name)
+    if not cloneable:
+        raise Exception(reason)
+
     path = directory
     url = 'https://github.com/{0}/{1}'.format(owner, name)
-    if not is_OK(url):
-        raise Exception('{0} is no longer active.'.format(url))
 
     # Clone
     command = 'git clone {0}'.format(url)
@@ -416,29 +418,45 @@ def parse_datetime_delta(datetime_delta):
     return delta
 
 
-def is_OK(url):
-    """Verify if a resource identified by a URL is available.
+def is_cloneable(owner, name):
+    """Verify if a repository is clone-able.
 
     Parameters
     ----------
-    url : str
-        URL of a resource to check for availability.
+    owner : string
+        User name of the owner of the repository.
+    name : string
+        Name of the repository to clone.
 
     Returns
     -------
-    is_ok : bool
-        True if the resource is available, False otherwise.
+    cloneablility : 2-tuple
+        A 2-tuple indicating the cloneablility of the repository. First element
+        is True if the repository is clone-able, False otherwise. Second
+        element is a string that describes the reason for a repository for not
+        being clone-able.
     """
-    is_ok = True
+    is_cloneable = True
+    reason = None
 
+    uri = '{0}/{1}'.format(owner, name)
+    url = 'https://api.github.com/repos/{0}'.format(uri)
+    if TOKENIZER is not None:
+        url = TOKENIZER.tokenize(url)
     request = urllib.request.Request(url, method='HEAD')
+
     try:
         urllib.request.urlopen(request)
     except urllib.error.HTTPError as error:
+        is_cloneable = False
         if error.code == 404:
-            is_ok = False
+            reason = '{0} is no longer active.'.format(uri)
+        elif error.code == 403:
+            reason = '{0} may have been deactivated.'.format(uri)
+        else:
+            reason = '{0} is not clone-able for reasons unknown.'.format(uri)
 
-    return is_ok
+    return (is_cloneable, reason)
 
 
 def get_files(path, language):

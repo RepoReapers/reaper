@@ -209,24 +209,54 @@ class UtilitiesTestCase(unittest.TestCase):
         # Assert
         self.assertCountEqual(expected, actual)
 
-    def test_is_OK(self):
+    def test_is_cloneable(self):
         # Arrange
-        url = 'https://github.com/ffmpeg/ffmpeg'
+        owner = 'FFmpeg'
+        name = 'FFmpeg'
+        expected = (True, None)
 
         # Act
-        actual = utilities.is_OK(url)
+        actual = utilities.is_cloneable(owner, name)
 
         # Assert
-        self.assertTrue(actual)
+        self.assertEqual(expected, actual)
 
         # Arrange
-        url = 'https://github.com/ffmpeg/ffmpe'
+        owner = 'FFmpeg'
+        name = 'FFmpe'
+        expected = (False, '{0}/{1} is no longer active.'.format(owner, name))
 
         # Act
-        actual = utilities.is_OK(url)
+        actual = utilities.is_cloneable(owner, name)
 
         # Assert
-        self.assertFalse(actual)
+        self.assertEqual(expected, actual)
+
+        # Arrange
+        owner = 'njulevi'
+        name = 'QInsight'
+        expected = (
+            False, '{0}/{1} may have been deactivated.'.format(owner, name)
+        )
+
+        # Act
+        actual = utilities.is_cloneable(owner, name)
+
+        # Assert
+        self.assertEqual(expected, actual)
+
+        # Arrange
+        owner = 'chambejp'
+        name = 'external'
+        expected = (
+            False, '{0}/{1} may have been deactivated.'.format(owner, name)
+        )
+
+        # Act
+        actual = utilities.is_cloneable(owner, name)
+
+        # Assert
+        self.assertEqual(expected, actual)
 
     def test_get_files(self):
         # Arrange
