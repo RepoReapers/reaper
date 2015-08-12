@@ -1,8 +1,9 @@
-import multiprocessing
 import os
 import sys
 import traceback
 import warnings
+
+import lib.pool
 
 QUERY_SAVE = 'INSERT INTO reaper_results({columns}) VALUES ({placeholders})'
 
@@ -38,7 +39,7 @@ class Run(object):
             )))
             sys.stdout.write('{0}\n'.format('#' * 25))
             self.attributes.global_init(samples)
-            with multiprocessing.Pool(self.processes) as pool:
+            with lib.pool.NonDaemonicProcessPool(self.processes) as pool:
                 pool.map(self._process, samples, chunksize=1)
             sys.stdout.write('{0}\n'.format('#' * 25))
         except Exception as e:

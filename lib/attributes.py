@@ -1,13 +1,12 @@
 import distutils
 import importlib
+import multiprocessing
 import os
 import shutil
 import sys
 import types
 import traceback
 from datetime import datetime
-from multiprocessing import TimeoutError
-from multiprocessing.pool import ThreadPool
 
 import attributes
 
@@ -26,6 +25,16 @@ class Attribute(object):
         self.options = goptions
         self.options.update(attribute.get('options', dict()))
         self.reference = importlib.import_module('{0}.main'.format(self.name))
+
+    def run(self, project_id, repository_path, cursor, outq):
+        result = self.reference.run(
+            project_id, repository_path, cursor, **self.options
+        )
+        outq.put(result)
+
+    @property
+    def timeout(self):
+        return self.options.get('timeout', None)
 
     def __getstate__(self):
         state = self.__dict__.copy()
@@ -48,7 +57,6 @@ class Attributes(object):
         self.attributes = None
         self.database = database
         self.today = goptions.get('today', str(datetime.today().date()))
-        self.timeout = goptions.get('timeout', '30M')
         self.cleanup = cleanup
 
         self._parse_attributes(attributes, **goptions)
@@ -74,6 +82,7 @@ class Attributes(object):
         score = 0
         rresults = dict()
         repository_home = os.path.join(repository_root, str(project_id))
+        outq = multiprocessing.Queue(maxsize=1)
 
         try:
             self.database.connect()
@@ -92,26 +101,27 @@ class Attributes(object):
                     if hasattr(attribute.reference, 'init'):
                         attribute.reference.init(cursor)
 
-                with self.database.cursor() as cursor, ThreadPool(1) as pool:
-                    async_result = pool.apply_async(
-                        func=attribute.reference.run,
-                        args=(project_id, repository_path, cursor),
-                        kwds=attribute.options
+                with self.database.cursor() as cursor:
+                    timeout = utilities.parse_datetime_delta(attribute.timeout)
+
+                    process = multiprocessing.Process(
+                        target=attribute.run,
+                        args=(project_id, repository_path, cursor, outq)
                     )
-                    try:
-                        timeout = utilities.parse_datetime_delta(
-                            attribute.options.get('timeout', self.timeout)
-                        )
-                        (bresult, rresult) = async_result.get(
-                            timeout=timeout.total_seconds()
-                        )
-                    except TimeoutError:
+                    process.start()
+                    process.join(timeout=timeout.total_seconds())
+
+                    if not outq.empty():
+                        (bresult, rresult) = outq.get()
+                    else:
                         sys.stderr.write(
                             (
                                 ' \033[91mWARNING\033[0m [{0:10d}] '
                                 '{1} timed out\n'
                             ).format(project_id, attribute.name)
                         )
+                        if process.is_alive():
+                            process.terminate()
 
                 rresults[attribute.name] = rresult
 
