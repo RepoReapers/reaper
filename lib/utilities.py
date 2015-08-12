@@ -235,27 +235,6 @@ def url_to_json(url, headers={}):
     return result
 
 
-def is_dir(path):
-    """Returns `path` if path is a valid directory, otherwise raises an
-    argparse.ArgumentTypeError.
-
-    Args:
-        path (string): User supplied path.
-
-    Returns:
-        string: User supplied path.
-
-    Raises:
-        argparse.ArgumentTypeError: Raised if `path` is not a valid directory.
-    """
-    if not os.path.isdir(path):
-        raise argparse.ArgumentTypeError(
-            '{0} is not a directory.'.format(path)
-        )
-    else:
-        return path
-
-
 def get_repo_path(repo_id, repositories_dir):
     # Repository path is the subdir within the id folder whose name is
     # NOT metadata.json. That is, the path we're interested in is the
