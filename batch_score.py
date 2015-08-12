@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import sys
 import traceback
 
@@ -44,7 +45,6 @@ def process_arguments():
     parser.add_argument(
         '-r',
         '--repositories-root',
-        type=utilities.is_dir,
         dest='repositories_root',
         help='Path to the root of downloaded repositories.'
     )
@@ -107,6 +107,9 @@ def main():
             manifest['attributes'], database, args.cleanup, args.key_string,
             **globaloptions
         )
+
+        if not os.path.exists(args.repositories_root):
+                os.makedirs(args.repositories_root, exist_ok=True)
 
         _run = run.Run(
             args.repositories_root, attributes, database,
