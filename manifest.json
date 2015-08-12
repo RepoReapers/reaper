@@ -9,7 +9,7 @@
         "ack"
       ],
       "options": {
-        "timeout": "10H",
+        "timeout": "6H",
         "threshold": 0.649123,
         "minimumFiles": 2
       }
