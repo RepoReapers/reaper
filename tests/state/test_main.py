@@ -58,3 +58,19 @@ class MainTestCase(unittest.TestCase):
 
         # Assert
         self.assertEqual(expected, actual)
+
+        # Arrange
+        project_id = 3235653
+        options = {'threshold': '6m'}
+        expected = (False, 'dormant')
+
+        # Act
+        try:
+            self.database.connect()
+            with self.database.cursor() as cursor:
+                actual = main.run(project_id, '', cursor, **options)
+        finally:
+            self.database.disconnect()
+
+        # Assert
+        self.assertEqual(expected, actual)
