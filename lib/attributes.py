@@ -1,4 +1,4 @@
-import distutils
+import distutils.spawn
 import importlib
 import multiprocessing
 import os
