@@ -82,4 +82,4 @@ class MainTestCase(unittest.TestCase):
 
         # Assert
         self.assertFalse(result)
-        self.assertIsNone(value)
+        self.assertEqual(0, value)
