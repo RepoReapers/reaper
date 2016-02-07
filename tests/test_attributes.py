@@ -268,3 +268,27 @@ class AttributesTestCase(unittest.TestCase):
 
         # Assert
         self.assertEqual(expected, actual)
+
+    def test_requires_source(self):
+        # Arrange
+        keystring = 'mchs'
+
+        # Act
+        attributes = Attributes(
+            self.rawattributes, database=None, keystring=keystring,
+            goptions=self.rawgoptions
+        )
+
+        # Assert
+        self.assertFalse(attributes.requires_source)
+
+        # Arrange
+        keystring = 'dualmichs'
+
+        # Act
+        attributes = Attributes(
+            self.rawattributes, database=None, keystring=keystring
+        )
+
+        # Assert
+        self.assertTrue(attributes.requires_source)

@@ -5,6 +5,7 @@
       "initial": "a",
       "weight": 20,
       "enabled": true,
+      "requires_source": true,
       "dependencies": [
         "ack"
       ],
@@ -19,6 +20,7 @@
       "initial": "c",
       "weight": 20,
       "enabled": true,
+      "requires_source": false,
       "options": {
         "threshold": 2,
         "cutoff": 0.8
@@ -29,6 +31,7 @@
       "initial": "i",
       "weight": 5,
       "enabled": true,
+      "requires_source": true,
       "options": {
       }
     },
@@ -37,6 +40,7 @@
       "initial": "d",
       "weight": 20,
       "enabled": true,
+      "requires_source": true,
       "options": {
           "threshold": 0.001866 
       }
@@ -46,6 +50,7 @@
       "initial": "h",
       "weight": 20,
       "enabled": true,
+      "requires_source": false,
       "options": {
         "threshold": 2.089552,
         "minimumDurationInMonths": 1
@@ -56,6 +61,7 @@
       "initial": "l",
       "weight": 0,
       "enabled": true,
+      "requires_source": true,
       "essential": true
     },
     {
@@ -63,6 +69,7 @@
       "initial": "m",
       "weight": 5,
       "enabled": true,
+      "requires_source": false,
       "options": {
           "threshold": 0.022989
       }
@@ -72,6 +79,7 @@
       "initial": "s",
       "weight": 0,
       "enabled": true,
+      "requires_source": false,
       "options": {
         "threshold": "6m"
       }
@@ -81,6 +89,7 @@
       "initial": "u",
       "weight": 10,
       "enabled": true,
+      "requires_source": true,
       "dependencies": [
         "cloc"
       ],

@@ -19,6 +19,7 @@ class Attribute(object):
         self.initial = attribute.get('initial', '').lower()
         self.weight = attribute.get('weight', 0.0)
         self.enabled = attribute.get('enabled', True)
+        self.requires_source = attribute.get('requires_source', False)
         self.essential = attribute.get('essential', False)
         self.persist = attribute.get('persist', True)
         self.dependencies = attribute.get('dependencies', list())
@@ -85,9 +86,12 @@ class Attributes(object):
         try:
             self.database.connect()
 
-            repository_path = self._init_repository(
-                project_id, repository_home
-            )
+            repository_path = None
+            if self.requires_source:
+                repository_path = self._init_repository(
+                    project_id, repository_home
+                )
+
             for attribute in self.attributes:
                 bresult = False
                 rresult = None
@@ -164,6 +168,13 @@ class Attributes(object):
     def is_persistence_enabled(self):
         for attribute in self.attributes:
             if attribute.persist:
+                return True
+        return False
+
+    @property
+    def requires_source(self):
+        for attribute in self.attributes:
+            if attribute.enabled and attribute.requires_source:
                 return True
         return False
 
