@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import traceback
 import warnings
 
@@ -51,6 +52,9 @@ class Run(object):
             if rresults is not None:
                 self._save(project_id, rresults, table)
 
+        # HACK: Waiting for mysqld to reclaim its connection
+        time.sleep(0.5)
+
     def _save(self, project_id, rresults, table):
         if self.attributes.is_persistence_enabled:
             # Merge raw results from current run with existing ones (if any)
@@ -98,15 +102,23 @@ class Run(object):
     def _get(self, project_id, table):
         rresults = dict()
 
-        columns = [attribute.name for attribute in self.attributes.attributes]
-        output = self.database.get(
-            SQL_QUERY.format(
-                columns=','.join(columns), table=table, project_id=project_id
+        try:
+            columns = [
+                attribute.name for attribute in self.attributes.attributes
+            ]
+
+            self.database.connect()
+            output = self.database.get(
+                SQL_QUERY.format(
+                    columns=','.join(columns), table=table,
+                    project_id=project_id
+                )
             )
-        )
-        if output is not None:
-            for (index, column) in enumerate(columns):
-                rresults[column] = output[index]
+            if output is not None:
+                for (index, column) in enumerate(columns):
+                    rresults[column] = output[index]
+        finally:
+            self.database.disconnect()
 
         return rresults
 
