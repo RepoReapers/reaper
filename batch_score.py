@@ -76,6 +76,15 @@ def process_arguments():
             ' from the samples file.'
         )
     )
+    parser.add_argument(
+        '--goldenset',
+        action='store_true',
+        dest='goldenset',
+        help=(
+            'Indicate that the repositories sample file contains projects'
+            ' from the Golden Set.'
+        )
+    )
 
     if len(sys.argv) < 2:
         parser.print_help()
@@ -109,13 +118,17 @@ def main():
         )
 
         if not os.path.exists(args.repositories_root):
-                os.makedirs(args.repositories_root, exist_ok=True)
+            os.makedirs(args.repositories_root, exist_ok=True)
+
+        table = 'reaper_results'
+        if args.goldenset:
+            table = 'reaper_goldenset'
 
         _run = run.Run(
             args.repositories_root, attributes, database,
             config['options']['threshold'], args.num_processes
         )
-        _run.run([int(line) for line in args.repositories_sample])
+        _run.run([int(line) for line in args.repositories_sample], table)
     except Exception as e:
         extype, exvalue, extrace = sys.exc_info()
         traceback.print_exception(extype, exvalue, extrace)

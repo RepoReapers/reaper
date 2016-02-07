@@ -202,3 +202,69 @@ class AttributesTestCase(unittest.TestCase):
                 self.assertEqual(expected, actual)
             finally:
                 attributes.database.disconnect()
+
+    def test_score(self):
+        # Global Arrange
+        attributes = Attributes(
+            self.rawattributes, database=None, goptions=self.rawgoptions
+        )
+
+        # Arrange
+        rresults = {
+            'architecture': 9.00,
+            'community': 9.00,
+            'continuous_integration': True,
+            'documentation': 9.00,
+            'history': 9.00,
+            'license': True,
+            'management': 9.00,
+            'state': 'active',
+            'unit_test': 9.00,
+        }
+        expected = 100.00
+
+        # Act
+        actual = attributes.score(rresults)
+
+        # Assert
+        self.assertEqual(expected, actual)
+
+        # Arrange
+        rresults = {
+            'architecture': 9.00,
+            'community': 9.00,
+            'continuous_integration': True,
+            'documentation': 0,
+            'history': 9.00,
+            'license': True,
+            'management': 9.00,
+            'state': 'active',
+            'unit_test': 9.00,
+        }
+        expected = 80.00
+
+        # Act
+        actual = attributes.score(rresults)
+
+        # Assert
+        self.assertEqual(expected, actual)
+
+        # Arrange
+        rresults = {
+            'architecture': 9.00,
+            'community': 9.00,
+            'continuous_integration': True,
+            'documentation': 9.00,
+            'history': 9.00,
+            'license': False,
+            'management': 9.00,
+            'state': 'active',
+            'unit_test': 9.00,
+        }
+        expected = 0
+
+        # Act
+        actual = attributes.score(rresults)
+
+        # Assert
+        self.assertEqual(expected, actual)

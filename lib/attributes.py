@@ -78,8 +78,6 @@ class Attributes(object):
             self.database.disconnect()
 
     def run(self, project_id, repository_root):
-        invalidated = False
-        score = 0
         rresults = dict()
         repository_home = os.path.join(repository_root, str(project_id))
         outq = multiprocessing.Queue(maxsize=1)
@@ -124,13 +122,6 @@ class Attributes(object):
                             process.terminate()
 
                 rresults[attribute.name] = rresult
-
-                if not bresult and attribute.essential:
-                    score = 0
-                    invalidated = True
-
-                if not invalidated:
-                    score += bresult * attribute.weight
         except:
             sys.stderr.write('Exception\n\n')
             sys.stderr.write('  Project ID   {0}\n'.format(project_id))
@@ -140,12 +131,34 @@ class Attributes(object):
             self.database.disconnect()
             if self.cleanup:
                 self._cleanup(repository_home)
-            return (score, rresults)
+            return rresults
 
     def get(self, name):
         for attribute in self.attributes:
             if attribute.name == name:
                 return attribute
+
+    def score(self, rresults):
+        score = 0
+
+        for (attribute, rresult) in rresults.items():
+            attribute = self.get(attribute)
+
+            bresult = False
+            if type(rresult) is not str:
+                if 'threshold' in attribute.options:
+                    bresult = (rresult >= attribute.options['threshold'])
+                else:
+                    bresult = bool(rresult)
+
+            # If an *essential* attribute is missing a ZERO score is assigned
+            if attribute.essential and bresult is False:
+                score = 0
+                break
+
+            score += bresult * attribute.weight
+
+        return score
 
     @property
     def is_persistence_enabled(self):
