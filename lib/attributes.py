@@ -149,7 +149,7 @@ class Attributes(object):
             attribute = self.get(attribute)
 
             bresult = False
-            if type(rresult) is not str:
+            if type(rresult) is not str and rresult is not None:
                 if 'threshold' in attribute.options:
                     bresult = (rresult >= attribute.options['threshold'])
                 else:
