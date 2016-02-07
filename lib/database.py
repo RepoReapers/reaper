@@ -71,7 +71,8 @@ class Database(object):
     @contextlib.contextmanager
     def cursor(self):
         if not self._connected:
-            self.connect()
+            msg = 'An active database connection is needed to create a cursor.'
+            raise DatabaseError(msg)
 
         cursor = self._connection.cursor()
         try:
