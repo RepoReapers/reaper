@@ -62,7 +62,17 @@ class Run(object):
             _rresults = self._get(project_id, table)
             if _rresults:
                 is_existing = True
-            _rresults.update(rresults)
+                # Update the dictionary containing attribute values retrieved
+                # from the database iff at least one of the values is not NULL.
+                # Typically, a project that was not active at the time of the
+                # reaper run will have all its attribute values set to NULL.
+                # However, when re-computing the score, the default values of
+                # the attributes may overwrite the NULL values in the database.
+                if len([i for i in _rresults.values() if i is not None]) > 0:
+                    _rresults.update(rresults)
+                else:
+                    return
+
             score = self.attributes.score(_rresults)
             self._print_outcome(project_id, score)
 
