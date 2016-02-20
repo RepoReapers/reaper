@@ -37,7 +37,7 @@ def run(project_id, repo_path, cursor, **options):
     delta = relativedelta.relativedelta(last_commit_date, first_commit_date)
     num_months = delta.years * 12 + delta.months
 
-    if num_months >= options.get('minimumDurationInMonths', 0):
+    if num_months >= options.get('minimumDurationInMonths', 1):
         avg_issues = num_issues / num_months
     else:
         return False, avg_issues
