@@ -58,10 +58,10 @@ class Run(object):
     def _save(self, project_id, rresults, table):
         if self.attributes.is_persistence_enabled:
             # Merge raw results from current run with existing ones (if any)
+            is_existing = False
             _rresults = self._get(project_id, table)
-            if _rresults is None:
-                return
-            is_existing = True if _rresults else False
+            if _rresults:
+                is_existing = True
             _rresults.update(rresults)
             score = self.attributes.score(_rresults)
             self._print_outcome(project_id, score)
@@ -100,7 +100,7 @@ class Run(object):
                     ))
 
     def _get(self, project_id, table):
-        rresults = None
+        rresults = dict()
 
         try:
             columns = [
@@ -115,18 +115,8 @@ class Run(object):
                 )
             )
             if output is not None:
-                _rresults = dict()
                 for (index, column) in enumerate(columns):
-                    _rresults[column] = output[index]
-
-                # Use the raw results from the database iff at least one
-                # attribute has a non-NULL value. Typically, a project that was
-                # non active at the time reaper was run will have the value for
-                # all attributes as NULL in the database.
-                for (_, value) in _rresults.items():
-                    if value:
-                        rresults = _rresults
-                        break
+                    rresults[column] = output[index]
         finally:
             self.database.disconnect()
 
