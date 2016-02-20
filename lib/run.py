@@ -56,25 +56,28 @@ class Run(object):
         time.sleep(0.5)
 
     def _save(self, project_id, rresults, table):
-        if self.attributes.is_persistence_enabled:
-            # Merge raw results from current run with existing ones (if any)
-            is_existing = False
-            _rresults = self._get(project_id, table)
-            if _rresults:
-                is_existing = True
-                # Update the dictionary containing attribute values retrieved
-                # from the database iff at least one of the values is not NULL.
-                # Typically, a project that was not active at the time of the
-                # reaper run will have all its attribute values set to NULL.
-                # However, when re-computing the score, the default values of
-                # the attributes may overwrite the NULL values in the database.
-                if len([i for i in _rresults.values() if i is not None]) > 0:
-                    _rresults.update(rresults)
-                else:
-                    return
+        # Merge raw results from current run with existing ones (if any)
+        is_existing = False
+        _rresults = self._get(project_id, table)
+        if _rresults:
+            is_existing = True
+            # Update the dictionary containing attribute values retrieved from
+            # the database iff at least one of the values is not NULL.
+            # Typically, a project that was not active at the time of the
+            # reaper run will have all its attribute values set to NULL.
+            # However, when re-computing the score, the default values of the
+            # attributes may overwrite the NULL values in the database.
+            updatable = False
+            if len([i for i in _rresults.values() if i is not None]) > 0:
+                updatable = True
+                _rresults.update(rresults)
 
-            score = self.attributes.score(_rresults)
-            self._print_outcome(project_id, score)
+        score = self.attributes.score(_rresults)
+        self._print_outcome(project_id, score)
+
+        if self.attributes.is_persistence_enabled:
+            if is_existing is True and updatable is False:
+                return
 
             columns = ('project_id', 'score')
             values = (project_id, score)
