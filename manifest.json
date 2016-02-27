@@ -85,6 +85,16 @@
       }
     },
     {
+      "name": "stars",
+      "initial": "t",
+      "weight": 0,
+      "enabled": true,
+      "requires_source": false,
+      "options": {
+        "threshold": 0
+      }
+    },
+    {
       "name": "unit_test",
       "initial": "u",
       "weight": 10,
