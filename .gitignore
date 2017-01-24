@@ -67,3 +67,8 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Files that are used to contain temporary content
+**/scratch.*
+**/workspace.*
+**/temp.*
