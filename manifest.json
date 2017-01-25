@@ -75,6 +75,26 @@
       }
     },
     {
+      "name": "project_size",
+      "initial": "p",
+      "weight": 0,
+      "enabled": true,
+      "requires_source": true,
+      "options": {
+        "threshold": 0
+      }
+    },
+    {
+      "name": "repository_size",
+      "initial": "r",
+      "weight": 0,
+      "enabled": true,
+      "requires_source": true,
+      "options": {
+        "threshold": 0
+      }
+    },
+    {
       "name": "state",
       "initial": "s",
       "weight": 0,
