@@ -40,6 +40,10 @@ TEST_DISCOVERERS = {
     'ruby': (
         'attributes.unit_test.discoverer.ruby',
         'RubyTestDiscoverer'
+    ),
+    'swift': (
+        'attributes.unit_test.discoverer.swift',
+        'SwiftTestDiscoverer'
     )
 }
 
