@@ -26,7 +26,7 @@ is outdated and cannot be used to score repos.
 
 ### Usage
 
-`batch_score.py` is called as follows: 
+`batch_score.py` can be called as follows: 
 
 `batch_score.py -c <config> -r <repos_path> -m <manifest> -s <sample_file>`
 
