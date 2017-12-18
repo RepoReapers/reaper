@@ -14,13 +14,30 @@ libraries that the code needs in order to execute. To install them, simply run
 `pip install -r requirements.txt` (or `pip3` if your system does not have python3 set
 as the default.)
 
-## Usage
+## Interface
 
-The `score_repo.py` executable is the main interface that should be used by the
-end user. In order to use the tool, however, a few steps need to be taken first.
+The main interface that should be used to run reaper is the Python script called 
+`batch_score.py`. This script should be called with a set of parameters that 
+specify where the datasource can be found, what projects need to be analyzed,
+etc. 
 
-Another batch script is currently under development, called `batch_score.py`
-will can be used to score many different repositories at the same time.
+Additionally there is a script called `score_repo.py`, however at the moment it 
+is outdated and cannot be used to score repos. 
+
+### Usage
+
+`batch_score.py` is called as follows: 
+
+`batch_score.py -c <config> -r <repos_path> -m <manifest> -s <sample_file>`
+
+Where:
+* `<config>`: Is an instance of `config.json`.
+* `<repos_path>`: Is the path to a directory where reaper can check out the 
+source files of a project. 
+* `<manifest>`: Is an instance of `manifest.json` (which can be found in this 
+repository) containing information on what attributes should be executed.
+* `<sample_file>`: A list of GHTorrent project ids that should be analyzed, 
+newline seperated. 
 
 ### config.json
 
@@ -54,7 +71,7 @@ attributes are apart of the base distribution of the system, but more can easily
 be added.
 
 In order for an attribute to be executed, it must be listed under the
-`attribtues` key in the configuration file.
+`attributes` key in the configuration file.
 
 An example entry looks like the following:
 
