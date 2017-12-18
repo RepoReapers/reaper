@@ -63,6 +63,37 @@ Load a dump of the GHTorrent data set into MySQL or MariaDB (binary compatible
 as of this writing), copy the `config.json.sample` file to `config.json` and
 edit the appropriate parameters under the `options => datasource` key.
 
+#### `peristResult`
+
+If persist results is enabled a database table needs to exist to which reaper can 
+write results. This table should be named `reaper_results` and should contain at 
+least a column for project ids named `project_id`, and a column to store the score 
+for a repository named `score`. Additionally, there should be a column for every 
+attribute that you want to store.
+
+For instance, to create this table in MySQL the following table create statement
+can be used:
+
+```
+CREATE TABLE `reaper_results` (
+  `project_id` int(11) NOT NULL,
+  `architecture` double DEFAULT NULL,
+  `community` double DEFAULT NULL,
+  `continuous_integration` double DEFAULT NULL,
+  `documentation` double DEFAULT NULL,
+  `history` double DEFAULT NULL,
+  `license` double DEFAULT NULL,
+  `management` double DEFAULT NULL,
+  `project_size` double DEFAULT NULL,
+  `repository_size` double DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `stars` double DEFAULT NULL,
+  `unit_test` double DEFAULT NULL,
+  `score` double DEFAULT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+```
+
 #### `attributes`
 
 The system is designed as a number of plugins that all have a chance to analyze
