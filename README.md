@@ -14,13 +14,30 @@ libraries that the code needs in order to execute. To install them, simply run
 `pip install -r requirements.txt` (or `pip3` if your system does not have python3 set
 as the default.)
 
-## Usage
+## Interface
 
-The `score_repo.py` executable is the main interface that should be used by the
-end user. In order to use the tool, however, a few steps need to be taken first.
+The main interface that should be used to run reaper is the Python script called 
+`batch_score.py`. This script should be called with a set of parameters that 
+specify where the datasource can be found, what projects need to be analyzed,
+etc. 
 
-Another batch script is currently under development, called `batch_score.py`
-will can be used to score many different repositories at the same time.
+Additionally there is a script called `score_repo.py`, however at the moment it 
+is outdated and cannot be used to score repos. 
+
+### Usage
+
+`batch_score.py` can be called as follows: 
+
+`batch_score.py -c <config> -r <repos_path> -m <manifest> -s <sample_file>`
+
+Where:
+* `<config>`: Is an instance of `config.json`.
+* `<repos_path>`: Is the path to a directory where reaper can check out the 
+source files of a project. 
+* `<manifest>`: Is an instance of `manifest.json` (which can be found in this 
+repository) containing information on what attributes should be executed.
+* `<sample_file>`: A list of GHTorrent project ids that should be analyzed, 
+newline seperated. 
 
 ### config.json
 
@@ -46,6 +63,37 @@ Load a dump of the GHTorrent data set into MySQL or MariaDB (binary compatible
 as of this writing), copy the `config.json.sample` file to `config.json` and
 edit the appropriate parameters under the `options => datasource` key.
 
+#### `peristResult`
+
+If persist results is enabled a database table needs to exist to which reaper can 
+write results. This table should be named `reaper_results` and should contain at 
+least a column for project ids named `project_id`, and a column to store the score 
+for a repository named `score`. Additionally, there should be a column for every 
+attribute that you want to store.
+
+For instance, to create this table in MySQL the following table create statement
+can be used:
+
+```
+CREATE TABLE `reaper_results` (
+  `project_id` int(11) NOT NULL,
+  `architecture` double DEFAULT NULL,
+  `community` double DEFAULT NULL,
+  `continuous_integration` double DEFAULT NULL,
+  `documentation` double DEFAULT NULL,
+  `history` double DEFAULT NULL,
+  `license` double DEFAULT NULL,
+  `management` double DEFAULT NULL,
+  `project_size` double DEFAULT NULL,
+  `repository_size` double DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `stars` double DEFAULT NULL,
+  `unit_test` double DEFAULT NULL,
+  `score` double DEFAULT NULL,
+  PRIMARY KEY (`project_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+```
+
 #### `attributes`
 
 The system is designed as a number of plugins that all have a chance to analyze
@@ -54,7 +102,7 @@ attributes are apart of the base distribution of the system, but more can easily
 be added.
 
 In order for an attribute to be executed, it must be listed under the
-`attribtues` key in the configuration file.
+`attributes` key in the configuration file.
 
 An example entry looks like the following:
 
