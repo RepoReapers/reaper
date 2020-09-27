@@ -9,8 +9,9 @@ def run(project_id, repo_path, cursor, **options):
     cursor.execute('SELECT url FROM projects WHERE id = {}'.format(project_id))
     record = cursor.fetchone()
 
-    full_url = utilities.TOKENIZER.tokenize(record[0].rstrip())
-    json_response = utilities.url_to_json(full_url)
+    full_url = record[0].rstrip()
+    (username, token) = utilities.TOKENIZER.get_token()
+    json_response = utilities.url_to_json(full_url, auth=(username, token))
     rresult = (
         json_response['stargazers_count']
         if 'stargazers_count' in json_response

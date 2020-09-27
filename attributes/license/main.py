@@ -33,8 +33,9 @@ def run(project_id, repo_path, cursor, **options):
 
     record = cursor.fetchone()
 
-    full_url = utilities.TOKENIZER.tokenize(record[0].rstrip())
-    json_response = url_to_json(full_url)
+    full_url = record[0].rstrip()
+    (username, token) = utilities.TOKENIZER.get_token()
+    json_response = utilities.url_to_json(full_url, auth=(username, token))
 
     result = True if 'license' in json_response \
                      and json_response['license'] else False

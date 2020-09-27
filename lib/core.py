@@ -9,7 +9,7 @@ config = {}
 
 class Tokenizer():
     def __init__(self):
-        tokens = config.get('options', {}).get('github_tokens', [])
+        tokens = config.get('options', {}).get('github_tokens', {})
 
         self.have_tokens = bool(tokens)
         self.available_tokens = queue.Queue()
@@ -23,21 +23,8 @@ class Tokenizer():
                 'authentication.'
             )
 
-        for token in tokens:
-            self.available_tokens.put(token)
-
-    def tokenize(self, url):
-        if url.startswith('https://api.github.com'):
-            if self.have_tokens:
-                token = self.get_token()
-                if token is not None:
-                    return '{0}?access_token={1}'.format(url, token)
-                else:
-                    return url
-            else:
-                return url
-        else:
-            raise ValueError('url must be for the GitHub API')
+        for (username, token) in tokens.items():
+            self.available_tokens.put((username, token))
 
     def get_token(self):
         while True:
@@ -45,12 +32,10 @@ class Tokenizer():
                 self.print_warning('No more valid OAuth tokens available.')
                 return None
 
-            token = self.available_tokens.get(block=True)
+            (username, token) = self.available_tokens.get(block=True)
 
-            rate_limit_url = (
-                'https://api.github.com/rate_limit?access_token={0}'
-            ).format(token)
-            status = url_to_json(rate_limit_url)
+            rate_limit_url = 'https://api.github.com/rate_limit'
+            status = url_to_json(rate_limit_url, auth=(username, token))
 
             # Throw away bad OAuth keys.
             if 'resources' not in status:
@@ -60,13 +45,13 @@ class Tokenizer():
                 continue
 
             if status['resources']['core']['remaining'] > 0:
-                self.available_tokens.put_nowait(token)
-                return token
+                self.available_tokens.put_nowait((username, token))
+                return (username, token)
             else:
                 self.scheduler.add_job(
                     self.available_tokens.put_nowait,
                     'date',
-                    args=[token],
+                    args=[(username, token)],
                     run_date=datetime.datetime.fromtimestamp(
                         status['resources']['core']['reset']
                     )

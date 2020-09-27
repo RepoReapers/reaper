@@ -9,7 +9,8 @@
     },
     "today": "yyyy-mm-dd",
     "timeout": "nynmndnHnMnS",
-    "github_tokens": [
-    ]
+    "github_tokens": {
+      "username": "token"
+    }
   }
 }

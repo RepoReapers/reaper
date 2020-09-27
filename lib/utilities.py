@@ -415,11 +415,10 @@ def is_cloneable(owner, name):
 
     uri = '{0}/{1}'.format(owner, name)
     url = 'https://api.github.com/repos/{0}'.format(uri)
-    if TOKENIZER is not None:
-        url = TOKENIZER.tokenize(url)
+    (username, token) = TOKENIZER.get_token()
 
     try:
-        response = requests.head(url)
+        response = requests.head(url, auth=(username, token))
         response.raise_for_status()
     except RequestException as error:
         status = error.response.status_code
