@@ -34,10 +34,7 @@ def run(project_id, repo_path, cursor, **options):
     record = cursor.fetchone()
 
     full_url = utilities.TOKENIZER.tokenize(record[0].rstrip())
-    json_response = url_to_json(full_url, headers={
-            'Accept': 'application/vnd.github.drax-preview+json'
-        }
-    )
+    json_response = url_to_json(full_url)
 
     result = True if 'license' in json_response \
                      and json_response['license'] else False
