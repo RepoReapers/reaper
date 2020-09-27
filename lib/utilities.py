@@ -210,7 +210,7 @@ def search(
     return files
 
 
-def url_to_json(url, headers={}):
+def url_to_json(url, headers={}, auth=()):
     """Returns the JSON response from the url.
 
     Args:
@@ -220,7 +220,7 @@ def url_to_json(url, headers={}):
         dict: JSON of the response or empty dict on error.
     """
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, auth=auth)
         response.raise_for_status()
         result = response.json()
     except RequestException as e:
