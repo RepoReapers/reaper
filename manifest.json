@@ -36,6 +36,16 @@
       }
     },
     {
+      "name": "dependency",
+      "initial": "y",
+      "weight": 10,
+      "enabled": true,
+      "requires_source": true,
+      "options": {
+        "threshold": 0
+      }
+    },
+    {
       "name": "documentation",
       "initial": "d",
       "weight": 20,
@@ -78,6 +88,26 @@
       "name": "project_size",
       "initial": "p",
       "weight": 0,
+      "enabled": true,
+      "requires_source": true,
+      "options": {
+        "threshold": 0
+      }
+    },
+    {
+      "name": "pull_requests",
+      "initial": "e",
+      "weight": 5,
+      "enabled": true,
+      "requires_source": false,
+      "options": {
+        "threshold": 0
+      }
+    },
+    {
+      "name": "releases",
+      "initial": "o",
+      "weight": 5,
       "enabled": true,
       "requires_source": true,
       "options": {
