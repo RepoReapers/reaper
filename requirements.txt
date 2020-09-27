@@ -4,3 +4,4 @@ networkx~=1.9
 pandas~=0.16
 Pygments~=2.0
 python-dateutil~=2.4
+requests~=2.24

@@ -4,10 +4,11 @@ import json
 import os
 import shlex
 import subprocess
-import urllib.request
+import requests
 import re
 import tarfile
 from tempfile import NamedTemporaryFile
+from requests.exceptions import RequestException
 
 from lib import dateutil
 
@@ -218,17 +219,11 @@ def url_to_json(url, headers={}):
     Returns:
         dict: JSON of the response or empty dict on error.
     """
-    request = urllib.request.Request(
-        url,
-        headers=headers
-    )
-
     try:
-        response = urllib.request.urlopen(request)
-
-        raw_data = response.readall().decode('utf-8')
-        result = json.loads(raw_data)
-    except Exception as e:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        result = response.json()
+    except RequestException as e:
         # TODO: Properly handle error. For now, just return empty dictionary.
         result = {}
 
@@ -422,15 +417,16 @@ def is_cloneable(owner, name):
     url = 'https://api.github.com/repos/{0}'.format(uri)
     if TOKENIZER is not None:
         url = TOKENIZER.tokenize(url)
-    request = urllib.request.Request(url, method='HEAD')
 
     try:
-        urllib.request.urlopen(request)
-    except urllib.error.HTTPError as error:
+        response = requests.head(url)
+        response.raise_for_status()
+    except RequestException as error:
+        status = error.response.status_code
         is_cloneable = False
-        if error.code == 404:
+        if status == 404:
             reason = '{0} is no longer active.'.format(uri)
-        elif error.code == 403:
+        elif status == 403:
             reason = '{0} may have been deactivated.'.format(uri)
         else:
             reason = '{0} is not clone-able for reasons unknown.'.format(uri)
